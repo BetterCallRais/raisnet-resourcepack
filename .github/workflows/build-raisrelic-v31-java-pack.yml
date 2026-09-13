@@ -1,0 +1,111 @@
+name: Build RaisRelic v3.1 Java Pack
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-raisrelic-v31-java-pack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pillow
+        run: python -m pip install --quiet pillow
+      - name: Build v3.1 pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build/v31
+          mkdir -p build/v31
+          unzip -q RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.zip -d build/v31
+          python <<'PY'
+          import json, math
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          root=Path('build/v31')
+          (root/'assets/raisnet/models/effects').mkdir(parents=True,exist_ok=True)
+          (root/'assets/raisnet/textures/item/effects').mkdir(parents=True,exist_ok=True)
+          meta={'pack':{'description':'RaisNet • RaisRelic v3.1 Legendary Ascension • TRUE 3D + Animated FX • Java 26.2 + Social','min_format':[88,0],'max_format':[88,0]}}
+          (root/'pack.mcmeta').write_text(json.dumps(meta,indent=2))
+          faces=['north','south','east','west','up','down']
+          def elem(a,b,t,rotation=None):
+              e={'from':a,'to':b,'faces':{f:{'texture':'#'+t} for f in faces}}
+              if rotation:e['rotation']=rotation
+              return e
+          def rot(o,axis,angle):return {'origin':o,'axis':axis,'angle':angle,'rescale':True}
+          ids=['ame_no_zanketsu','kurohana_calamity','seiryuu_lance','tsukikage_reaper','guren_fang','tenma_crusher','astra_veloce']
+          # Add extra layered 3D geometry to the seven v3.0 models.
+          for wid in ids:
+              p=root/f'assets/raisnet/models/legendary/{wid}.json'
+              d=json.loads(p.read_text())
+              es=d.setdefault('elements',[])
+              for j,y in enumerate([5.8,7.6,9.4,11.2,13.0]):
+                  es.append(elem([6.55,y,6.85],[7.1,y+0.38,9.15],'accent',rot([7.0,y+0.2,8],'z',22.5 if j%2==0 else -22.5)))
+                  es.append(elem([8.9,y,6.85],[9.45,y+0.38,9.15],'glow',rot([9.0,y+0.2,8],'z',-22.5 if j%2==0 else 22.5)))
+              d['ambientocclusion']=False
+              p.write_text(json.dumps(d,indent=2))
+          # Hexa Noctis true-3D model.
+          pal={'metal':(185,177,230,255),'dark':(18,12,38,255),'accent':(104,52,205,255),'glow':(230,91,255,255),'grip':(44,28,79,255)}
+          tdir=root/'assets/raisnet/textures/item/legendary'; tdir.mkdir(parents=True,exist_ok=True)
+          def tex(path,c,accent=None):
+              im=Image.new('RGBA',(64,64),c); dr=ImageDraw.Draw(im)
+              for x in range(-64,128,8):dr.line((x,0,x-64,64),fill=(max(0,c[0]-28),max(0,c[1]-28),max(0,c[2]-28),255),width=2)
+              if accent:dr.line((6,55,58,9),fill=accent,width=3)
+              im.save(path)
+          for k,c in pal.items():tex(tdir/f'hexa_noctis_{k}.png',c,pal['glow'] if k in ('accent','glow') else None)
+          E=[elem([7.2,.2,7.2],[8.8,4.1,8.8],'grip'),elem([6.8,0,6.8],[9.2,.8,9.2],'accent'),elem([4.8,3.7,7.1],[7.4,5.4,8.9],'accent',rot([7,4.4,8],'z',-22.5)),elem([8.6,3.7,7.1],[11.2,5.4,8.9],'accent',rot([9,4.4,8],'z',22.5)),elem([6.65,4.5,7.2],[7.75,15.2,8.8],'metal'),elem([8.25,4.5,7.2],[9.35,15.2,8.8],'metal'),elem([7.55,5,6.9],[8.45,14.6,9.1],'glow'),elem([7.2,14.2,7],[8.8,16,9],'accent',rot([8,15,8],'z',45)),elem([5.5,4.5,6.8],[6.6,8.2,9.2],'dark',rot([6.3,5.4,8],'z',-22.5)),elem([9.4,4.5,6.8],[10.5,8.2,9.2],'dark',rot([9.7,5.4,8],'z',22.5))]
+          for idx,a in enumerate([0,60,120,180,240,300]):
+              cx=8+math.cos(math.radians(a))*2.4; cy=5.5+idx*.42
+              E.append(elem([cx-.3,cy,6.7],[cx+.3,cy+1,9.3],'glow',rot([cx,cy+.5,8],'z',45 if idx%2==0 else -45)))
+          for y in [6,8.2,10.4,12.6]:
+              E.append(elem([6.25,y,7],[6.75,y+.45,9],'accent'));E.append(elem([9.25,y,7],[9.75,y+.45,9],'accent'))
+          display={'thirdperson_righthand':{'rotation':[0,-90,55],'translation':[0,4,1],'scale':[1.25]*3},'thirdperson_lefthand':{'rotation':[0,90,-55],'translation':[0,4,1],'scale':[1.25]*3},'firstperson_righthand':{'rotation':[0,-90,22],'translation':[1.1,3.4,1.2],'scale':[1.42]*3},'firstperson_lefthand':{'rotation':[0,90,-22],'translation':[1.1,3.4,1.2],'scale':[1.42]*3},'gui':{'rotation':[28,225,0],'translation':[0,0,0],'scale':[.9]*3},'ground':{'rotation':[0,0,0],'translation':[0,2,0],'scale':[.72]*3},'fixed':{'rotation':[0,0,0],'translation':[0,0,0],'scale':[1.05]*3}}
+          model={'ambientocclusion':False,'textures':{k:f'raisnet:item/legendary/hexa_noctis_{k}' for k in pal},'elements':E,'display':display}
+          mdir=root/'assets/raisnet/models/legendary'; idir=root/'assets/raisnet/items'
+          (mdir/'hexa_noctis.json').write_text(json.dumps(model,indent=2));(mdir/'hexa_noctis_orbit.json').write_text(json.dumps(model,indent=2))
+          for name in ['hexa_noctis','hexa_noctis_orbit']:(idir/f'{name}.json').write_text(json.dumps({'model':{'type':'minecraft:model','model':f'raisnet:legendary/{name}'},'hand_animation_on_swap':False,'oversized_in_gui':True},indent=2))
+          # Custom animated skill FX item models used by v3.1 ItemDisplay animations.
+          fx=['fx_cyan_slash','fx_cyan_horizon','fx_crimson_arc','fx_crimson_burst','fx_dragon_spiral','fx_dragon_head','fx_moon_crescent','fx_moon_execution','fx_guren_slash_a','fx_guren_slash_b','fx_guren_cross','fx_oni_ring','fx_oni_impact','fx_oni_pillar','fx_star_projectile','fx_star_burst','fx_hexa_slash','fx_hexa_burst']
+          colors=[(60,220,255),(70,190,255),(235,35,60),(255,90,60),(30,220,200),(80,255,220),(160,65,240),(215,120,255),(255,70,25),(240,35,20),(255,145,35),(150,20,30),(220,35,45),(180,20,55),(255,220,90),(190,235,255),(190,75,255),(130,40,225)]
+          for name,col in zip(fx,colors):
+              im=Image.new('RGBA',(64,64),(0,0,0,0));dr=ImageDraw.Draw(im)
+              if any(k in name for k in ['burst','impact','ring']):
+                  for r in [28,22,16,10]:dr.ellipse((32-r,32-r,32+r,32+r),outline=(*col,220),width=3)
+              elif 'pillar' in name:
+                  dr.rectangle((28,3,36,61),fill=(*col,220));dr.rectangle((31,1,33,63),fill=(255,255,255,240))
+              elif 'star' in name:
+                  pts=[]
+                  for i in range(10):
+                      a=-math.pi/2+i*math.pi/5;r=27 if i%2==0 else 10;pts.append((32+math.cos(a)*r,32+math.sin(a)*r))
+                  dr.polygon(pts,fill=(*col,220))
+              else:
+                  dr.polygon([(4,46),(14,36),(29,27),(46,17),(60,10),(50,20),(34,31),(17,43)],fill=(*col,225));dr.line((7,44,55,13),fill=(255,255,255,230),width=2)
+              im.save(root/f'assets/raisnet/textures/item/effects/{name}.png')
+              e=[elem([.8,7.45,7.65],[15.2,8.55,8.35],'fx',rot([8,8,8],'z',-22.5))]
+              if any(k in name for k in ['burst','impact','ring']):e=[elem([.5,7.7,.5],[15.5,8.3,15.5],'fx')]
+              if 'pillar' in name:e=[elem([7.5,.2,7.3],[8.5,15.8,8.7],'fx')]
+              mm={'ambientocclusion':False,'textures':{'fx':f'raisnet:item/effects/{name}'},'elements':e,'display':{'fixed':{'rotation':[0,0,0],'translation':[0,0,0],'scale':[2.2,2.2,2.2]},'gui':{'rotation':[0,0,0],'translation':[0,0,0],'scale':[.9,.9,.9]}}}
+              (root/f'assets/raisnet/models/effects/{name}.json').write_text(json.dumps(mm,indent=2))
+              (idir/f'{name}.json').write_text(json.dumps({'model':{'type':'minecraft:model','model':f'raisnet:effects/{name}'},'hand_animation_on_swap':False,'oversized_in_gui':True},indent=2))
+          # validate JSON
+          for f in root.rglob('*.json'):json.loads(f.read_text())
+          PY
+          cd build/v31
+          zip -qr ../../RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.1.zip .
+          cd ../..
+          sha1sum RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.1.zip | awk '{print $1}' > RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.1.sha1
+      - name: Commit pack
+        shell: bash
+        run: |
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.1.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.1.sha1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Generate RaisRelic v3.1 Legendary Ascension Java pack'
+            git push
+          fi
