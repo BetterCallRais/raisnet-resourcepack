@@ -122,7 +122,12 @@ for f in ROOT.rglob('*.json'): json.loads(f.read_text(encoding='utf-8'))
 if OUT.exists():OUT.unlink()
 with zipfile.ZipFile(OUT,'w',zipfile.ZIP_DEFLATED) as z:
     for f in sorted(ROOT.rglob('*')):
-        if f.is_file(): z.write(f,f.relative_to(ROOT).as_posix())
+        if not f.is_file():
+            continue
+        info=zipfile.ZipInfo(f.relative_to(ROOT).as_posix(), date_time=(2026,9,13,0,0,0))
+        info.compress_type=zipfile.ZIP_DEFLATED
+        info.external_attr=(0o644 & 0xFFFF) << 16
+        z.writestr(info,f.read_bytes())
 sha=hashlib.sha1(OUT.read_bytes()).hexdigest()
 SHA.write_text(sha+'\n',encoding='utf-8')
 print(OUT,OUT.stat().st_size,sha)
