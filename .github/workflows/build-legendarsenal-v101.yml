@@ -1,0 +1,38 @@
+name: Build RaisLegendArsenal v1.0.1 Java Pack
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-legendarsenal-v101.yml'
+      - '.github/scripts/build_legendarsenal_v101.py'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pillow
+        run: python -m pip install --quiet pillow
+      - name: Build Java 26.2 resource pack
+        run: python .github/scripts/build_legendarsenal_v101.py
+      - name: Validate pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -t RaisLegendArsenal-Java-26.2-v1.0.1.zip
+          test "$(wc -c < RaisLegendArsenal-Java-26.2-v1.0.1.zip)" -gt 30000
+          test "$(cat RaisLegendArsenal-Java-26.2-v1.0.1.sha1 | tr -d '\n')" = "$(sha1sum RaisLegendArsenal-Java-26.2-v1.0.1.zip | awk '{print $1}')"
+      - name: Commit final pack
+        shell: bash
+        run: |
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisLegendArsenal-Java-26.2-v1.0.1.zip RaisLegendArsenal-Java-26.2-v1.0.1.sha1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build RaisLegendArsenal v1.0.1 Java 26.2 pack'
+            git push
+          fi
