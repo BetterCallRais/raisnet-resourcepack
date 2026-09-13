@@ -1,0 +1,65 @@
+name: Build RaisRelic Legendary Weapons Java Pack v2.2
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/build-legendary-weapons-pack-v22.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build v2.2 pack from verified v2.1 pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC='RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.zip'
+          OUT='RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.2.zip'
+          test -f "$SRC"
+          rm -rf .build/v22
+          mkdir -p .build/v22
+          unzip -q "$SRC" -d .build/v22
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('.build/v22')
+          p=root/'pack.mcmeta'
+          data=json.loads(p.read_text())
+          data['pack']['description']='RaisNet • RaisRelic Private Realms v2.2 • Java 26.2 • Legendary 3D + Social'
+          data['pack']['pack_format']=88
+          data['pack']['min_format']=[88,0]
+          data['pack']['max_format']=[88,0]
+          p.write_text(json.dumps(data,indent=2,ensure_ascii=False))
+          for f in (root/'assets/minecraft/items').glob('*.json'):
+              s=f.read_text()
+              for i in range(1,8):
+                  s=s.replace(str(92100+i),str(92200+i))
+              f.write_text(s)
+          for f in root.rglob('*.json'):
+              json.loads(f.read_text())
+          PY
+          rm -f "$OUT"
+          (cd .build/v22 && zip -qr "../../$OUT" .)
+          sha1sum "$OUT" | awk '{print $1}' > RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.2.sha1
+          unzip -t "$OUT"
+
+      - name: Commit generated v2.2 pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.2.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.2.sha1
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Generate RaisRelic Private Realms v2.2 Java pack'
+          git push
