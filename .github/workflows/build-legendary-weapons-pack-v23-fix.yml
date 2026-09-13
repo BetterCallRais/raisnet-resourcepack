@@ -1,0 +1,97 @@
+name: Build RaisRelic Legendary Weapons Java Pack v2.3 FIX
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-legendary-weapons-pack-v23-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build fixed Java 26.2 pack from v2.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/raispack
+          mkdir -p /tmp/raispack
+          unzip -q RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.2.zip -d /tmp/raispack
+
+          # Do not override vanilla base-item definitions. RaisRelic already sets minecraft:item_model directly.
+          rm -rf /tmp/raispack/assets/minecraft/items
+
+          # Since Resource Pack 73+, item textures use the dedicated items atlas.
+          # Keep custom item sprites under textures/item/... so Minecraft 26.2 can stitch them correctly.
+          mkdir -p /tmp/raispack/assets/raisnet/textures/item/legend
+          mkdir -p /tmp/raispack/assets/raisnet/textures/item/social
+
+          if compgen -G '/tmp/raispack/assets/raisnet/textures/legend/*.png' > /dev/null; then
+            mv /tmp/raispack/assets/raisnet/textures/legend/*.png /tmp/raispack/assets/raisnet/textures/item/legend/
+          fi
+          rm -rf /tmp/raispack/assets/raisnet/textures/legend
+
+          if [ -f /tmp/raispack/assets/raisnet/textures/item/whatsapp.png ]; then
+            mv /tmp/raispack/assets/raisnet/textures/item/whatsapp.png /tmp/raispack/assets/raisnet/textures/item/social/whatsapp.png
+          fi
+          if [ -f /tmp/raispack/assets/raisnet/textures/item/discord.png ]; then
+            mv /tmp/raispack/assets/raisnet/textures/item/discord.png /tmp/raispack/assets/raisnet/textures/item/social/discord.png
+          fi
+
+          python3 - <<'PY'
+          import json, glob, os
+          root='/tmp/raispack'
+
+          for f in glob.glob(root+'/assets/raisnet/models/legend/*.json'):
+              with open(f, encoding='utf-8') as h:
+                  d=json.load(h)
+              tex=d.get('textures', {})
+              for k,v in list(tex.items()):
+                  if isinstance(v,str) and v.startswith('raisnet:legend/'):
+                      tex[k]=v.replace('raisnet:legend/','raisnet:item/legend/')
+              with open(f,'w',encoding='utf-8') as h:
+                  json.dump(d,h,ensure_ascii=False,indent=2)
+
+          for f in glob.glob(root+'/assets/raisnet/models/social/*.json'):
+              with open(f, encoding='utf-8') as h:
+                  d=json.load(h)
+              tex=d.get('textures', {})
+              for k,v in list(tex.items()):
+                  if v in ('raisnet:item/whatsapp','raisnet:social/whatsapp'):
+                      tex[k]='raisnet:item/social/whatsapp'
+                  elif v in ('raisnet:item/discord','raisnet:social/discord'):
+                      tex[k]='raisnet:item/social/discord'
+              with open(f,'w',encoding='utf-8') as h:
+                  json.dump(d,h,ensure_ascii=False,indent=2)
+
+          meta={
+              'pack': {
+                  'description': 'RaisNet • RaisRelic v2.3 FIX • Java 26.2 • Legendary 3D + Social',
+                  'min_format': [88,0],
+                  'max_format': [88,0]
+              }
+          }
+          with open(root+'/pack.mcmeta','w',encoding='utf-8') as h:
+              json.dump(meta,h,ensure_ascii=False,indent=2)
+          PY
+
+          cd /tmp/raispack
+          zip -qr "$GITHUB_WORKSPACE/RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.zip" .
+          cd "$GITHUB_WORKSPACE"
+          sha1sum RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.zip | awk '{print $1}' > RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.sha1
+          unzip -t RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.zip
+
+      - name: Commit fixed pack
+        shell: bash
+        run: |
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.sha1
+          git commit -m 'Generate RaisRelic v2.3 FIX Java pack' || exit 0
+          git push
