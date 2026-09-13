@@ -1,10 +1,11 @@
-name: Build RaisNet HD Resource Pack
+name: Build RaisNet FINAL Resource Pack
 
 on:
   push:
     paths:
       - '.github/workflows/build-hd-pack.yml'
       - 'RaisSocialInteract-Java-26.2.zip'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,122 +19,130 @@ jobs:
       - name: Install Pillow
         run: python -m pip install --quiet pillow
 
-      - name: Build polished icons and pack
+      - name: Build final Java 26.2 pack
         shell: bash
         run: |
+          set -e
           rm -rf packbuild
-          mkdir packbuild
+          mkdir -p packbuild
           unzip -q RaisSocialInteract-Java-26.2.zip -d packbuild
 
+          # Minecraft Java 26.2 uses resource-pack version 88.0.
+          cat > packbuild/pack.mcmeta <<'EOF'
+          {
+            "pack": {
+              "description": "RaisNet Social Icons FINAL - Minecraft Java 26.2",
+              "min_format": [88, 0],
+              "max_format": [88, 0]
+            }
+          }
+          EOF
+
+          mkdir -p packbuild/assets/raisnet/items
+          mkdir -p packbuild/assets/raisnet/models/social
+          mkdir -p packbuild/assets/raisnet/textures/item
+          mkdir -p packbuild/assets/minecraft/items
+
+          # Keep the original recognizable logos but add a soft glow.
           python <<'PY'
-          from PIL import Image, ImageDraw, ImageFilter
+          from PIL import Image, ImageFilter
           from pathlib import Path
 
-          out = Path('packbuild/assets/raisnet/textures/item')
-          out.mkdir(parents=True, exist_ok=True)
-          S = 1024
-
-          def glow(mask, color, blur=50, opacity=185):
-              a = mask.filter(ImageFilter.GaussianBlur(blur))
-              a = a.point(lambda p: min(255, int(p * opacity / 255)))
-              g = Image.new('RGBA', mask.size, color + (0,))
-              g.putalpha(a)
-              return g
-
-          def save(img, name):
-              img.resize((256,256), Image.Resampling.LANCZOS).save(out / name)
-
-          # WhatsApp: premium floating neon badge
-          img = Image.new('RGBA', (S,S), (0,0,0,0))
-          m = Image.new('L', (S,S), 0)
-          d = ImageDraw.Draw(m)
-          d.ellipse((150,105,875,830), fill=255)
-          d.polygon([(285,700),(180,900),(405,780)], fill=255)
-          img = Image.alpha_composite(img, glow(m, (55,255,125), 58, 190))
-
-          body = Image.new('RGBA', (S,S), (0,0,0,0))
-          bd = ImageDraw.Draw(body)
-          bd.ellipse((150,105,875,830), fill=(20,205,82,255))
-          bd.polygon([(285,700),(180,900),(405,780)], fill=(20,205,82,255))
-          bd.ellipse((205,160,800,755), fill=(35,225,95,255))
-          img = Image.alpha_composite(img, body)
-
-          border = Image.new('RGBA',(S,S),(0,0,0,0))
-          b = ImageDraw.Draw(border)
-          b.ellipse((150,105,875,830), outline=(255,255,255,255), width=48)
-          b.line([(288,704),(205,860),(392,776)], fill=(255,255,255,255), width=48, joint='curve')
-          img = Image.alpha_composite(img, border)
-
-          # handset, built from arc + rounded ends
-          p = Image.new('RGBA',(S,S),(0,0,0,0))
-          pd = ImageDraw.Draw(p)
-          pd.arc((310,300,715,705), start=205, end=325, fill=(255,255,255,255), width=92)
-          pd.rounded_rectangle((315,485,430,605), radius=32, fill=(255,255,255,255))
-          pd.rounded_rectangle((565,605,685,725), radius=32, fill=(255,255,255,255))
-          p = p.rotate(-18, resample=Image.Resampling.BICUBIC, center=(512,512))
-          sh = Image.new('RGBA',(S,S),(0,0,0,0))
-          sa = p.split()[-1].filter(ImageFilter.GaussianBlur(18)).point(lambda v: int(v*0.4))
-          sh.putalpha(sa)
-          sh = sh.transform((S,S), Image.AFFINE, (1,0,16,0,1,18))
-          tint = Image.new('RGBA',(S,S),(0,0,0,0)); tint.putalpha(sh.split()[-1])
-          img = Image.alpha_composite(img, tint)
-          img = Image.alpha_composite(img, p)
-
-          hi = Image.new('RGBA',(S,S),(0,0,0,0))
-          hd = ImageDraw.Draw(hi)
-          hd.arc((245,180,770,665), start=190, end=305, fill=(255,255,255,95), width=42)
-          img = Image.alpha_composite(img, hi.filter(ImageFilter.GaussianBlur(3)))
-          save(img, 'whatsapp.png')
-
-          # Discord: clean glossy violet badge
-          img = Image.new('RGBA',(S,S),(0,0,0,0))
-          m = Image.new('L',(S,S),0)
-          d = ImageDraw.Draw(m)
-          d.rounded_rectangle((185,110,840,765), radius=150, fill=255)
-          img = Image.alpha_composite(img, glow(m, (110,120,255), 62, 195))
-
-          body = Image.new('RGBA',(S,S),(0,0,0,0))
-          bd = ImageDraw.Draw(body)
-          bd.rounded_rectangle((185,110,840,765), radius=150, fill=(82,78,235,255))
-          bd.rounded_rectangle((225,150,800,725), radius=130, fill=(98,92,245,255))
-          img = Image.alpha_composite(img, body)
-
-          border = Image.new('RGBA',(S,S),(0,0,0,0))
-          b = ImageDraw.Draw(border)
-          b.rounded_rectangle((185,110,840,765), radius=150, outline=(235,237,255,255), width=48)
-          img = Image.alpha_composite(img, border)
-
-          face = Image.new('RGBA',(S,S),(0,0,0,0))
-          fd = ImageDraw.Draw(face)
-          fd.rounded_rectangle((315,340,710,565), radius=108, fill=(255,255,255,255))
-          fd.polygon([(320,392),(255,345),(292,435)], fill=(255,255,255,255))
-          fd.polygon([(705,392),(770,345),(733,435)], fill=(255,255,255,255))
-          fd.ellipse((388,418,462,492), fill=(78,74,225,255))
-          fd.ellipse((563,418,637,492), fill=(78,74,225,255))
-          fd.arc((400,430,625,570), start=20, end=160, fill=(78,74,225,255), width=22)
-          shadow = Image.new('RGBA',(S,S),(30,30,80,0))
-          a = face.split()[-1].filter(ImageFilter.GaussianBlur(18)).point(lambda v:int(v*0.42))
-          shadow.putalpha(a)
-          shadow = shadow.transform((S,S), Image.AFFINE, (1,0,14,0,1,16))
-          img = Image.alpha_composite(img, shadow)
-          img = Image.alpha_composite(img, face)
-
-          gloss = Image.new('RGBA',(S,S),(0,0,0,0))
-          gd = ImageDraw.Draw(gloss)
-          gd.rounded_rectangle((240,160,785,350), radius=90, fill=(255,255,255,35))
-          img = Image.alpha_composite(img, gloss.filter(ImageFilter.GaussianBlur(6)))
-          save(img, 'discord.png')
+          base = Path('packbuild/assets/raisnet/textures/item')
+          for name, color in [('whatsapp',(40,255,105)), ('discord',(100,115,255))]:
+              p = base / f'{name}.png'
+              src = Image.open(p).convert('RGBA')
+              alpha = src.getchannel('A')
+              glow_alpha = alpha.filter(ImageFilter.GaussianBlur(5)).point(lambda v: int(v * 0.62))
+              glow = Image.new('RGBA', src.size, color + (0,))
+              glow.putalpha(glow_alpha)
+              out = Image.alpha_composite(glow, src)
+              out.save(p, optimize=True)
           PY
 
-          cd packbuild
-          zip -qr ../RaisSocialInteract-Java-26.2-HD.zip .
-          cd ..
-          sha1sum RaisSocialInteract-Java-26.2-HD.zip | awk '{print $1}' > RaisSocialInteract-Java-26.2-HD.sha1
+          cat > packbuild/assets/raisnet/items/whatsapp.json <<'EOF'
+          {
+            "model": {
+              "type": "minecraft:model",
+              "model": "raisnet:social/whatsapp"
+            }
+          }
+          EOF
 
-      - name: Commit generated pack
+          cat > packbuild/assets/raisnet/items/discord.json <<'EOF'
+          {
+            "model": {
+              "type": "minecraft:model",
+              "model": "raisnet:social/discord"
+            }
+          }
+          EOF
+
+          cat > packbuild/assets/raisnet/models/social/whatsapp.json <<'EOF'
+          {
+            "textures": {"logo":"raisnet:item/whatsapp"},
+            "elements": [
+              {
+                "from": [0,0,7.5],
+                "to": [16,16,8.5],
+                "faces": {
+                  "north": {"uv":[0,0,16,16],"texture":"#logo"},
+                  "south": {"uv":[0,0,16,16],"texture":"#logo"}
+                }
+              }
+            ],
+            "display": {
+              "fixed": {"rotation":[0,180,0],"translation":[0,0,0],"scale":[1.9,1.9,1.9]},
+              "ground": {"rotation":[0,0,0],"translation":[0,3,0],"scale":[1.6,1.6,1.6]},
+              "gui": {"rotation":[0,180,0],"translation":[0,0,0],"scale":[1.25,1.25,1.25]}
+            }
+          }
+          EOF
+
+          sed 's#raisnet:item/whatsapp#raisnet:item/discord#g' \
+            packbuild/assets/raisnet/models/social/whatsapp.json \
+            > packbuild/assets/raisnet/models/social/discord.json
+
+          # Fallback path if plugin uses CustomModelData instead of minecraft:item_model.
+          cat > packbuild/assets/minecraft/items/paper.json <<'EOF'
+          {
+            "model": {
+              "type": "minecraft:range_dispatch",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "entries": [
+                {
+                  "threshold": 91001,
+                  "model": {"type":"minecraft:model","model":"raisnet:social/whatsapp"}
+                },
+                {
+                  "threshold": 91002,
+                  "model": {"type":"minecraft:model","model":"raisnet:social/discord"}
+                }
+              ],
+              "fallback": {"type":"minecraft:model","model":"minecraft:item/paper"}
+            }
+          }
+          EOF
+
+          python <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('packbuild')
+          for p in list(root.rglob('*.json')) + [root / 'pack.mcmeta']:
+              json.loads(p.read_text())
+              print('validated', p)
+          PY
+
+          rm -f RaisSocialInteract-Java-26.2-FINAL.zip RaisSocialInteract-Java-26.2-FINAL.sha1
+          (cd packbuild && zip -qr ../RaisSocialInteract-Java-26.2-FINAL.zip .)
+          sha1sum RaisSocialInteract-Java-26.2-FINAL.zip | awk '{print $1}' > RaisSocialInteract-Java-26.2-FINAL.sha1
+          echo "FINAL SHA1: $(cat RaisSocialInteract-Java-26.2-FINAL.sha1)"
+
+      - name: Commit final pack
         run: |
           git config user.name "RaisNet Pack Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add RaisSocialInteract-Java-26.2-HD.zip RaisSocialInteract-Java-26.2-HD.sha1
-          git commit -m "Generate polished HD Java resource pack" || exit 0
+          git add RaisSocialInteract-Java-26.2-FINAL.zip RaisSocialInteract-Java-26.2-FINAL.sha1
+          git commit -m "Generate FINAL Java 26.2 social resource pack" || exit 0
           git push
