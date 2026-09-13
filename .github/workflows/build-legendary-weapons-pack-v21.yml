@@ -1,0 +1,92 @@
+name: Build RaisRelic Legendary Weapons Java Pack v2.1
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-legendary-weapons-pack-v21.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build cache-busted Java 26.2 pack with item_model + CMD fallback
+        shell: bash
+        run: |
+          set -e
+          rm -rf legendary-v21
+          mkdir legendary-v21
+          unzip -q RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.zip -d legendary-v21
+
+          python <<'PY'
+          from pathlib import Path
+          import json
+
+          root = Path('legendary-v21')
+          (root/'pack.mcmeta').write_text(json.dumps({
+              'pack': {
+                  'description': 'RaisNet • RaisRelic Anime Ascension v2.1 • Java 26.2',
+                  'min_format': [88,0],
+                  'max_format': [88,0]
+              }
+          }, indent=2))
+
+          # Primary path is minecraft:item_model via Paper ItemMeta#setItemModel.
+          # These minecraft/items definitions are a second fallback using CMD,
+          # so the weapon still gets its 3D model if item_model linkage fails.
+          bybase = {
+              'netherite_sword': [(92101,'raijin_no_kiba'), (92102,'kurotsuki_requiem'), (92103,'enka_ryujin')],
+              'trident': [(92104,'hoshikiri')],
+              'netherite_axe': [(92105,'shirogane_setsuna')],
+              'mace': [(92106,'tenma_guren')],
+              'bow': [(92107,'aetherion_arc')],
+          }
+          out = root/'assets/minecraft/items'
+          out.mkdir(parents=True, exist_ok=True)
+          for base, entries in bybase.items():
+              obj = {
+                  'model': {
+                      'type': 'minecraft:range_dispatch',
+                      'property': 'minecraft:custom_model_data',
+                      'index': 0,
+                      'entries': [
+                          {'threshold': cmd, 'model': {'type':'minecraft:model','model':f'raisnet:legend/{wid}'}}
+                          for cmd,wid in entries
+                      ],
+                      'fallback': {'type':'minecraft:model','model':f'minecraft:item/{base}'}
+                  }
+              }
+              (out/f'{base}.json').write_text(json.dumps(obj, indent=2))
+
+          # Validate all JSON and mandatory models before packaging.
+          required = [
+              'raijin_no_kiba','kurotsuki_requiem','enka_ryujin','hoshikiri',
+              'shirogane_setsuna','tenma_guren','aetherion_arc'
+          ]
+          for wid in required:
+              assert (root/f'assets/raisnet/items/{wid}.json').is_file(), wid
+              assert (root/f'assets/raisnet/models/legend/{wid}.json').is_file(), wid
+              assert (root/f'assets/raisnet/textures/legend/{wid}.png').is_file(), wid
+          for p in root.rglob('*.json'):
+              json.loads(p.read_text())
+          json.loads((root/'pack.mcmeta').read_text())
+          print('RaisRelic v2.1 Java pack validated')
+          PY
+
+          rm -f RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.sha1
+          (cd legendary-v21 && zip -qr ../RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.zip .)
+          sha1sum RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.zip | awk '{print $1}' > RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.sha1
+          echo "PACK SHA1: $(cat RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.sha1)"
+
+      - name: Commit generated v2.1 Java pack
+        run: |
+          git config user.name "RaisNet Pack Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.1.sha1
+          git commit -m "Generate RaisRelic Anime Ascension v2.1 Java pack" || exit 0
+          git push
