@@ -1,0 +1,140 @@
+name: Build RaisRelic Legendary Weapons Java Pack
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-legendary-weapons-pack.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pillow
+        run: python -m pip install --quiet pillow
+
+      - name: Build combined Java resource pack
+        shell: bash
+        run: |
+          set -e
+          rm -rf legendary-pack
+          mkdir legendary-pack
+          unzip -q RaisSocialInteract-Java-26.2-FINAL2.zip -d legendary-pack
+
+          python <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFilter
+          import json
+
+          root = Path('legendary-pack')
+          item_dir = root / 'assets/raisnet/items'
+          model_dir = root / 'assets/raisnet/models/legend'
+          tex_dir = root / 'assets/raisnet/textures/legend'
+          item_dir.mkdir(parents=True, exist_ok=True)
+          model_dir.mkdir(parents=True, exist_ok=True)
+          tex_dir.mkdir(parents=True, exist_ok=True)
+
+          weapons = {
+              'raijin_no_kiba': {'theme':'thunder','c1':(35,210,255),'c2':(245,250,255)},
+              'kurotsuki_requiem': {'theme':'void','c1':(116,45,220),'c2':(255,70,230)},
+              'enka_ryujin': {'theme':'fire','c1':(255,70,20),'c2':(255,210,40)},
+              'hoshikiri': {'theme':'celestial','c1':(215,90,255),'c2':(120,230,255)},
+              'shirogane_setsuna': {'theme':'ice','c1':(100,220,255),'c2':(245,255,255)},
+              'tenma_guren': {'theme':'demon','c1':(190,15,35),'c2':(255,120,20)},
+              'aetherion_arc': {'theme':'aether','c1':(255,220,70),'c2':(130,210,255)},
+          }
+
+          def texture(wid, d):
+              S=128
+              img=Image.new('RGBA',(S,S),(5,7,14,255))
+              dr=ImageDraw.Draw(img)
+              for r in range(70,2,-3):
+                  t=(70-r)/68
+                  c=tuple(int(d['c1'][i]*(1-t)+d['c2'][i]*t) for i in range(3))
+                  a=max(12, int(110*(1-t)))
+                  layer=Image.new('RGBA',(S,S),(0,0,0,0)); ld=ImageDraw.Draw(layer)
+                  ld.ellipse((64-r,64-r,64+r,64+r), outline=c+(a,), width=2)
+                  img=Image.alpha_composite(img,layer)
+              dr=ImageDraw.Draw(img)
+              for i in range(9):
+                  y=14+i*12
+                  dr.line((10,y,118,y-22), fill=d['c1']+(90,), width=2)
+              dr.ellipse((36,36,92,92), outline=d['c2']+(255,), width=5)
+              dr.polygon([(64,24),(76,52),(104,64),(76,76),(64,104),(52,76),(24,64),(52,52)], outline=d['c1']+(255,))
+              glow=img.filter(ImageFilter.GaussianBlur(5))
+              img=Image.blend(glow,img,0.72)
+              img.save(tex_dir/f'{wid}.png', optimize=True)
+
+          def face(texture='#0'):
+              return {k:{'texture':texture,'uv':[0,0,16,16]} for k in ['north','south','east','west','up','down']}
+
+          def elem(frm,to):
+              return {'from':frm,'to':to,'faces':face()}
+
+          def sword_model(style):
+              els=[elem([7,0,7],[9,5,9]), elem([5,4.5,6.5],[11,6,9.5])]
+              if style=='thunder':
+                  els += [elem([7.2,6,7.2],[8.8,16,8.8]), elem([5.7,9,7.3],[8.4,10.4,8.7]), elem([8.1,12,7.3],[10.2,13.4,8.7])]
+              elif style=='void':
+                  els += [elem([6.5,6,7],[9.5,16,9]), elem([4.8,12,7.2],[6.7,15.8,8.8]), elem([9.3,9,7.2],[11.2,13.2,8.8])]
+              else:
+                  els += [elem([6.8,6,7],[9.2,16,9]), elem([5.7,11.5,7.2],[7.2,15.5,8.8]), elem([8.8,9,7.2],[10.3,13.4,8.8])]
+              return els
+
+          def spear_model():
+              return [elem([7.3,0,7.3],[8.7,13.5,8.7]), elem([5.5,12,6.5],[10.5,16,9.5]), elem([6.5,10.6,7],[9.5,13.2,9])]
+
+          def scythe_model():
+              return [elem([7.2,0,7.2],[8.8,14,8.8]), elem([7.7,12.3,7],[15.5,14.1,9]), elem([12,9.8,7.2],[15.7,12.5,8.8])]
+
+          def mace_model():
+              return [elem([7.1,0,7.1],[8.9,10.5,8.9]), elem([4.5,9.5,4.5],[11.5,15.8,11.5]), elem([2.8,11,6.5],[4.8,14,9.5]), elem([11.2,11,6.5],[13.2,14,9.5])]
+
+          def bow_model():
+              return [elem([7.4,1,7.4],[8.6,15,8.6]), elem([4.2,12,7],[7.8,15.8,9]), elem([8.2,0.2,7],[11.8,4,9]), elem([5.1,7.2,7.2],[7.8,9,8.8]), elem([8.2,7.2,7.2],[10.9,9,8.8])]
+
+          display={
+            'thirdperson_righthand':{'rotation':[0,-90,55],'translation':[0,4,1],'scale':[1.1,1.1,1.1]},
+            'firstperson_righthand':{'rotation':[0,-90,25],'translation':[1.13,3.2,1.13],'scale':[1.0,1.0,1.0]},
+            'gui':{'rotation':[20,225,0],'translation':[0,0,0],'scale':[1.05,1.05,1.05]},
+            'ground':{'rotation':[0,0,0],'translation':[0,2,0],'scale':[0.7,0.7,0.7]},
+            'fixed':{'rotation':[0,180,0],'translation':[0,0,0],'scale':[1.15,1.15,1.15]}
+          }
+
+          for wid,d in weapons.items():
+              texture(wid,d)
+              if wid in ('raijin_no_kiba','kurotsuki_requiem','enka_ryujin'):
+                  els=sword_model(d['theme'])
+              elif wid=='hoshikiri': els=spear_model()
+              elif wid=='shirogane_setsuna': els=scythe_model()
+              elif wid=='tenma_guren': els=mace_model()
+              else: els=bow_model()
+              model={'textures':{'0':f'raisnet:legend/{wid}','particle':f'raisnet:legend/{wid}'},'elements':els,'display':display}
+              (model_dir/f'{wid}.json').write_text(json.dumps(model,indent=2))
+              item={'model':{'type':'minecraft:model','model':f'raisnet:legend/{wid}'}}
+              (item_dir/f'{wid}.json').write_text(json.dumps(item,indent=2))
+
+          for p in root.rglob('*.json'):
+              json.loads(p.read_text())
+              print('validated', p)
+          json.loads((root/'pack.mcmeta').read_text())
+          print('validated pack.mcmeta')
+          PY
+
+          rm -f RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.sha1
+          (cd legendary-pack && zip -qr ../RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.zip .)
+          sha1sum RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.zip | awk '{print $1}' > RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.sha1
+          echo "PACK SHA1: $(cat RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.sha1)"
+
+      - name: Commit generated Java pack
+        run: |
+          git config user.name "RaisNet Pack Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2.sha1
+          git commit -m "Generate RaisRelic Legendary Weapons Java resource pack" || exit 0
+          git push
