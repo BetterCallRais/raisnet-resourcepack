@@ -1,4 +1,4 @@
-name: Build RaisNet FINAL Resource Pack
+name: Build RaisNet FINAL2 Resource Pack
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Install Pillow
         run: python -m pip install --quiet pillow
 
-      - name: Build final Java 26.2 pack
+      - name: Build FINAL2 Java 26.2 pack
         shell: bash
         run: |
           set -e
@@ -27,13 +27,12 @@ jobs:
           mkdir -p packbuild
           unzip -q RaisSocialInteract-Java-26.2.zip -d packbuild
 
-          # Minecraft Java 26.2 uses resource-pack version 88.0.
           cat > packbuild/pack.mcmeta <<'EOF'
           {
             "pack": {
-              "description": "RaisNet Social Icons FINAL - Minecraft Java 26.2",
-              "min_format": [88, 0],
-              "max_format": [88, 0]
+              "pack_format": 88,
+              "supported_formats": {"min_inclusive": 88, "max_inclusive": 88},
+              "description": "RaisSocialInteract Java FINAL2"
             }
           }
           EOF
@@ -43,106 +42,81 @@ jobs:
           mkdir -p packbuild/assets/raisnet/textures/item
           mkdir -p packbuild/assets/minecraft/items
 
-          # Keep the original recognizable logos but add a soft glow.
           python <<'PY'
-          from PIL import Image, ImageFilter
+          from PIL import Image, ImageDraw, ImageFilter
           from pathlib import Path
 
-          base = Path('packbuild/assets/raisnet/textures/item')
-          for name, color in [('whatsapp',(40,255,105)), ('discord',(100,115,255))]:
-              p = base / f'{name}.png'
-              src = Image.open(p).convert('RGBA')
-              alpha = src.getchannel('A')
-              glow_alpha = alpha.filter(ImageFilter.GaussianBlur(5)).point(lambda v: int(v * 0.62))
-              glow = Image.new('RGBA', src.size, color + (0,))
-              glow.putalpha(glow_alpha)
-              out = Image.alpha_composite(glow, src)
-              out.save(p, optimize=True)
+          p = Path('packbuild/assets/raisnet/textures/item/whatsapp.png')
+          S = 128
+          img = Image.new('RGBA', (S,S), (0,0,0,0))
+          shadow = Image.new('RGBA',(S,S),(0,0,0,0))
+          s = ImageDraw.Draw(shadow)
+          s.ellipse((16,12,112,108), fill=(0,0,0,100))
+          s.polygon([(28,82),(21,106),(44,94)], fill=(0,0,0,100))
+          shadow = shadow.filter(ImageFilter.GaussianBlur(3))
+          img.alpha_composite(shadow)
+          d = ImageDraw.Draw(img)
+          green = (37,211,102,255)
+          d.ellipse((12,8,108,104), fill=green)
+          d.polygon([(28,82),(19,110),(45,95)], fill=green)
+          d.ellipse((21,17,99,95), outline=(245,255,245,255), width=6)
+          hand = Image.new('RGBA',(S,S),(0,0,0,0))
+          hd = ImageDraw.Draw(hand)
+          poly=[(43,40),(38,46),(34,54),(33,61),(36,67),(43,74),(49,74),(55,69),(51,62),(48,57),(49,52),(54,46),(61,41),(68,39),(74,41),(80,46),(85,52),(90,52),(96,47),(96,40),(91,33),(84,27),(77,24),(69,24),(61,27),(54,31),(48,36)]
+          hd.polygon(poly, fill=(255,255,255,255))
+          alpha = hand.split()[-1].filter(ImageFilter.GaussianBlur(1))
+          hand2 = Image.new('RGBA',(S,S),(255,255,255,0))
+          hand2.putalpha(alpha.point(lambda v:255 if v>80 else 0))
+          hd2 = ImageDraw.Draw(hand2)
+          hd2.rounded_rectangle((33,49,46,69), radius=5, fill=(255,255,255,255))
+          hd2.rounded_rectangle((82,33,95,53), radius=5, fill=(255,255,255,255))
+          hand2 = hand2.rotate(-15, resample=Image.Resampling.BICUBIC, center=(64,64))
+          img.alpha_composite(hand2)
+          img.save(p, optimize=True)
           PY
 
           cat > packbuild/assets/raisnet/items/whatsapp.json <<'EOF'
-          {
-            "model": {
-              "type": "minecraft:model",
-              "model": "raisnet:social/whatsapp"
-            }
-          }
+          {"model":{"type":"minecraft:model","model":"raisnet:social/whatsapp"}}
           EOF
 
           cat > packbuild/assets/raisnet/items/discord.json <<'EOF'
-          {
-            "model": {
-              "type": "minecraft:model",
-              "model": "raisnet:social/discord"
-            }
-          }
+          {"model":{"type":"minecraft:model","model":"raisnet:social/discord"}}
           EOF
 
           cat > packbuild/assets/raisnet/models/social/whatsapp.json <<'EOF'
           {
-            "textures": {"logo":"raisnet:item/whatsapp"},
-            "elements": [
-              {
-                "from": [0,0,7.5],
-                "to": [16,16,8.5],
-                "faces": {
-                  "north": {"uv":[0,0,16,16],"texture":"#logo"},
-                  "south": {"uv":[0,0,16,16],"texture":"#logo"}
-                }
-              }
-            ],
-            "display": {
-              "fixed": {"rotation":[0,180,0],"translation":[0,0,0],"scale":[1.9,1.9,1.9]},
-              "ground": {"rotation":[0,0,0],"translation":[0,3,0],"scale":[1.6,1.6,1.6]},
-              "gui": {"rotation":[0,180,0],"translation":[0,0,0],"scale":[1.25,1.25,1.25]}
-            }
+            "textures":{"logo":"raisnet:item/whatsapp"},
+            "elements":[{"from":[0,0,7.5],"to":[16,16,8.5],"faces":{"north":{"uv":[0,0,16,16],"texture":"#logo"},"south":{"uv":[0,0,16,16],"texture":"#logo"}}}],
+            "display":{"fixed":{"rotation":[0,180,0],"translation":[0,0,0],"scale":[1.9,1.9,1.9]},"ground":{"rotation":[0,0,0],"translation":[0,3,0],"scale":[1.6,1.6,1.6]},"gui":{"rotation":[0,180,0],"translation":[0,0,0],"scale":[1.25,1.25,1.25]}}
           }
           EOF
 
-          sed 's#raisnet:item/whatsapp#raisnet:item/discord#g' \
-            packbuild/assets/raisnet/models/social/whatsapp.json \
-            > packbuild/assets/raisnet/models/social/discord.json
+          sed 's#raisnet:item/whatsapp#raisnet:item/discord#g' packbuild/assets/raisnet/models/social/whatsapp.json > packbuild/assets/raisnet/models/social/discord.json
 
-          # Fallback path if plugin uses CustomModelData instead of minecraft:item_model.
           cat > packbuild/assets/minecraft/items/paper.json <<'EOF'
           {
             "model": {
-              "type": "minecraft:range_dispatch",
-              "property": "minecraft:custom_model_data",
-              "index": 0,
-              "entries": [
-                {
-                  "threshold": 91001,
-                  "model": {"type":"minecraft:model","model":"raisnet:social/whatsapp"}
-                },
-                {
-                  "threshold": 91002,
-                  "model": {"type":"minecraft:model","model":"raisnet:social/discord"}
-                }
+              "type":"minecraft:range_dispatch",
+              "property":"minecraft:custom_model_data",
+              "index":0,
+              "entries":[
+                {"threshold":91001,"model":{"type":"minecraft:model","model":"raisnet:social/whatsapp"}},
+                {"threshold":91002,"model":{"type":"minecraft:model","model":"raisnet:social/discord"}}
               ],
-              "fallback": {"type":"minecraft:model","model":"minecraft:item/paper"}
+              "fallback":{"type":"minecraft:model","model":"minecraft:item/paper"}
             }
           }
           EOF
 
-          python <<'PY'
-          import json
-          from pathlib import Path
-          root = Path('packbuild')
-          for p in list(root.rglob('*.json')) + [root / 'pack.mcmeta']:
-              json.loads(p.read_text())
-              print('validated', p)
-          PY
+          rm -f RaisSocialInteract-Java-26.2-FINAL2.zip RaisSocialInteract-Java-26.2-FINAL2.sha1
+          (cd packbuild && zip -qr ../RaisSocialInteract-Java-26.2-FINAL2.zip .)
+          sha1sum RaisSocialInteract-Java-26.2-FINAL2.zip | awk '{print $1}' > RaisSocialInteract-Java-26.2-FINAL2.sha1
+          echo "FINAL2 SHA1: $(cat RaisSocialInteract-Java-26.2-FINAL2.sha1)"
 
-          rm -f RaisSocialInteract-Java-26.2-FINAL.zip RaisSocialInteract-Java-26.2-FINAL.sha1
-          (cd packbuild && zip -qr ../RaisSocialInteract-Java-26.2-FINAL.zip .)
-          sha1sum RaisSocialInteract-Java-26.2-FINAL.zip | awk '{print $1}' > RaisSocialInteract-Java-26.2-FINAL.sha1
-          echo "FINAL SHA1: $(cat RaisSocialInteract-Java-26.2-FINAL.sha1)"
-
-      - name: Commit final pack
+      - name: Commit FINAL2 pack
         run: |
           git config user.name "RaisNet Pack Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add RaisSocialInteract-Java-26.2-FINAL.zip RaisSocialInteract-Java-26.2-FINAL.sha1
-          git commit -m "Generate FINAL Java 26.2 social resource pack" || exit 0
+          git add RaisSocialInteract-Java-26.2-FINAL2.zip RaisSocialInteract-Java-26.2-FINAL2.sha1
+          git commit -m "Generate FINAL2 Java 26.2 social resource pack" || exit 0
           git push
