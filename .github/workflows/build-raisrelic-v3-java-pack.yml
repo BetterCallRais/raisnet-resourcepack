@@ -1,0 +1,58 @@
+name: Build RaisRelic v3 Java Pack
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/build-raisrelic-v3-java-pack.yml'
+      - '.github/scripts/build_raisrelic_v300_github.py'
+      - 'RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Prepare v2.3 base pack
+        run: |
+          rm -rf /tmp/rp23inspect
+          mkdir -p /tmp/rp23inspect
+          unzip -q RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v2.3-FIX.zip -d /tmp/rp23inspect
+
+      - name: Build RaisRelic v3 pack
+        run: python .github/scripts/build_raisrelic_v300_github.py
+
+      - name: Validate pack
+        run: |
+          unzip -t RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.zip
+          cat RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.sha1
+          test "$(sha1sum RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.zip | awk '{print $1}')" = "$(tr -d '\r\n' < RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.sha1)"
+
+      - name: Commit generated pack
+        run: |
+          rm -rf .build/raisrelic-v3
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A .build/raisrelic-v3 RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.zip RaisNet-RaisRelic-LegendaryWeapons-Java-26.2-v3.0.sha1
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+          else
+            git commit -m 'Generate RaisRelic v3.0 Legendary Reforge Java pack'
+            git push origin HEAD:main
+          fi
