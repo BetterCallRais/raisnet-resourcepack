@@ -1,0 +1,81 @@
+name: Build RaisRelic v3.5.1 Dungeon Nightmare
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v3.5.1-build]
+    paths:
+      - '.build/raisrelic-v351/**'
+      - '.github/workflows/build-raisrelic-v351-plugin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Java 26
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+          cache: maven
+          cache-dependency-path: .build/raisrelic-v351/pom.xml
+      - name: Reconstruct v3.5.1 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET=.build/raisrelic-v351/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          mkdir -p "$(dirname "$TARGET")" .build/raisrelic-v351/src/main/resources
+          cat .build/raisrelic-v330/source.part* | tr -d '\r\n' | base64 -d | gzip -d > "$TARGET"
+          base64 -d .build/raisrelic-v340/v340.patch.gz.b64 | gzip -d > /tmp/v340.patch
+          patch "$TARGET" /tmp/v340.patch
+          base64 -d .build/raisrelic-v350/v350.patch.gz.b64 | gzip -d > /tmp/v350.patch
+          patch "$TARGET" /tmp/v350.patch
+          base64 -d .build/raisrelic-v351/v351.patch.gz.b64 | gzip -d > /tmp/v351.patch
+          patch "$TARGET" /tmp/v351.patch
+          cp .build/raisrelic-v351/plugin.yml .build/raisrelic-v351/src/main/resources/plugin.yml
+          cp .build/raisrelic-v351/config.yml .build/raisrelic-v351/src/main/resources/config.yml
+          grep -q 'giveall' "$TARGET"
+          grep -q 'dungeonPlacedBlocks' "$TARGET"
+          grep -q 'onDungeonLeavesDecay' "$TARGET"
+          grep -q 'Nightmare' .build/raisrelic-v351/plugin.yml
+      - name: Compile against Spigot API 26.1.2
+        run: mvn -B -f .build/raisrelic-v351/pom.xml clean package
+      - name: Validate JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR=.build/raisrelic-v351/target/RaisRelic-3.5.1-Paper-26.1.2.jar
+          test -s "$JAR"
+          jar tf "$JAR" | grep -q 'id/raisnet/raisrelic/RaisRelicPlugin.class'
+          unzip -p "$JAR" plugin.yml | grep -q "version: '3.5.1'"
+          unzip -p "$JAR" plugin.yml | grep -q "api-version: '26.1'"
+          unzip -p "$JAR" config.yml | grep -q 'allow-player-block-place: true'
+          unzip -p "$JAR" config.yml | grep -q 'health-per-wave: 0.20'
+          cp "$JAR" RaisRelic-3.5.1-Paper-26.1.2.jar
+          sha256sum RaisRelic-3.5.1-Paper-26.1.2.jar | awk '{print $1}' > RaisRelic-3.5.1-Paper-26.1.2.sha256
+          echo "JAR size: $(stat -c%s RaisRelic-3.5.1-Paper-26.1.2.jar)"
+          echo "SHA256: $(cat RaisRelic-3.5.1-Paper-26.1.2.sha256)"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-3.5.1-Paper-26.1.2
+          path: |
+            RaisRelic-3.5.1-Paper-26.1.2.jar
+            RaisRelic-3.5.1-Paper-26.1.2.sha256
+      - name: Commit plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisRelic-3.5.1-Paper-26.1.2.jar RaisRelic-3.5.1-Paper-26.1.2.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build RaisRelic v3.5.1 Dungeon Nightmare'
+            git push
+          fi
