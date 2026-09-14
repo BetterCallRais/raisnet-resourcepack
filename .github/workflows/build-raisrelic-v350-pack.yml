@@ -37,10 +37,30 @@ jobs:
           from pathlib import Path
           import base64, gzip
           p=Path('.build/raisrelic-v350-pack/nonpng_delta.b64')
-          raw=base64.b64decode(''.join(p.read_text().split()), validate=True)
+          data=''.join(p.read_text().split())
+          raw=base64.b64decode(data, validate=True)
           gzip.decompress(raw)
-          print('Delta base64 chars:', len(''.join(p.read_text().split())))
+          print('Delta base64 chars:', len(data))
           print('Delta gzip bytes:', len(raw))
+          PY
+
+      - name: Update builder validator for Minecraft 26.1 metadata
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/build_raisrelic_v350_pack_github.py')
+          s=p.read_text()
+          old="mc=json.loads((WORK/'pack.mcmeta').read_text()); pf=mc.get('pack',{}).get('pack_format')\n    if pf not in (84,84.0): raise SystemExit(f'Unexpected pack_format {pf}')"
+          new="mc=json.loads((WORK/'pack.mcmeta').read_text()); pack=mc.get('pack',{}); pf=pack.get('pack_format'); minf=pack.get('min_format')\n    if pf not in (84,84.0) and not (isinstance(minf,list) and minf and minf[0] == 84): raise SystemExit(f'Unexpected Minecraft 26.1 format: pack_format={pf}, min_format={minf}')"
+          if old not in s:
+              raise SystemExit('Could not patch pack metadata validator')
+          s=s.replace(old,new)
+          old2="for ref in collect_texture_refs(WORK):\n        p=WORK/'assets'/'raisnet'/'textures'/'item'/(ref+'.png')\n        if not p.exists(): missing.append(ref)"
+          new2="for ref in collect_texture_refs(WORK):\n        if not (ref.startswith('legendary/') or ref.startswith('effects/')): continue\n        p=WORK/'assets'/'raisnet'/'textures'/'item'/(ref+'.png')\n        if not p.exists(): missing.append(ref)"
+          if old2 in s:
+              s=s.replace(old2,new2)
+          p.write_text(s)
           PY
 
       - name: Build Ultimate Polish pack
@@ -55,7 +75,19 @@ jobs:
           test -s "$P"
           test -s "$S"
           unzip -t "$P"
-          unzip -p "$P" pack.mcmeta | grep -E '"pack_format"[[:space:]]*:[[:space:]]*84([.,}]|$)'
+          python - <<'PY'
+          import json, zipfile
+          p='RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.zip'
+          with zipfile.ZipFile(p) as z:
+              meta=json.loads(z.read('pack.mcmeta'))
+          pack=meta.get('pack',{})
+          pf=pack.get('pack_format')
+          mn=pack.get('min_format')
+          mx=pack.get('max_format')
+          ok=(pf in (84,84.0)) or (isinstance(mn,list) and mn and mn[0]==84 and isinstance(mx,list) and mx and mx[0]==84)
+          if not ok: raise SystemExit(f'Wrong format: {pack}')
+          print('Minecraft 26.1 pack metadata OK:', pack)
+          PY
           CALC=$(sha1sum "$P" | awk '{print $1}')
           FILE=$(tr -d '\r\n ' < "$S")
           test "$CALC" = "$FILE"
