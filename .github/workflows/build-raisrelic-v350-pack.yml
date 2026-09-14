@@ -1,0 +1,83 @@
+name: Build RaisRelic v3.5 Ultimate Polish Java Pack
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.build/raisrelic-v350-pack/**'
+      - '.github/scripts/build_raisrelic_v350_pack_github.py'
+      - '.github/workflows/build-raisrelic-v350-pack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Reassemble exact v3.5 metadata delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .build/raisrelic-v350-pack/nonpng.part* > .build/raisrelic-v350-pack/nonpng_delta.b64
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip
+          p=Path('.build/raisrelic-v350-pack/nonpng_delta.b64')
+          raw=base64.b64decode(''.join(p.read_text().split()), validate=True)
+          gzip.decompress(raw)
+          print('Delta base64 chars:', len(''.join(p.read_text().split())))
+          print('Delta gzip bytes:', len(raw))
+          PY
+
+      - name: Build Ultimate Polish pack
+        run: python .github/scripts/build_raisrelic_v350_pack_github.py
+
+      - name: Validate Java resource pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          P=RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.zip
+          S=RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.sha1
+          test -s "$P"
+          test -s "$S"
+          unzip -t "$P"
+          unzip -p "$P" pack.mcmeta | grep -E '"pack_format"[[:space:]]*:[[:space:]]*84([.,}]|$)'
+          CALC=$(sha1sum "$P" | awk '{print $1}')
+          FILE=$(tr -d '\r\n ' < "$S")
+          test "$CALC" = "$FILE"
+          echo "Java pack bytes: $(stat -c%s "$P")"
+          echo "Java pack SHA1: $CALC"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-v3.5-UltimatePolish-Java-Pack
+          path: |
+            RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.zip
+            RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.sha1
+
+      - name: Publish pack to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.zip RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.sha1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish RaisRelic v3.5 Ultimate Polish Java pack'
+            git push
+          fi
