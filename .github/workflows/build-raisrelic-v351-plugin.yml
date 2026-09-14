@@ -38,7 +38,7 @@ jobs:
           patch "$TARGET" /tmp/v350.patch
           base64 -d .build/raisrelic-v350/v350-fix1.patch.gz.b64 | gzip -d > /tmp/v350-fix1.patch
           patch "$TARGET" /tmp/v350-fix1.patch
-          base64 -d .build/raisrelic-v351/v351.patch.gz.b64 | gzip -d > /tmp/v351.patch
+          cat .build/raisrelic-v351/v351.patch.part* | tr -d '\r\n' | base64 -d | gzip -d > /tmp/v351.patch
           patch "$TARGET" /tmp/v351.patch
           cp .build/raisrelic-v351/plugin.yml .build/raisrelic-v351/src/main/resources/plugin.yml
           cp .build/raisrelic-v351/config.yml .build/raisrelic-v351/src/main/resources/config.yml
