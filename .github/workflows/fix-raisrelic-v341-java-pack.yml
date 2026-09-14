@@ -1,0 +1,87 @@
+name: Fix RaisRelic v3.4.1 Java Pack
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/fix-raisrelic-v341-java-pack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build Minecraft 26.1 compatible pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, zipfile, os
+          src='RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.zip'
+          dst='RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.zip'
+          mcmeta={
+            'pack': {
+              'description': 'RaisNet • RaisRelic v3.4.1 Sovereign Arsenal FIX • Minecraft 26.1 • Long 3D Weapons • Unique Cinematics • Sovereign Fusion',
+              'min_format': [84,0],
+              'max_format': [84,0]
+            }
+          }
+          with zipfile.ZipFile(src,'r') as zin, zipfile.ZipFile(dst,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as zout:
+              for info in zin.infolist():
+                  if info.filename == 'pack.mcmeta':
+                      continue
+                  zout.writestr(info, zin.read(info.filename))
+              zout.writestr('pack.mcmeta', json.dumps(mcmeta, indent=2, ensure_ascii=False).encode('utf-8'))
+          with zipfile.ZipFile(dst,'r') as z:
+              assert z.testzip() is None
+              data=json.loads(z.read('pack.mcmeta'))
+              assert data['pack']['min_format']==[84,0]
+              assert data['pack']['max_format']==[84,0]
+              names=set(z.namelist())
+              missing=[]
+              for n in names:
+                  if not (n.startswith('assets/raisnet/items/') and n.endswith('.json')):
+                      continue
+                  obj=json.loads(z.read(n))
+                  def walk(x):
+                      if isinstance(x,dict):
+                          if x.get('type')=='minecraft:model' and isinstance(x.get('model'),str):
+                              ref=x['model']; ns,path=(ref.split(':',1) if ':' in ref else ('minecraft',ref))
+                              target=f'assets/{ns}/models/{path}.json'
+                              if target not in names: missing.append((n,target))
+                          for v in x.values(): walk(v)
+                      elif isinstance(x,list):
+                          for v in x: walk(v)
+                  walk(obj)
+              assert not missing, missing
+          print('Built',dst,os.path.getsize(dst),'bytes')
+          PY
+          sha1sum RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.zip | awk '{print $1}' > RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.sha1
+          unzip -t RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.zip >/dev/null
+          echo "SHA1=$(cat RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.sha1)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-v3.4.1-Java-Pack-FIX
+          path: |
+            RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.zip
+            RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.sha1
+
+      - name: Commit fixed pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.zip RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.1-FIX.sha1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build RaisRelic v3.4.1 Minecraft 26.1 Java pack fix'
+            git push
+          fi
