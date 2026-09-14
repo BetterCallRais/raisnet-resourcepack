@@ -1,0 +1,138 @@
+dungeon:
+  world: dungeon_world
+  spawn:
+    x: 0.5
+    y: 80.0
+    z: 0.5
+    yaw: 0.0
+    pitch: 0.0
+  return-world: world
+  max-distance-from-center: 70
+  arena-radius: 60
+  wall-height: 18
+  roof-height: 22
+  max-levels: 30
+  wave-delay-ticks: 0
+  # Radius aman di titik /raisdungeon enter. Mob pribadi tidak dapat target/damage owner di sini.
+  safe-zone-radius: 10.0
+
+  # You can override any built-in hard-mode level here.
+  # If a level is absent, RaisRelic uses its built-in difficulty table.
+  levels:
+    1:
+      stalkers: 18
+      knights: 8
+      brutes: 3
+      reapers: 0
+      bosses: 0
+    5:
+      stalkers: 22
+      knights: 10
+      brutes: 5
+      reapers: 1
+      bosses: 1
+    10:
+      stalkers: 27
+      knights: 14
+      brutes: 8
+      reapers: 3
+      bosses: 1
+    15:
+      stalkers: 32
+      knights: 17
+      brutes: 10
+      reapers: 5
+      bosses: 1
+    20:
+      stalkers: 37
+      knights: 20
+      brutes: 13
+      reapers: 6
+      bosses: 1
+
+mobs:
+  abyss-stalker:
+    name: '&5Abyss Stalker'
+    health: 320.0
+    damage: 18.0
+  void-knight:
+    name: '&d&lVoid Knight'
+    health: 750.0
+    damage: 28.0
+  abyss-brute:
+    name: '&4&lAbyss Brute'
+    health: 1400.0
+    damage: 38.0
+  void-reaper:
+    name: '&c&lVOID REAPER'
+    health: 2500.0
+    damage: 48.0
+  abyss-overlord:
+    name: '&5&lABYSS OVERLORD'
+    health: 8500.0
+    damage: 60.0
+
+custom-enchants:
+  # Books are OP/admin /give ONLY. They never drop from dungeon mobs.
+  max-per-item: 3
+
+skills:
+  # Every active enchant skill uses this cooldown.
+  enchant-cooldown-seconds: 30
+  cooldown-seconds: 30
+
+legendary-weapons:
+  # Fallback only. Each legendary weapon below has its OWN cooldown.
+  skill-cooldown-seconds: 30
+  basic-damage:
+    # Guaranteed minimum damage for normal/basic hits. Edit these without recompiling the plugin.
+    ame_no_zanketsu: 28.0
+    kurohana_calamity: 31.0
+    seiryuu_lance: 29.0
+    tsukikage_reaper: 28.0
+    guren_fang: 27.0
+    tenma_crusher: 34.0
+    astra_veloce: 30.0
+    hexa_noctis: 29.0
+    ascendant_ii: 36.0
+    ascendant_iii: 42.0
+    ascendant_iv: 48.0
+    ascendant_v: 56.0
+    ascendant_vi: 65.0
+    ascendant_vii: 76.0
+    eternity_empyrean: 92.0
+  cooldowns:
+    ame_no_zanketsu: 34
+    kurohana_calamity: 40
+    seiryuu_lance: 38
+    tsukikage_reaper: 36
+    guren_fang: 32
+    tenma_crusher: 48
+    astra_veloce: 42
+    hexa_noctis: 46
+    ascendant_ii: 38
+    ascendant_iii: 40
+    ascendant_iv: 42
+    ascendant_v: 44
+    ascendant_vi: 46
+    ascendant_vii: 48
+    eternity_empyrean: 52
+  hexa-noctis:
+    max-orbit-swords: 6
+    auto-lock-radius: 18.0
+    vengeance-seconds: 15
+    auto-strike-interval-ms: 1200
+
+  # Members obtain these only by clearing all dungeon waves.
+  full-clear-chance-percent: 7.0
+  pity-clears: 15
+
+protection:
+  prevent-natural-mobs: true
+  protect-arena-blocks: true
+  keep-players-inside: true
+
+combat:
+  knockback-horizontal: 1.05
+  knockback-vertical: 0.34
+  independent-player-waves: true
