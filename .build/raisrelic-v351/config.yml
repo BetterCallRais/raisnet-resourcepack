@@ -1,0 +1,164 @@
+dungeon:
+  world: dungeon_world
+  spawn:
+    x: 0.5
+    y: 80.0
+    z: 0.5
+    yaw: 0.0
+    pitch: 0.0
+  return-world: world
+  max-distance-from-center: 70
+  arena-radius: 60
+  wall-height: 18
+  roof-height: 22
+  max-levels: 30
+  wave-delay-ticks: 0
+  # Radius aman di titik /raisdungeon enter. Mob pribadi tidak dapat target/damage owner di sini.
+  safe-zone-radius: 10.0
+
+  # v3.5.1 Dungeon Nightmare scaling. Counts stay controlled for TPS; enemies get stronger instead of only multiplying mob count.
+  difficulty:
+    health-per-wave: 0.20
+    damage-per-wave: 0.028
+
+  # You can override any built-in hard-mode level here.
+  # If a level is absent, RaisRelic uses its built-in difficulty table.
+  levels:
+    1:
+      stalkers: 18
+      knights: 8
+      brutes: 3
+      reapers: 0
+      bosses: 0
+    5:
+      stalkers: 22
+      knights: 10
+      brutes: 5
+      reapers: 1
+      bosses: 1
+    10:
+      stalkers: 27
+      knights: 14
+      brutes: 8
+      reapers: 3
+      bosses: 1
+    15:
+      stalkers: 32
+      knights: 17
+      brutes: 10
+      reapers: 5
+      bosses: 1
+    20:
+      stalkers: 37
+      knights: 20
+      brutes: 13
+      reapers: 6
+      bosses: 1
+
+mobs:
+  abyss-stalker:
+    name: '&5Abyss Stalker'
+    health: 600.0
+    damage: 24.0
+  void-knight:
+    name: '&d&lVoid Knight'
+    health: 1300.0
+    damage: 38.0
+  abyss-brute:
+    name: '&4&lAbyss Brute'
+    health: 2600.0
+    damage: 52.0
+  void-reaper:
+    name: '&c&lVOID REAPER'
+    health: 4800.0
+    damage: 65.0
+  abyss-overlord:
+    name: '&5&lABYSS OVERLORD'
+    health: 15000.0
+    damage: 80.0
+
+custom-enchants:
+  # Books are OP/admin /give ONLY. They never drop from dungeon mobs.
+  max-per-item: 3
+
+skills:
+  # Every active enchant skill uses this cooldown.
+  enchant-cooldown-seconds: 30
+  cooldown-seconds: 30
+
+legendary-weapons:
+  # Fallback only. Each legendary weapon below has its OWN cooldown.
+  skill-cooldown-seconds: 30
+  basic-damage:
+    # Guaranteed minimum damage for normal/basic hits. Fusion tiers are intentionally much stronger than base Legendary weapons.
+    ame_no_zanketsu: 38.0
+    kurohana_calamity: 42.0
+    seiryuu_lance: 37.0
+    tsukikage_reaper: 39.0
+    guren_fang: 40.0
+    tenma_crusher: 46.0
+    astra_veloce: 36.0
+    hexa_noctis: 41.0
+    ascendant_ii: 62.0
+    ascendant_iii: 78.0
+    ascendant_iv: 96.0
+    ascendant_v: 118.0
+    ascendant_vi: 145.0
+    ascendant_vii: 176.0
+    eternity_empyrean: 230.0
+  cooldowns:
+    ame_no_zanketsu: 32
+    kurohana_calamity: 38
+    seiryuu_lance: 27
+    tsukikage_reaper: 34
+    guren_fang: 35
+    tenma_crusher: 42
+    astra_veloce: 31
+    hexa_noctis: 40
+    ascendant_ii: 39
+    ascendant_iii: 42
+    ascendant_iv: 44
+    ascendant_v: 46
+    ascendant_vi: 49
+    ascendant_vii: 52
+    eternity_empyrean: 60
+  hexa-noctis:
+    max-orbit-swords: 6
+    auto-lock-radius: 18.0
+    vengeance-seconds: 15
+    auto-strike-interval-ms: 1200
+
+  # Members obtain these only by clearing all dungeon waves.
+  full-clear-chance-percent: 7.0
+  pity-clears: 15
+
+protection:
+  prevent-natural-mobs: true
+  # Applies to the ENTIRE configured dungeon world, including downloaded maps/structures.
+  protect-arena-blocks: true
+  allow-player-block-place: true
+  # Original/imported map blocks can never be broken. Player-placed blocks are tracked by owner.
+  max-player-placed-blocks: 512
+  cleanup-player-blocks-on-run-end: true
+  # Turn on temporarily only when an OP/developer needs to edit the map manually.
+  admin-build-bypass: false
+  keep-players-inside: true
+
+combat:
+  knockback-horizontal: 1.05
+  knockback-vertical: 0.34
+  independent-player-waves: true
+
+# v3.5 Ultimate Polish runtime safety/performance controls.
+visual:
+  particle-quality: HIGH
+  max-effects-per-player: 160
+  distance-culling: 48
+  display-culling: 64
+
+legendary-combat:
+  combo-reset-ms: 1800
+  protect-npcs: true
+  protect-armor-stands: true
+  protect-tamed-pets: true
+  protect-allies: true
