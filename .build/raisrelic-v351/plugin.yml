@@ -1,0 +1,39 @@
+name: RaisRelic
+version: '3.5.1'
+main: id.raisnet.raisrelic.RaisRelicPlugin
+api-version: '26.1'
+author: RaisNet
+description: 'RaisRelic v3.5.1 Dungeon Nightmare: Ultimate Polish weapons, giveall command, brutal dungeon scaling, immutable imported-map structures with player-placeable blocks.'
+softdepend: [Multiverse-Core, Geyser-Spigot, floodgate, MythicLib, MythicMobs]
+commands:
+  raisenchant:
+    description: RaisNet custom enchantment books
+    usage: /raisenchant <list|inspect|give|reload>
+    permission: raisrelic.use
+  relic:
+    description: Compatibility alias for RaisEnchant
+    usage: /relic <list|inspect|give|reload>
+    permission: raisrelic.use
+  raisweapon:
+    description: RaisNet legendary weapons
+    usage: /raisweapon <list|inspect|give|giveall>
+    permission: raisrelic.weapon
+  raisdungeon:
+    description: RaisRelic dungeon management
+    usage: /raisdungeon <enter|leave|start|stop|status|setspawn|build|stopall>
+    permission: raisrelic.dungeon
+permissions:
+  raisrelic.use:
+    default: true
+  raisrelic.admin:
+    default: op
+  raisrelic.weapon:
+    default: true
+  raisrelic.weapon.admin:
+    default: op
+  raisrelic.dungeon:
+    default: true
+  raisrelic.dungeon.admin:
+    default: op
+  raisrelic.dungeon.buildbypass:
+    default: op
