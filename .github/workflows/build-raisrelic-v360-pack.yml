@@ -1,0 +1,107 @@
+name: Build RaisRelic v3.6 Legendary Reforged Java Pack
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.build/raisrelic-v360-pack/**'
+      - '.github/workflows/build-raisrelic-v360-pack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Reconstruct v3.6 pack builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .build/raisrelic-v360-pack/builder.part* | tr -d '\r\n' | base64 -d | gzip -d > /tmp/build_rp360.py
+          python -m py_compile /tmp/build_rp360.py
+
+      - name: Prepare v3.5 base pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=.build/raisrelic-v360-pack/work
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          unzip -q RaisNet-RaisRelic-UltimatePolish-Java-26.1-v3.5.0.zip -d "$ROOT"
+
+      - name: Apply Legendary Reforged models and textures
+        env:
+          RP360_ROOT: ${{ github.workspace }}/.build/raisrelic-v360-pack/work
+        run: python /tmp/build_rp360.py
+
+      - name: Validate and package Java resource pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=.build/raisrelic-v360-pack/work
+          OUT=RaisNet-RaisRelic-LegendaryReforged-Java-26.1-v3.6.0.zip
+          SHA=RaisNet-RaisRelic-LegendaryReforged-Java-26.1-v3.6.0.sha1
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          from PIL import Image
+          root=Path('.build/raisrelic-v360-pack/work')
+          mc=json.loads((root/'pack.mcmeta').read_text())
+          p=mc['pack']
+          assert p.get('min_format',[None])[0] == 84 or p.get('pack_format') == 84
+          for f in root.rglob('*.json'):
+              json.loads(f.read_text())
+          for f in root.rglob('*.png'):
+              with Image.open(f) as im:
+                  im.verify()
+          must=[
+              root/'assets/raisnet/models/legendary/ame_no_zanketsu.json',
+              root/'assets/raisnet/models/legendary/kurohana_calamity.json',
+              root/'assets/raisnet/models/effects/fx_solar_crosscut.json',
+              root/'assets/raisnet/models/effects/fx_storm_collapse.json',
+              root/'assets/raisnet/items/fx_solar_crosscut.json',
+              root/'assets/raisnet/items/fx_storm_collapse.json',
+          ]
+          for f in must: assert f.is_file(), f
+          print('JSON/PNG validation OK')
+          PY
+          rm -f "$OUT" "$SHA"
+          (cd "$ROOT" && zip -q -r -9 "$GITHUB_WORKSPACE/$OUT" .)
+          unzip -t "$OUT" >/dev/null
+          sha1sum "$OUT" | awk '{print $1}' > "$SHA"
+          echo "Java pack bytes: $(stat -c%s "$OUT")"
+          echo "Java pack SHA1: $(cat "$SHA")"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-v3.6-LegendaryReforged-Java-Pack
+          path: |
+            RaisNet-RaisRelic-LegendaryReforged-Java-26.1-v3.6.0.zip
+            RaisNet-RaisRelic-LegendaryReforged-Java-26.1-v3.6.0.sha1
+
+      - name: Publish pack to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-LegendaryReforged-Java-26.1-v3.6.0.zip RaisNet-RaisRelic-LegendaryReforged-Java-26.1-v3.6.0.sha1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish RaisRelic v3.6 Legendary Reforged Java pack'
+            git push
+          fi
