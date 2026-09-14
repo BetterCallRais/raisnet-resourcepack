@@ -1,0 +1,37 @@
+name: RaisRelic
+version: '3.4.0'
+main: id.raisnet.raisrelic.RaisRelicPlugin
+api-version: '26.1'
+author: RaisNet
+description: 'RaisRelic v3.4 Sovereign Arsenal: long 3D mixed weapon roster, unique 2-second cinematics, stronger Sovereign Forge fusion evolution, Hexa Noctis preserved.'
+softdepend: [Multiverse-Core, Geyser-Spigot, floodgate]
+commands:
+  raisenchant:
+    description: RaisNet custom enchantment books
+    usage: /raisenchant <list|inspect|give|reload>
+    permission: raisrelic.use
+  relic:
+    description: Compatibility alias for RaisEnchant
+    usage: /relic <list|inspect|give|reload>
+    permission: raisrelic.use
+  raisweapon:
+    description: RaisNet legendary weapons
+    usage: /raisweapon <list|inspect|give>
+    permission: raisrelic.weapon
+  raisdungeon:
+    description: RaisRelic dungeon management
+    usage: /raisdungeon <enter|leave|start|stop|status|setspawn|build|stopall>
+    permission: raisrelic.dungeon
+permissions:
+  raisrelic.use:
+    default: true
+  raisrelic.admin:
+    default: op
+  raisrelic.weapon:
+    default: true
+  raisrelic.weapon.admin:
+    default: op
+  raisrelic.dungeon:
+    default: true
+  raisrelic.dungeon.admin:
+    default: op

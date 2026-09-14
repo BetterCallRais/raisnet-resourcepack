@@ -1,0 +1,62 @@
+name: Build RaisRelic v3.4 Sovereign Arsenal Java Pack
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/v340-builder.part*'
+      - '.github/workflows/build-raisrelic-v340-pack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Pillow
+        run: python -m pip install --quiet pillow
+      - name: Reconstruct pack builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/scripts/v340-builder.part* | tr -d '\r\n' | base64 -d > /tmp/build_raisrelic_v340.py
+          python -m py_compile /tmp/build_raisrelic_v340.py
+      - name: Build Sovereign Arsenal v3.4 pack
+        run: python /tmp/build_raisrelic_v340.py
+      - name: Validate pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP=RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.zip
+          test -s "$ZIP"
+          unzip -t "$ZIP" >/dev/null
+          unzip -l "$ZIP" | grep -q 'assets/raisnet/models/legendary/kurohana_calamity.json'
+          unzip -l "$ZIP" | grep -q 'assets/raisnet/models/effects/fx_void_axe_arc.json'
+          unzip -l "$ZIP" | grep -q 'assets/raisnet/models/effects/fx_eternity_throne.json'
+          EXPECTED=$(cat RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.sha1)
+          ACTUAL=$(sha1sum "$ZIP" | awk '{print $1}')
+          test "$EXPECTED" = "$ACTUAL"
+          echo "Pack size: $(stat -c%s "$ZIP")"
+          echo "SHA1: $ACTUAL"
+      - name: Upload pack artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-v3.4-Sovereign-Arsenal-Java-Pack
+          path: |
+            RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.zip
+            RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.sha1
+      - name: Commit pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Pack Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.zip RaisNet-RaisRelic-SovereignArsenal-Java-26.1-v3.4.0.sha1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build RaisRelic v3.4 Sovereign Arsenal Java pack'
+            git push
+          fi
