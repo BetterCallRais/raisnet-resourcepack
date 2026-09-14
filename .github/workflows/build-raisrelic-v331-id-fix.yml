@@ -1,0 +1,108 @@
+name: Build RaisRelic v3.3.1 Weapon ID Fix
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-raisrelic-v331-id-fix.yml'
+      - '.build/raisrelic-v330/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 26
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '26'
+          cache: maven
+          cache-dependency-path: .build/raisrelic-v330/pom.xml
+
+      - name: Reconstruct and patch v3.3.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build/raisrelic-v330/src/main/java/id/raisnet/raisrelic
+          mkdir -p .build/raisrelic-v330/src/main/resources
+          cat .build/raisrelic-v330/source.part* | tr -d '\r\n' | base64 -d | gzip -d > .build/raisrelic-v330/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          cp .build/raisrelic-v330/plugin.yml .build/raisrelic-v330/src/main/resources/plugin.yml
+          cp .build/raisrelic-v330/config.yml .build/raisrelic-v330/src/main/resources/config.yml
+          python <<'PY'
+          from pathlib import Path
+          p=Path('.build/raisrelic-v330/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java')
+          s=p.read_text()
+          marker='    private boolean weaponCommand(CommandSender sender, String[] args) {'
+          helper='''    private String normalizeWeaponCommandId(String raw) {\n        String id = raw == null ? "" : raw.trim().toUpperCase(Locale.ROOT).replace('-', '_').replace(' ', '_');\n        return switch (id) {\n            case "AURELIUS_EDGE" -> "AME_NO_ZANKETSU";\n            case "VANTA_CROWN" -> "KUROHANA_CALAMITY";\n            case "TEMPEST_REGALIA" -> "SEIRYUU_LANCE";\n            case "EIDOLON_VEIL" -> "TSUKIKAGE_REAPER";\n            case "PYREHEART_OATH" -> "GUREN_FANG";\n            case "TERRA_NOVA_SOVEREIGN" -> "TENMA_CRUSHER";\n            case "CELESTIAL_ARBITER" -> "ASTRA_VELOCE";\n            case "DAWNFALL_CONCORD" -> "ASCENDANT_II";\n            case "TEMPEST_CROWNED" -> "ASCENDANT_III";\n            case "SPECTRAL_SOVEREIGN" -> "ASCENDANT_IV";\n            case "PYRESTORM_TESTAMENT" -> "ASCENDANT_V";\n            case "WORLDSTAR_IMPERIUM" -> "ASCENDANT_VI";\n            case "CELESTIAL_CONVERGENCE" -> "ASCENDANT_VII";\n            default -> id;\n        };\n    }\n\n    private String publicWeaponId(String internalId) {\n        return switch (internalId) {\n            case "AME_NO_ZANKETSU" -> "aurelius_edge";\n            case "KUROHANA_CALAMITY" -> "vanta_crown";\n            case "SEIRYUU_LANCE" -> "tempest_regalia";\n            case "TSUKIKAGE_REAPER" -> "eidolon_veil";\n            case "GUREN_FANG" -> "pyreheart_oath";\n            case "TENMA_CRUSHER" -> "terra_nova_sovereign";\n            case "ASTRA_VELOCE" -> "celestial_arbiter";\n            case "HEXA_NOCTIS" -> "hexa_noctis";\n            case "ASCENDANT_II" -> "dawnfall_concord";\n            case "ASCENDANT_III" -> "tempest_crowned";\n            case "ASCENDANT_IV" -> "spectral_sovereign";\n            case "ASCENDANT_V" -> "pyrestorm_testament";\n            case "ASCENDANT_VI" -> "worldstar_imperium";\n            case "ASCENDANT_VII" -> "celestial_convergence";\n            case "ETERNITY_EMPYREAN" -> "eternity_empyrean";\n            default -> internalId.toLowerCase(Locale.ROOT);\n        };\n    }\n\n'''
+          if marker not in s:
+              raise SystemExit('weaponCommand marker not found')
+          s=s.replace(marker, helper+marker, 1)
+          old='String id = args[2].equalsIgnoreCase("random") ? randomLegendWeaponId() : args[2].toUpperCase(Locale.ROOT).replace(\'-\', \'_\');'
+          new='String id = args[2].equalsIgnoreCase("random") ? randomLegendWeaponId() : normalizeWeaponCommandId(args[2]);'
+          if old not in s:
+              raise SystemExit('give id line not found')
+          s=s.replace(old,new,1)
+          oldlist='sender.sendMessage(c("&8• " + d.displayName + " &8- &7" + d.skillName + " &8(CD " + weaponCooldownSeconds(d) + "s)"));'
+          newlist='sender.sendMessage(c("&8• " + d.displayName + " &8- &7" + d.skillName + " &8(CD " + weaponCooldownSeconds(d) + "s) &8ID: &f" + publicWeaponId(d.id)));'
+          if oldlist not in s:
+              raise SystemExit('list line not found')
+          s=s.replace(oldlist,newlist,1)
+          s=s.replace('RaisRelic v3.3.0 enabled', 'RaisRelic v3.3.1 enabled')
+          s=s.replace('Ascendant Forge v3.3.0', 'Ascendant Forge v3.3.1')
+          s=s.replace('RAISNET LEGENDARY WEAPONS v3.3.0', 'RAISNET LEGENDARY WEAPONS v3.3.1')
+          p.write_text(s)
+
+          py=Path('.build/raisrelic-v330/src/main/resources/plugin.yml')
+          t=py.read_text().replace("version: '3.3.0'", "version: '3.3.1'")
+          py.write_text(t)
+
+          pom=Path('.build/raisrelic-v330/pom.xml')
+          m=pom.read_text()
+          m=m.replace('<version>3.3.0</version>', '<version>3.3.1</version>', 1)
+          m=m.replace('<finalName>RaisRelic-3.3.0-Paper-26.1.2</finalName>', '<finalName>RaisRelic-3.3.1-Paper-26.1.2</finalName>')
+          pom.write_text(m)
+          PY
+          grep -q 'case "AURELIUS_EDGE" -> "AME_NO_ZANKETSU"' .build/raisrelic-v330/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          grep -q "version: '3.3.1'" .build/raisrelic-v330/src/main/resources/plugin.yml
+
+      - name: Compile plugin against Spigot API 26.1.2
+        run: mvn -B -f .build/raisrelic-v330/pom.xml clean package
+
+      - name: Validate JAR and aliases
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR=.build/raisrelic-v330/target/RaisRelic-3.3.1-Paper-26.1.2.jar
+          test -s "$JAR"
+          jar tf "$JAR" | grep -q 'id/raisnet/raisrelic/RaisRelicPlugin.class'
+          unzip -p "$JAR" plugin.yml | grep -q "version: '3.3.1'"
+          unzip -p "$JAR" plugin.yml | grep -q "api-version: '26.1'"
+          cp "$JAR" RaisRelic-3.3.1-Paper-26.1.2.jar
+          sha256sum RaisRelic-3.3.1-Paper-26.1.2.jar | awk '{print $1}' > RaisRelic-3.3.1-Paper-26.1.2.sha256
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-3.3.1-Paper-26.1.2
+          path: |
+            RaisRelic-3.3.1-Paper-26.1.2.jar
+            RaisRelic-3.3.1-Paper-26.1.2.sha256
+
+      - name: Commit plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisRelic-3.3.1-Paper-26.1.2.jar RaisRelic-3.3.1-Paper-26.1.2.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build RaisRelic v3.3.1 weapon ID fix'
+            git push
+          fi
