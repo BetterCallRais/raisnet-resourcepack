@@ -24,17 +24,22 @@ jobs:
           java-version: '26'
           cache: maven
           cache-dependency-path: .build/raisrelic-v340/pom.xml
-      - name: Reconstruct source
+      - name: Reconstruct and patch v3.4 source
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p .build/raisrelic-v340/src/main/java/id/raisnet/raisrelic .build/raisrelic-v340/src/main/resources
-          gzip -dc .build/raisrelic-v340/RaisRelicPlugin.java.gz > .build/raisrelic-v340/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          TARGET=.build/raisrelic-v340/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          mkdir -p "$(dirname "$TARGET")" .build/raisrelic-v340/src/main/resources
+          cat .build/raisrelic-v330/source.part* | tr -d '\r\n' | base64 -d | gzip -d > "$TARGET"
+          base64 -d .build/raisrelic-v340/v340.patch.gz.b64 | gzip -d > /tmp/v340.patch
+          patch "$TARGET" /tmp/v340.patch
           cp .build/raisrelic-v340/plugin.yml .build/raisrelic-v340/src/main/resources/plugin.yml
           cp .build/raisrelic-v340/config.yml .build/raisrelic-v340/src/main/resources/config.yml
-          grep -q 'class RaisRelicPlugin' .build/raisrelic-v340/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
-          grep -q 'Sovereign Arsenal' .build/raisrelic-v340/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
-          grep -q 'VANTA_REAVER' .build/raisrelic-v340/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          grep -q 'class RaisRelicPlugin' "$TARGET"
+          grep -q 'Sovereign Arsenal' "$TARGET"
+          grep -q 'VANTA_REAVER' "$TARGET"
+          grep -q 'ETERNITY_EMPYREAN' "$TARGET"
+          echo "Source SHA256: $(sha256sum "$TARGET" | awk '{print $1}')"
       - name: Compile against Spigot API 26.1.2
         run: mvn -B -f .build/raisrelic-v340/pom.xml clean package
       - name: Validate JAR
@@ -48,6 +53,8 @@ jobs:
           unzip -p "$JAR" plugin.yml | grep -q "api-version: '26.1'"
           cp "$JAR" RaisRelic-3.4.0-Paper-26.1.2.jar
           sha256sum RaisRelic-3.4.0-Paper-26.1.2.jar | awk '{print $1}' > RaisRelic-3.4.0-Paper-26.1.2.sha256
+          echo "JAR size: $(stat -c%s RaisRelic-3.4.0-Paper-26.1.2.jar)"
+          echo "SHA256: $(cat RaisRelic-3.4.0-Paper-26.1.2.sha256)"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
