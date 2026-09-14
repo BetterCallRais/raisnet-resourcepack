@@ -34,8 +34,10 @@ jobs:
           cat .build/raisrelic-v330/source.part* | tr -d '\r\n' | base64 -d | gzip -d > "$TARGET"
           base64 -d .build/raisrelic-v340/v340.patch.gz.b64 | gzip -d > /tmp/v340.patch
           patch "$TARGET" /tmp/v340.patch
-          base64 -d .build/raisrelic-v350/v350.patch.gz.b64 | gzip -d > /tmp/v350.patch
+          cat .build/raisrelic-v350/v350.patch.part* | tr -d '\r\n' | base64 -d | gzip -d > /tmp/v350.patch
           patch "$TARGET" /tmp/v350.patch
+          base64 -d .build/raisrelic-v350/v350-fix1.patch.gz.b64 | gzip -d > /tmp/v350-fix1.patch
+          patch "$TARGET" /tmp/v350-fix1.patch
           base64 -d .build/raisrelic-v351/v351.patch.gz.b64 | gzip -d > /tmp/v351.patch
           patch "$TARGET" /tmp/v351.patch
           cp .build/raisrelic-v351/plugin.yml .build/raisrelic-v351/src/main/resources/plugin.yml
