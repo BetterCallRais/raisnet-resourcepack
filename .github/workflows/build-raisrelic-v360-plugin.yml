@@ -1,0 +1,119 @@
+name: Build RaisRelic v3.6.0 Legendary Reforged
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.build/raisrelic-v360/**'
+      - '.github/workflows/build-raisrelic-v360-plugin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 26
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+          cache: maven
+          cache-dependency-path: .build/raisrelic-v351/pom.xml
+
+      - name: Reconstruct v3.6 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=.build/raisrelic-v360
+          TARGET=$ROOT/src/main/java/id/raisnet/raisrelic/RaisRelicPlugin.java
+          mkdir -p "$(dirname "$TARGET")" "$ROOT/src/main/resources"
+
+          cat .build/raisrelic-v330/source.part* | tr -d '\r\n' | base64 -d | gzip -d > "$TARGET"
+
+          base64 -d .build/raisrelic-v340/v340.patch.gz.b64 | gzip -d > /tmp/v340.patch
+          patch "$TARGET" /tmp/v340.patch
+
+          cat .build/raisrelic-v350/v350.patch.part* | tr -d '\r\n' | base64 -d | gzip -d > /tmp/v350.patch
+          patch "$TARGET" /tmp/v350.patch
+
+          base64 -d .build/raisrelic-v350/v350-fix1.patch.gz.b64 | gzip -d > /tmp/v350-fix1.patch
+          patch "$TARGET" /tmp/v350-fix1.patch
+
+          cat .build/raisrelic-v351/v351.patch.part* | tr -d '\r\n' | base64 -d | gzip -d > /tmp/v351.patch
+          patch "$TARGET" /tmp/v351.patch
+
+          cat .build/raisrelic-v360/v360.patch.part* | tr -d '\r\n' | base64 -d | gzip -d > /tmp/v360.patch
+          patch "$TARGET" /tmp/v360.patch
+
+          cp .build/raisrelic-v351/config.yml "$ROOT/src/main/resources/config.yml"
+          cp .build/raisrelic-v351/plugin.yml "$ROOT/src/main/resources/plugin.yml"
+          cp .build/raisrelic-v351/pom.xml "$ROOT/pom.xml"
+
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.build/raisrelic-v360')
+          py=root/'src/main/resources/plugin.yml'
+          s=py.read_text()
+          s=s.replace("version: '3.5.1'", "version: '3.6.0'")
+          s=s.replace("description: 'RaisRelic v3.5.1 Dungeon Nightmare: Ultimate Polish weapons, giveall command, brutal dungeon scaling, immutable imported-map structures with player-placeable blocks.'", "description: 'RaisRelic v3.6.0 Legendary Reforged: clean long 3D legendary weapons, unique multi-phase skills, detailed skill lore, custom enchant giveall, and Dungeon Nightmare.'")
+          s=s.replace('/raisenchant <list|inspect|give|reload>', '/raisenchant <list|inspect|give|giveall|reload>')
+          s=s.replace('/relic <list|inspect|give|reload>', '/relic <list|inspect|give|giveall|reload>')
+          py.write_text(s)
+
+          pom=root/'pom.xml'
+          p=pom.read_text().replace('<version>3.5.1</version>', '<version>3.6.0</version>', 1)
+          p=p.replace('<finalName>RaisRelic-3.5.1-Paper-26.1.2</finalName>', '<finalName>RaisRelic-3.6.0-Paper-26.1.2</finalName>')
+          pom.write_text(p)
+          PY
+
+          grep -q 'weaponSkillLore' "$TARGET"
+          grep -q 'TWELVEFOLD CROWN' "$TARGET"
+          grep -q 'giveall <player> \[level|max\]' "$TARGET"
+          grep -q 'dungeonPlacedBlocks' "$TARGET"
+          grep -q "version: '3.6.0'" "$ROOT/src/main/resources/plugin.yml"
+
+      - name: Compile against Spigot API 26.1.2
+        run: mvn -B -f .build/raisrelic-v360/pom.xml clean package
+
+      - name: Validate JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR=.build/raisrelic-v360/target/RaisRelic-3.6.0-Paper-26.1.2.jar
+          test -s "$JAR"
+          jar tf "$JAR" | grep -q 'id/raisnet/raisrelic/RaisRelicPlugin.class'
+          unzip -p "$JAR" plugin.yml | grep -q "version: '3.6.0'"
+          unzip -p "$JAR" plugin.yml | grep -q "api-version: '26.1'"
+          unzip -p "$JAR" plugin.yml | grep -q 'giveall'
+          unzip -p "$JAR" config.yml | grep -q 'allow-player-block-place: true'
+          cp "$JAR" RaisRelic-3.6.0-Paper-26.1.2.jar
+          sha256sum RaisRelic-3.6.0-Paper-26.1.2.jar | awk '{print $1}' > RaisRelic-3.6.0-Paper-26.1.2.sha256
+          echo "JAR size: $(stat -c%s RaisRelic-3.6.0-Paper-26.1.2.jar)"
+          echo "SHA256: $(cat RaisRelic-3.6.0-Paper-26.1.2.sha256)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaisRelic-3.6.0-Paper-26.1.2
+          path: |
+            RaisRelic-3.6.0-Paper-26.1.2.jar
+            RaisRelic-3.6.0-Paper-26.1.2.sha256
+
+      - name: Publish plugin to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'RaisNet Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add RaisRelic-3.6.0-Paper-26.1.2.jar RaisRelic-3.6.0-Paper-26.1.2.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build RaisRelic v3.6.0 Legendary Reforged'
+            git push
+          fi
