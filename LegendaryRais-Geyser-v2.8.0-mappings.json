@@ -1,0 +1,73 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:netherite_sword": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910041,
+        "bedrock_identifier": "raisnet:soul_tide_katana",
+        "display_name": "Soul Tide Katana",
+        "bedrock_options": {
+          "icon": "raisnet:soul_tide_katana",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:trident": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910042,
+        "bedrock_identifier": "raisnet:abyss_leviathan_trident",
+        "display_name": "Abyss Leviathan Trident",
+        "bedrock_options": {
+          "icon": "raisnet:abyss_leviathan_trident",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:prismarine_shard": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910051,
+        "bedrock_identifier": "raisnet:fx_water_slash",
+        "display_name": "FX Water Slash",
+        "bedrock_options": {
+          "icon": "raisnet:fx_water_slash",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910052,
+        "bedrock_identifier": "raisnet:fx_water_ring",
+        "display_name": "FX Water Ring",
+        "bedrock_options": {
+          "icon": "raisnet:fx_water_ring",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910053,
+        "bedrock_identifier": "raisnet:fx_abyss_ring",
+        "display_name": "FX Abyss Ring",
+        "bedrock_options": {
+          "icon": "raisnet:fx_abyss_ring",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910054,
+        "bedrock_identifier": "raisnet:fx_abyss_slash",
+        "display_name": "FX Abyss Slash",
+        "bedrock_options": {
+          "icon": "raisnet:fx_abyss_slash",
+          "display_handheld": false
+        }
+      }
+    ]
+  }
+}
