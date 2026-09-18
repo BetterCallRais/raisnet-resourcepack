@@ -132,6 +132,34 @@ final class Skills {
   }
  }
 
+ void leviathanWaterPassive(Player p,long tick){
+  if(!pl.getConfig().getBoolean("leviathan-water-passive.enabled",true))return;
+  boolean wet=p.isInWater()||p.isSwimming()||p.getLocation().getBlock().getType()==Material.WATER;
+  if(!wet)return;
+
+  int dur=Math.max(30,pl.getConfig().getInt("leviathan-water-passive.effect-duration-ticks",60));
+  try{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING,dur,0,true,false,true),true);}catch(Throwable ignored){}
+  try{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.DOLPHINS_GRACE,dur,0,true,false,true),true);}catch(Throwable ignored){}
+  try{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.CONDUIT_POWER,dur,0,true,false,true),true);}catch(Throwable ignored){}
+
+  Location c=p.getLocation().add(0,.85,0);
+  double phase=tick*.29;
+  // Strong underwater sovereign aura: two rotating water rings plus rising soul bubbles.
+  for(int i=0;i<10;i++){
+   double a=phase+i*Math.PI/5;
+   double r=.82+.12*Math.sin(i*.7+phase);
+   Location q=c.clone().add(Math.cos(a)*r,(i%3)*.18-.12,Math.sin(a)*r);
+   part(p.getWorld(),"BUBBLE_COLUMN_UP",q,1,.025,.08,.025,.015);
+   dust(p.getWorld(),q,1,.02,.03,.02,(i&1)==0?DEEP:CYAN);
+   if((i%3)==0)part(p.getWorld(),"SOUL",q,1,.02,.03,.02,.005);
+  }
+  if((tick%8)==0){
+   part(p.getWorld(),"SPLASH",c,6,.58,.48,.58,.045);
+   part(p.getWorld(),"BUBBLE_POP",c,5,.52,.44,.52,.035);
+   waterRing(p.getWorld(),c.clone().add(0,-.35,0),1.05,18,phase,true);
+  }
+ }
+
  void heldAura(Player p,String id,long tick){
   if(!pl.getConfig().getBoolean("held-aura.enabled",true))return;
   Location eye=p.getEyeLocation(); Vector f=eye.getDirection().normalize();
