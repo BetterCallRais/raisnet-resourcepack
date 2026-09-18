@@ -1,0 +1,33 @@
+name: Build LegendaryRais Plugin v2.1.2 FIX
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/plugin-v212/**"
+      - ".github/workflows/build-legendaryrais-plugin-v212.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Compile plugin
+        working-directory: .build/plugin-v212
+        run: mvn -B -U clean package
+      - name: Publish JAR
+        run: |
+          cp .build/plugin-v212/target/LegendaryRais-2.1.2-FIX.jar LegendaryRais-2.1.2-FIX.jar
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-2.1.2-FIX.jar
+          git commit -m "Publish LegendaryRais 2.1.2 FIX plugin"
+          git push
