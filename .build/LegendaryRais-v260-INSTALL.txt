@@ -1,0 +1,38 @@
+LegendaryRais v2.6.0 AQUATIC AWAKENING - Java + Bedrock
+
+FIX UTAMA:
+- Abyss Leviathan sekarang benar-benar punya passive saat berada di air:
+  WATER_BREATHING + DOLPHINS_GRACE + CONDUIT_POWER.
+- Passive hanya aktif selama Abyss Leviathan dipegang dan player berada di air.
+- Aura underwater: bubble column, splash, cyan/deep-blue ring, soul-water.
+- Java particle skill tetap memakai world broadcast + direct per-player packets.
+- Java resource pack ditingkatkan menjadi material 512px.
+- Model Java diperhalus: Soul Tide 371 elements, Abyss Leviathan 262 elements.
+- Bedrock pack ditingkatkan menjadi 512px textures dan geometry lebih detail.
+- Damage: basic melee 40 raw; skills 3.0x.
+- Water-walk Soul Tide tetap hanya aktif pada kontak air langsung.
+
+INSTALL:
+1. STOP server.
+2. Hapus LegendaryRais lama.
+3. plugins/ -> LegendaryRais-2.6.0-AQUATIC-AWAKENING.jar
+
+JAVA server.properties:
+require-resource-pack=true
+resource-pack=https\://raw.githubusercontent.com/BetterCallRais/raisnet-resourcepack/main/LegendaryRais-Java-26plus-v2.6.0-AQUATIC-AWAKENING.zip
+resource-pack-id=bd7d52c3-2fe5-4e32-87fd-77f7fd194f04
+resource-pack-prompt={"text"\:"RaisNet LegendaryRais v2.6 AQUATIC AWAKENING - 512px Java + Bedrock Legendary Weapons.","color"\:"aqua","bold"\:true}
+resource-pack-sha1=d5f700e3a76fd13f368f2b09935769bcfb2ac315
+
+BEDROCK/GEYSER:
+plugins/Geyser-Spigot/packs/
+  LegendaryRais-Bedrock-v2.6.0-AQUATIC-AWAKENING.mcpack
+
+plugins/Geyser-Spigot/custom_mappings/
+  LegendaryRais-Geyser-v2.6.0-mappings.json
+
+Pastikan custom content Geyser aktif.
+
+4. START server. Jangan /reload.
+5. Java: hapus cache .minecraft/server-resource-packs lalu join ulang.
+6. Ambil item baru dari /riswp.
