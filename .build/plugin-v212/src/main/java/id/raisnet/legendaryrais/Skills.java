@@ -41,22 +41,35 @@ final class Skills {
  }
  private void bar(Player p,String s){try{p.sendActionBar(Component.text(s));}catch(Throwable x){p.sendMessage(s);}}
  private int fxCount(int base){
-  double m=Math.max(1.0,pl.getConfig().getDouble("effects.java.particle-multiplier",2.80));
+  double m=Math.max(1.0,pl.getConfig().getDouble("effects.java.particle-multiplier",3.20));
   return Math.max(1,(int)Math.round(base*m));
  }
+ private List<Player> viewers(World w,Location l){
+  double max=Math.max(24.0,pl.getConfig().getDouble("effects.view-distance",72.0));
+  double max2=max*max; List<Player> out=new ArrayList<>();
+  for(Player v:Bukkit.getOnlinePlayers()){
+   if(!v.getWorld().equals(w))continue;
+   if(v.getLocation().distanceSquared(l)<=max2)out.add(v);
+  }
+  return out;
+ }
  private void part(World w,String n,Location l,int c,double ox,double oy,double oz,double sp){
-  int count=fxCount(c);
-  boolean force=pl.getConfig().getBoolean("effects.java.force-particles",true);
-  try{
-   Particle particle=Particle.valueOf(n);
-   w.spawnParticle(particle,l,count,ox,oy,oz,sp,null,force);
-  }catch(Throwable x){
-   try{w.spawnParticle(Particle.SOUL,l,count,ox,oy,oz,sp,null,force);}catch(Throwable ignored){}
+  int count=fxCount(c); boolean force=pl.getConfig().getBoolean("effects.java.force-particles",true);
+  Particle particle;
+  try{particle=Particle.valueOf(n);}catch(Throwable x){particle=Particle.SOUL;}
+  try{w.spawnParticle(particle,l,count,ox,oy,oz,sp,null,force);}catch(Throwable ignored){}
+  // Direct per-viewer packets are intentionally also sent. This makes Java skill FX
+  // visible even on servers/proxies where the normal world broadcast gets culled.
+  for(Player v:viewers(w,l)){
+   try{v.spawnParticle(particle,l,Math.max(1,count/2),ox,oy,oz,sp);}catch(Throwable ignored){}
   }
  }
  private void dust(World w,Location l,int c,double ox,double oy,double oz,Particle.DustOptions d){
-  boolean force=pl.getConfig().getBoolean("effects.java.force-particles",true);
-  try{w.spawnParticle(Particle.DUST,l,fxCount(c),ox,oy,oz,0,d,force);}catch(Throwable ignored){}
+  int count=fxCount(c); boolean force=pl.getConfig().getBoolean("effects.java.force-particles",true);
+  try{w.spawnParticle(Particle.DUST,l,count,ox,oy,oz,0,d,force);}catch(Throwable ignored){}
+  for(Player v:viewers(w,l)){
+   try{v.spawnParticle(Particle.DUST,l,Math.max(1,count/2),ox,oy,oz,0,d);}catch(Throwable ignored){}
+  }
  }
  private void sound(World w,String n,Location l,float v,float pitch){try{w.playSound(l,Sound.valueOf(n),v,pitch);}catch(Throwable ignored){}}
  private void ring(World w,Location c,String p,double r,int pts,double phase){
@@ -116,6 +129,40 @@ final class Skills {
    dust(p.getWorld(),h,12,.35,.45,.35,DEEP);part(p.getWorld(),"SOUL_FIRE_FLAME",h,10,.4,.5,.4,.03);
    if(m>=3){marks.remove(t.getUniqueId());part(p.getWorld(),"SOUL_FIRE_FLAME",h,40,.8,.8,.8,.06);part(p.getWorld(),"BUBBLE_POP",h,40,.8,.8,.8,.13);dust(p.getWorld(),h,24,.5,.6,.5,VOID);dmg(t,4,p);}
    else marks.put(t.getUniqueId(),m);
+  }
+ }
+
+ void heldAura(Player p,String id,long tick){
+  if(!pl.getConfig().getBoolean("held-aura.enabled",true))return;
+  Location eye=p.getEyeLocation(); Vector f=eye.getDirection().normalize();
+  Vector up=new Vector(0,1,0); Vector right=f.clone().crossProduct(up);
+  if(right.lengthSquared()<.001)right=new Vector(1,0,0); else right.normalize();
+  Location hand=eye.clone().add(f.clone().multiply(.68)).add(right.clone().multiply(.34)).add(0,-.43,0);
+  double phase=tick*.34;
+
+  if(LegendaryRais.SOUL.equals(id)){
+   // A thin living-water helix that follows the held katana.
+   for(int i=0;i<7;i++){
+    double along=i*.18, a=phase+i*.92;
+    Location q=hand.clone().add(f.clone().multiply(along))
+      .add(right.clone().multiply(Math.cos(a)*.16))
+      .add(0,Math.sin(a)*.15,0);
+    dust(p.getWorld(),q,1,.012,.012,.012,CYAN);
+    if((i&1)==0)part(p.getWorld(),"BUBBLE_POP",q,1,.015,.015,.015,.005);
+    if(i==6)part(p.getWorld(),"SPLASH",q,1,.02,.02,.02,.01);
+   }
+  }else if(LegendaryRais.LEV.equals(id)){
+   // Leviathan aura is denser around the trident crown.
+   Location crown=hand.clone().add(f.clone().multiply(.55));
+   for(int i=0;i<8;i++){
+    double a=phase*.82+i*Math.PI/4;
+    Location q=crown.clone().add(right.clone().multiply(Math.cos(a)*.23))
+      .add(0,Math.sin(a)*.20,0)
+      .add(f.clone().multiply(Math.sin(a*.5)*.08));
+    dust(p.getWorld(),q,1,.015,.015,.015,(i&1)==0?DEEP:VOID);
+    if((i&2)==0)part(p.getWorld(),"BUBBLE_POP",q,1,.012,.012,.012,.004);
+   }
+   part(p.getWorld(),"SOUL",crown,1,.09,.09,.09,.004);
   }
  }
 
