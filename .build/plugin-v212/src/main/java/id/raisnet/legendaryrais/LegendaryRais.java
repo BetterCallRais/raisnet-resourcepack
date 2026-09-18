@@ -42,7 +42,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   getServer().getPluginManager().registerEvents(this,this);
   Objects.requireNonNull(getCommand("riswp")).setExecutor(this);
   Bukkit.getScheduler().runTaskTimer(this,this::tickSystems,1L,1L);
-  getLogger().info("LegendaryRais 2.5.0-LIVE-AURA enabled");
+  getLogger().info("LegendaryRais 2.6.0-AQUATIC-AWAKENING enabled");
  }
 
  @Override public void onDisable(){
@@ -289,7 +289,10 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   if((auraClock&1L)==0L){
    for(Player p:Bukkit.getOnlinePlayers()){
     String id=weapon(p.getInventory().getItemInMainHand());
-    if(id!=null)skills.heldAura(p,id,auraClock);
+    if(id!=null){
+     skills.heldAura(p,id,auraClock);
+     if(LEV.equals(id) && (auraClock%4L)==0L)skills.leviathanWaterPassive(p,auraClock);
+    }
    }
   }
 
