@@ -1,1 +1,1 @@
-build LegendaryRais v2.4.0 FINAL
+build LegendaryRais v2.5.0 LIVE AURA
