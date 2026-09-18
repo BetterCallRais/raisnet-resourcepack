@@ -8,6 +8,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
@@ -25,13 +26,25 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  private Skills skills;
  private final Map<UUID,Long> walkFx=new HashMap<>();
  private final Set<UUID> tideWalking=new HashSet<>();
+ private final Map<UUID,Double> tideY=new HashMap<>();
+ private final Map<UUID,Float> oldWalkSpeed=new HashMap<>();
+ private final Map<UUID,Boolean> oldGravity=new HashMap<>();
+ private final Map<UUID,Long> lastSprint=new HashMap<>();
+ private final Map<UUID,ItemDisplay> leviathanVisuals=new HashMap<>();
  private static final String GUI="LegendaryRais • Weapons";
 
  @Override public void onEnable(){
   saveDefaultConfig(); weaponKey=new NamespacedKey(this,"weapon_id"); skills=new Skills(this);
   getServer().getPluginManager().registerEvents(this,this);
   Objects.requireNonNull(getCommand("riswp")).setExecutor(this);
-  getLogger().info("LegendaryRais 2.1.3-FIX enabled");
+  Bukkit.getScheduler().runTaskTimer(this,this::tickSystems,1L,1L);
+  getLogger().info("LegendaryRais 2.2.0-FIX enabled");
+ }
+
+ @Override public void onDisable(){
+  for(Player p:Bukkit.getOnlinePlayers()) stopTideWalk(p);
+  for(ItemDisplay d:new ArrayList<>(leviathanVisuals.values())) if(d!=null&&d.isValid()) d.remove();
+  leviathanVisuals.clear();
  }
 
  @Override public boolean onCommand(CommandSender s,Command c,String l,String[] a){
@@ -52,13 +65,13 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  ItemStack soulItem(){
   ItemStack i=new ItemStack(Material.NETHERITE_SWORD); ItemMeta m=i.getItemMeta();
   m.displayName(Component.text("§b§lSoul Tide Katana §3V4"));
-  m.lore(List.of(Component.text("§7LegendaryRais • Water Soul"),Component.text("§bPassive: Soul Tidewalker"),Component.text("§fS1 Right Click • Abyssal Step"),Component.text("§fS2 Sneak+Left • Tidal Crescent"),Component.text("§fS3 Sneak+Right • Soul Undertow")));
+  m.lore(List.of(Component.text("§7LegendaryRais • Water Soul"),Component.text("§bPassive: Soul Tidewalker"),Component.text("§fS1 Right Click • Abyssal Step"),Component.text("§fS2 Sneak+Left • Tidal Crescent"),Component.text("§fS3 Sneak+Right • Soul Undertow"),Component.text("§bULT Sprint → Sneak+Right @ 100%")));
   finishMeta(m,SOUL,SOUL_CMD,"soultide:soul_tide_katana"); i.setItemMeta(m); return i;
  }
  ItemStack levItem(){
   ItemStack i=new ItemStack(Material.TRIDENT); ItemMeta m=i.getItemMeta();
   m.displayName(Component.text("§3§lAbyss Leviathan Trident §8V3"));
-  m.lore(List.of(Component.text("§7LegendaryRais • Dark Abyss"),Component.text("§3Passive: Sovereign of the Abyss"),Component.text("§fS1 Right Click • Abyssal Harpoon"),Component.text("§fS2 Sneak+Left • Leviathan Fang"),Component.text("§fS3 Sneak+Right • Maelstrom Prison")));
+  m.lore(List.of(Component.text("§7LegendaryRais • Dark Abyss"),Component.text("§3Passive: Sovereign of the Abyss"),Component.text("§fS1 Right Click • Abyssal Harpoon"),Component.text("§fS2 Sneak+Left • Leviathan Fang"),Component.text("§fS3 Sneak+Right • Maelstrom Prison"),Component.text("§3ULT Sprint → Sneak+Right @ 100%")));
   try{m.addEnchant(Enchantment.LOYALTY,3,true);}catch(Throwable ignored){}
   finishMeta(m,LEV,LEV_CMD,"legendaryrais:abyss_leviathan_trident"); i.setItemMeta(m); return i;
  }
@@ -69,7 +82,9 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
    Method get=m.getClass().getMethod("getCustomModelDataComponent"); Object comp=get.invoke(m);
    comp.getClass().getMethod("setFloats",List.class).invoke(comp,List.of((float)cmd));
    try{comp.getClass().getMethod("setStrings",List.class).invoke(comp,List.of(model));}catch(Throwable ignored){}
-   m.getClass().getMethod("setCustomModelDataComponent",comp.getClass().getInterfaces().length>0?comp.getClass().getInterfaces()[0]:comp.getClass()).invoke(m,comp);
+   Method setter=null;
+   for(Method x:m.getClass().getMethods())if(x.getName().equals("setCustomModelDataComponent")&&x.getParameterCount()==1){setter=x;break;}
+   if(setter!=null)setter.invoke(m,comp);
   }catch(Throwable ignored){}
   try{m.getClass().getMethod("setItemModel",NamespacedKey.class).invoke(m,NamespacedKey.fromString(model));}catch(Throwable ignored){}
   try{m.getClass().getMethod("setEnchantmentGlintOverride",Boolean.class).invoke(m,Boolean.TRUE);}catch(Throwable ignored){}
@@ -107,17 +122,18 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   Player p=e.getPlayer(); String id=weapon(p.getInventory().getItemInMainHand()); if(id==null)return;
   Action a=e.getAction(); boolean r=a==Action.RIGHT_CLICK_AIR||a==Action.RIGHT_CLICK_BLOCK, l=a==Action.LEFT_CLICK_AIR||a==Action.LEFT_CLICK_BLOCK;
   if(!r&&!l)return;
+  boolean ultCombo=p.isSneaking()&&recentSprint(p);
   if(SOUL.equals(id)){
-   if(p.isSneaking()&&p.isSprinting()&&r)skills.domain(p);
+   if(ultCombo&&r&&skills.soulUltimateReady(p))skills.domain(p);
    else if(p.isSneaking()&&r)skills.undertow(p);
    else if(p.isSneaking()&&l)skills.crescent(p);
    else if(r)skills.step(p);
    e.setCancelled(true);
   }else{
-   if(p.isSneaking()&&p.isSprinting()&&r){skills.wrath(p);e.setCancelled(true);}
+   if(ultCombo&&r&&skills.abyssUltimateReady(p)){skills.wrath(p);e.setCancelled(true);}
    else if(p.isSneaking()&&r){skills.maelstrom(p);e.setCancelled(true);}
    else if(p.isSneaking()&&l){skills.fang(p);e.setCancelled(true);}
-   else if(r){skills.harpoon(p); /* allow vanilla trident charge/throw */ }
+   else if(r){skills.harpoon(p);}
   }
  }
 
@@ -127,6 +143,13 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   String id=weapon(p.getInventory().getItemInMainHand()); if(id==null)return;
   if(p.isSneaking()){e.setCancelled(true);if(SOUL.equals(id))skills.crescent(p);else skills.fang(p);return;}
   skills.basicHit(p,t,id);
+ }
+
+ @EventHandler public void sprint(PlayerToggleSprintEvent e){
+  if(e.isSprinting())lastSprint.put(e.getPlayer().getUniqueId(),System.currentTimeMillis());
+ }
+ private boolean recentSprint(Player p){
+  return p.isSprinting()||System.currentTimeMillis()-lastSprint.getOrDefault(p.getUniqueId(),0L)<=1100L;
  }
 
  @EventHandler public void sneak(PlayerToggleSneakEvent e){if(e.isSneaking()&&(soul(e.getPlayer())||lev(e.getPlayer())))skills.status(e.getPlayer());}
@@ -144,78 +167,108 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   }catch(Throwable ignored){return false;}
  }
 
+ @EventHandler(ignoreCancelled=true,priority=EventPriority.MONITOR)
+ public void launched(ProjectileLaunchEvent e){
+  if(!(e.getEntity() instanceof Trident tr))return;
+  ItemStack stack=tr.getItemStack();
+  if(!LEV.equals(weapon(stack)))return;
+  for(Player viewer:Bukkit.getOnlinePlayers())viewer.hideEntity(this,tr);
+  ItemDisplay d=tr.getWorld().spawn(tr.getLocation(),ItemDisplay.class);
+  d.setItemStack(stack.clone());
+  d.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
+  d.setPersistent(false); d.setInvulnerable(true); d.setViewRange(1.5f);
+  leviathanVisuals.put(tr.getUniqueId(),d);
+ }
+
+ @EventHandler public void onJoin(PlayerJoinEvent e){
+  for(UUID id:leviathanVisuals.keySet()){
+   Entity x=e.getPlayer().getWorld().getEntity(id);
+   if(x!=null)e.getPlayer().hideEntity(this,x);
+  }
+ }
+
  @EventHandler(ignoreCancelled=true,priority=EventPriority.HIGHEST)
  public void waterWalk(PlayerMoveEvent e){
-  Player p=e.getPlayer();
-  Location to=e.getTo();
-  if(to==null){return;}
-  if(!soul(p)||p.isFlying()||p.isGliding()){
-   tideWalking.remove(p.getUniqueId());
-   return;
-  }
+  Player p=e.getPlayer(); Location to=e.getTo(); if(to==null)return;
+  if(!soul(p)||p.isFlying()||p.isGliding()){stopTideWalk(p);return;}
 
-  Location from=e.getFrom();
   double surface=findWaterSurface(to);
-  if(Double.isNaN(surface)){
-   tideWalking.remove(p.getUniqueId());
-   return;
+  if(Double.isNaN(surface)){stopTideWalk(p);return;}
+  double target=surface+0.085;
+  double dy=to.getY()-e.getFrom().getY();
+
+  // Jump is player-controlled: release the lock while rising.
+  if(to.getY()>target+0.13&&dy>0.02){stopTideWalk(p);return;}
+  if(to.getY()>target+0.18&&!tideWalking.contains(p.getUniqueId()))return;
+
+  if(!tideWalking.contains(p.getUniqueId())){
+   beginTideWalk(p,target);
+   Location n=to.clone(); n.setY(target); e.setTo(n);
+  }else{
+   tideY.put(p.getUniqueId(),target);
+   p.setGravity(false);
+   // Only correct meaningful vertical drift. Never touch X/Z, yaw or pitch.
+   if(Math.abs(to.getY()-target)>0.075){
+    Location n=to.clone(); n.setY(target); e.setTo(n);
+   }
   }
+  p.setFallDistance(0f); try{p.setSwimming(false);}catch(Throwable ignored){}
+  long now=System.currentTimeMillis(),next=walkFx.getOrDefault(p.getUniqueId(),0L);
+  if(now>=next){walkFx.put(p.getUniqueId(),now+Math.max(70,getConfig().getLong("water-walk.effect-interval-ms",100)));skills.walkFx(p,e.getTo()==null?to:e.getTo());}
+ }
 
-  /*
-   * IMPORTANT:
-   * X/Z are NEVER changed here. Those coordinates come entirely from the
-   * player's own movement packet, so Soul Tide cannot steer or slide them.
-   * We only stabilise the feet Y position when the player touches water.
-   */
-  double dy=to.getY()-from.getY();
-  double toAbove=to.getY()-surface;
-  double fromAbove=from.getY()-surface;
-
-  // Let the player jump normally. Do not pull them back down while rising.
-  if(dy>0.045 && fromAbove>=-0.18){
-   tideWalking.add(p.getUniqueId());
-   return;
+ private void beginTideWalk(Player p,double y){
+  UUID id=p.getUniqueId();
+  if(tideWalking.add(id)){
+   oldGravity.put(id,p.hasGravity()); oldWalkSpeed.put(id,p.getWalkSpeed());
   }
-
-  // While still clearly above the surface (for example during a jump),
-  // leave the complete player movement untouched until they fall back.
-  if(toAbove>0.16){
-   tideWalking.add(p.getUniqueId());
-   return;
-  }
-
-  // Snap only vertically to the water surface. Preserve exact X, Z, yaw,
-  // pitch and horizontal player input. No setVelocity() is used at all.
-  Location stable=to.clone();
-  stable.setY(surface);
-  e.setTo(stable);
-  tideWalking.add(p.getUniqueId());
-
-  p.setFallDistance(0f);
-  try{p.setSwimming(false);}catch(Throwable ignored){}
-
-  long now=System.currentTimeMillis();
-  long next=walkFx.getOrDefault(p.getUniqueId(),0L);
-  if(now>=next){
-   walkFx.put(p.getUniqueId(),now+Math.max(60,getConfig().getLong("water-walk.effect-interval-ms",90)));
-   skills.walkFx(p,stable);
-  }
+  tideY.put(id,y); p.setGravity(false);
+  float desired=(float)Math.max(0.20,Math.min(0.35,getConfig().getDouble("water-walk.walk-speed",0.245)));
+  if(p.getWalkSpeed()<desired)p.setWalkSpeed(desired);
+ }
+ private void stopTideWalk(Player p){
+  UUID id=p.getUniqueId(); if(!tideWalking.remove(id))return;
+  Boolean g=oldGravity.remove(id); Float s=oldWalkSpeed.remove(id); tideY.remove(id);
+  if(g!=null)p.setGravity(g); else p.setGravity(true);
+  if(s!=null)p.setWalkSpeed(s);
  }
 
  private double findWaterSurface(Location l){
-  World w=l.getWorld();
-  if(w==null)return Double.NaN;
+  World w=l.getWorld(); if(w==null)return Double.NaN;
   int x=l.getBlockX(),z=l.getBlockZ(),base=l.getBlockY();
-
-  // If already inside water, find the TOP of this water column so the
-  // passive immediately rescues the player instead of letting them sink.
-  for(int y=base+2;y>=base-6;y--){
+  for(int y=Math.min(w.getMaxHeight()-2,base+2);y>=Math.max(w.getMinHeight(),base-5);y--){
    if(w.getBlockAt(x,y,z).getType()!=Material.WATER)continue;
-   int top=y;
-   while(top< w.getMaxHeight()-1 && w.getBlockAt(x,top+1,z).getType()==Material.WATER)top++;
-   return top+1.015;
+   int top=y; while(top<w.getMaxHeight()-2&&w.getBlockAt(x,top+1,z).getType()==Material.WATER)top++;
+   return top+1.0;
   }
   return Double.NaN;
  }
- private boolean isWater(Location l){return l.getBlock().getType()==Material.WATER;}
+
+ private void tickSystems(){
+  // Restore normal physics if the player stops holding Soul Tide while standing still.
+  for(UUID id:new ArrayList<>(tideWalking)){
+   Player p=Bukkit.getPlayer(id);
+   if(p==null||!p.isOnline()||!soul(p)||Double.isNaN(findWaterSurface(p.getLocation()))) {if(p!=null)stopTideWalk(p);}
+  }
+
+  // Custom flying visual for Abyss Leviathan. The real trident remains server-side
+  // for hit detection + Loyalty, but clients only see the custom ItemDisplay.
+  Iterator<Map.Entry<UUID,ItemDisplay>> it=leviathanVisuals.entrySet().iterator();
+  while(it.hasNext()){
+   Map.Entry<UUID,ItemDisplay> en=it.next(); ItemDisplay d=en.getValue();
+   if(d==null||!d.isValid()){it.remove();continue;}
+   Entity ent=d.getWorld().getEntity(en.getKey());
+   if(!(ent instanceof Trident tr)||!tr.isValid()){
+    d.remove(); it.remove(); continue;
+   }
+   for(Player viewer:Bukkit.getOnlinePlayers())if(viewer.getWorld().equals(tr.getWorld()))viewer.hideEntity(this,tr);
+   Location l=tr.getLocation().clone(); Vector v=tr.getVelocity();
+   if(v.lengthSquared()>0.0005){
+    double len=v.length();
+    l.setYaw((float)Math.toDegrees(Math.atan2(-v.getX(),v.getZ())));
+    l.setPitch((float)Math.toDegrees(-Math.asin(Math.max(-1,Math.min(1,v.getY()/len)))));
+   }
+   d.teleport(l);
+  }
+ }
 }
