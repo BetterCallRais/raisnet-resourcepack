@@ -23,14 +23,14 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  static final int SOUL_CMD=910041, LEV_CMD=910042;
  private NamespacedKey weaponKey;
  private Skills skills;
- private final Map<UUID,Long> walkFx=new HashMap<>();
+ private final Map<UUID,Long> walkFx=new HashMap<>();\n private final Set<UUID> tideWalking=new HashSet<>();
  private static final String GUI="LegendaryRais • Weapons";
 
  @Override public void onEnable(){
   saveDefaultConfig(); weaponKey=new NamespacedKey(this,"weapon_id"); skills=new Skills(this);
   getServer().getPluginManager().registerEvents(this,this);
   Objects.requireNonNull(getCommand("riswp")).setExecutor(this);
-  getLogger().info("LegendaryRais 2.1.2-FIX enabled");
+  getLogger().info("LegendaryRais 2.1.3-FIX enabled");
  }
 
  @Override public boolean onCommand(CommandSender s,Command c,String l,String[] a){
@@ -145,22 +145,75 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
 
  @EventHandler(ignoreCancelled=true,priority=EventPriority.HIGHEST)
  public void waterWalk(PlayerMoveEvent e){
-  Player p=e.getPlayer(); if(!soul(p)||e.getTo()==null)return;
-  if(p.isFlying()||p.isGliding())return;
-  Location from=e.getFrom(),to=e.getTo(); double surface=findWaterSurface(to);
-  if(Double.isNaN(surface))return;
+  Player p=e.getPlayer();
+  Location to=e.getTo();
+  if(to==null){return;}
+  if(!soul(p)||p.isFlying()||p.isGliding()){
+   tideWalking.remove(p.getUniqueId());
+   return;
+  }
+
+  Location from=e.getFrom();
+  double surface=findWaterSurface(to);
+  if(Double.isNaN(surface)){
+   tideWalking.remove(p.getUniqueId());
+   return;
+  }
+
+  /*
+   * IMPORTANT:
+   * X/Z are NEVER changed here. Those coordinates come entirely from the
+   * player's own movement packet, so Soul Tide cannot steer or slide them.
+   * We only stabilise the feet Y position when the player touches water.
+   */
   double dy=to.getY()-from.getY();
-  if(dy>0.18&&!isWater(to.clone().add(0,-0.15,0)))return;
-  if(Math.abs(to.getY()-surface)<2.2){
-   Location n=to.clone(); n.setY(surface); e.setTo(n);
-   Vector v=p.getVelocity(); if(v.getY()<0)v.setY(0); p.setVelocity(v); p.setFallDistance(0); try{p.setSwimming(false);}catch(Throwable ignored){}
-   long now=System.currentTimeMillis(),next=walkFx.getOrDefault(p.getUniqueId(),0L);
-   if(now>=next){walkFx.put(p.getUniqueId(),now+Math.max(60,getConfig().getLong("water-walk.effect-interval-ms",90)));skills.walkFx(p,n);}
+  double toAbove=to.getY()-surface;
+  double fromAbove=from.getY()-surface;
+
+  // Let the player jump normally. Do not pull them back down while rising.
+  if(dy>0.045 && fromAbove>=-0.18){
+   tideWalking.add(p.getUniqueId());
+   return;
+  }
+
+  // While still clearly above the surface (for example during a jump),
+  // leave the complete player movement untouched until they fall back.
+  if(toAbove>0.16){
+   tideWalking.add(p.getUniqueId());
+   return;
+  }
+
+  // Snap only vertically to the water surface. Preserve exact X, Z, yaw,
+  // pitch and horizontal player input. No setVelocity() is used at all.
+  Location stable=to.clone();
+  stable.setY(surface);
+  e.setTo(stable);
+  tideWalking.add(p.getUniqueId());
+
+  p.setFallDistance(0f);
+  try{p.setSwimming(false);}catch(Throwable ignored){}
+
+  long now=System.currentTimeMillis();
+  long next=walkFx.getOrDefault(p.getUniqueId(),0L);
+  if(now>=next){
+   walkFx.put(p.getUniqueId(),now+Math.max(60,getConfig().getLong("water-walk.effect-interval-ms",90)));
+   skills.walkFx(p,stable);
   }
  }
+
  private double findWaterSurface(Location l){
-  int x=l.getBlockX(),z=l.getBlockZ(),start=(int)Math.floor(l.getY()+1.2);
-  for(int y=start;y>=start-4;y--)if(l.getWorld().getBlockAt(x,y,z).getType()==Material.WATER)return y+1.03;
+  World w=l.getWorld();
+  if(w==null)return Double.NaN;
+  int x=l.getBlockX(),z=l.getBlockZ(),base=l.getBlockY();
+
+  // If already inside water, find the TOP of this water column so the
+  // passive immediately rescues the player instead of letting them sink.
+  for(int y=base+2;y>=base-6;y--){
+   if(w.getBlockAt(x,y,z).getType()!=Material.WATER)continue;
+   int top=y;
+   while(top< w.getMaxHeight()-1 && w.getBlockAt(x,top+1,z).getType()==Material.WATER)top++;
+   return top+1.015;
+  }
   return Double.NaN;
  }
  private boolean isWater(Location l){return l.getBlock().getType()==Material.WATER;}
