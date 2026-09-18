@@ -25,4 +25,5 @@ jobs:
           git add LegendaryRais-Java-26plus-v2.1.4-FIX.zip LegendaryRais-Java-26plus-v2.1.4-FIX.sha1
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Publish LegendaryRais v2.1.4 FIX resource pack"
+          git pull --rebase origin main
           git push
