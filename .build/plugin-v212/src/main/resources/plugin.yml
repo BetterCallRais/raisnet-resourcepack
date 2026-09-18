@@ -1,5 +1,5 @@
 name: LegendaryRais
-version: 2.4.0-FINAL
+version: 2.5.0-LIVE-AURA
 main: id.raisnet.legendaryrais.LegendaryRais
 api-version: '1.21'
 softdepend: [Geyser-Spigot, floodgate]
