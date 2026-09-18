@@ -1,0 +1,31 @@
+name: Build LegendaryRais Java Pack v2.9.1 Paper 26.2 Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v291_java_fix.py"
+      - ".build/trigger-v291-java.txt"
+      - ".github/workflows/build-legendaryrais-v291-java-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and validate LegendaryRais v2.9.1 Java pack
+        run: python3 .build/build_v291_java_fix.py
+      - name: Publish Java pack
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26plus-v2.9.1-PAPER-26.2-FIX.zip LegendaryRais-Java-26plus-v2.9.1-PAPER-26.2-FIX.sha1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish LegendaryRais v2.9.1 Paper 26.2 Java pack"
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
