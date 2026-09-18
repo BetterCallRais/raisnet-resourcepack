@@ -72,6 +72,14 @@ jobs:
           fi
           exit 0
 
+      - name: Upload verified plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-2.9.4-PAPER-26.2-BUILD112
+          path: LegendaryRais-2.9.4-PAPER-26.2-BUILD112.jar
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Publish build result
         run: |
           git config user.name "github-actions[bot]"
