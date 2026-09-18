@@ -8,6 +8,10 @@ combat:
 skills:
   damage-multiplier: 3.00
 effects:
+  view-distance: 72.0
   java:
-    particle-multiplier: 2.80
+    particle-multiplier: 3.20
     force-particles: true
+held-aura:
+  enabled: true
+  interval-ticks: 2
