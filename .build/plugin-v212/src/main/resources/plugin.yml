@@ -1,5 +1,5 @@
 name: LegendaryRais
-version: 2.7.0-MYTHIC-OCEAN
+version: 2.8.0-REALISM-FX
 main: id.raisnet.legendaryrais.LegendaryRais
 api-version: '1.21'
 softdepend: [Geyser-Spigot, floodgate]
