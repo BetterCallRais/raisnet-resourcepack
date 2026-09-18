@@ -23,7 +23,8 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  static final int SOUL_CMD=910041, LEV_CMD=910042;
  private NamespacedKey weaponKey;
  private Skills skills;
- private final Map<UUID,Long> walkFx=new HashMap<>();\n private final Set<UUID> tideWalking=new HashSet<>();
+ private final Map<UUID,Long> walkFx=new HashMap<>();
+ private final Set<UUID> tideWalking=new HashSet<>();
  private static final String GUI="LegendaryRais • Weapons";
 
  @Override public void onEnable(){
