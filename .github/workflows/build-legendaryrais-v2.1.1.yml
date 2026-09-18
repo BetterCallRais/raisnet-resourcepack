@@ -1,0 +1,196 @@
+name: Build LegendaryRais v2.1.1 FIX
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-legendaryrais-v2.1.1.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build fixed pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf packfix
+          mkdir packfix
+          cd packfix
+          unzip -q ../LegendaryRais-Java-26plus-v2.1.zip
+
+          mkdir -p assets/minecraft/items
+
+          cat > assets/minecraft/items/netherite_sword.json <<'EOF'
+          {
+            "hand_animation_on_swap": true,
+            "model": {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "cases": [
+                {
+                  "when": "soultide:soul_tide_katana",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "soultide:item/soul_tide_katana"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:range_dispatch",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "entries": [
+                  {
+                    "threshold": 910041.0,
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "soultide:item/soul_tide_katana"
+                    }
+                  },
+                  {
+                    "threshold": 910042.0,
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/netherite_sword"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/netherite_sword"
+                }
+              }
+            }
+          }
+          EOF
+
+          cat > assets/minecraft/items/trident.json <<'EOF'
+          {
+            "hand_animation_on_swap": true,
+            "model": {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "cases": [
+                {
+                  "when": "legendaryrais:abyss_leviathan_trident",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "legendaryrais:item/abyss_leviathan_trident"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:range_dispatch",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "entries": [
+                  {
+                    "threshold": 910042.0,
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "legendaryrais:item/abyss_leviathan_trident"
+                    }
+                  },
+                  {
+                    "threshold": 910043.0,
+                    "model": {
+                      "type": "minecraft:select",
+                      "cases": [
+                        {
+                          "model": {
+                            "type": "minecraft:model",
+                            "model": "minecraft:item/trident"
+                          },
+                          "when": ["gui", "ground", "fixed", "on_shelf"]
+                        }
+                      ],
+                      "fallback": {
+                        "type": "minecraft:condition",
+                        "on_false": {
+                          "type": "minecraft:special",
+                          "base": "minecraft:item/trident_in_hand",
+                          "model": {
+                            "type": "minecraft:trident"
+                          }
+                        },
+                        "on_true": {
+                          "type": "minecraft:special",
+                          "base": "minecraft:item/trident_throwing",
+                          "model": {
+                            "type": "minecraft:trident"
+                          }
+                        },
+                        "property": "minecraft:using_item"
+                      },
+                      "property": "minecraft:display_context"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:select",
+                  "cases": [
+                    {
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "minecraft:item/trident"
+                      },
+                      "when": ["gui", "ground", "fixed", "on_shelf"]
+                    }
+                  ],
+                  "fallback": {
+                    "type": "minecraft:condition",
+                    "on_false": {
+                      "type": "minecraft:special",
+                      "base": "minecraft:item/trident_in_hand",
+                      "model": {
+                        "type": "minecraft:trident"
+                      }
+                    },
+                    "on_true": {
+                      "type": "minecraft:special",
+                      "base": "minecraft:item/trident_throwing",
+                      "model": {
+                        "type": "minecraft:trident"
+                      }
+                    },
+                    "property": "minecraft:using_item"
+                  },
+                  "property": "minecraft:display_context"
+                }
+              }
+            }
+          }
+          EOF
+
+          cat > pack.mcmeta <<'EOF'
+          {
+            "pack": {
+              "description": "LegendaryRais v2.1.1 FIX • Soul Tide V4 + Abyss Leviathan V3 • Java 26.1-26.2",
+              "min_format": [84, 0],
+              "max_format": [88, 0]
+            }
+          }
+          EOF
+
+          cd ..
+          rm -f LegendaryRais-Java-26plus-v2.1.1-FIX.zip LegendaryRais-Java-26plus-v2.1.1-FIX.sha1
+          (cd packfix && zip -qr ../LegendaryRais-Java-26plus-v2.1.1-FIX.zip .)
+          sha1sum LegendaryRais-Java-26plus-v2.1.1-FIX.zip | awk '{print $1}' > LegendaryRais-Java-26plus-v2.1.1-FIX.sha1
+
+      - name: Commit generated pack
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26plus-v2.1.1-FIX.zip LegendaryRais-Java-26plus-v2.1.1-FIX.sha1
+          git commit -m "Publish LegendaryRais v2.1.1 FIX resource pack"
+          git push
