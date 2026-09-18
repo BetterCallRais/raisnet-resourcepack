@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - ".github/workflows/build-legendaryrais-v2.1.1.yml"
+      - ".github/workflows/build-legendaryrais-v2.1.1.yml"\n      - ".build/legendaryrais-v211-trigger.txt"
 
 permissions:
   contents: write
