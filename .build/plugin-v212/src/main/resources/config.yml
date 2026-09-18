@@ -2,9 +2,12 @@ cooldown-seconds: 30
 water-walk:
   enabled: true
   effects: true
-  effect-interval-ms: 90
+  effect-interval-ms: 85
+combat:
+  base-melee-damage: 40.0
 skills:
-  damage-multiplier: 1.30
+  damage-multiplier: 3.00
 effects:
   java:
-    particle-multiplier: 1.85
+    particle-multiplier: 2.80
+    force-particles: true
