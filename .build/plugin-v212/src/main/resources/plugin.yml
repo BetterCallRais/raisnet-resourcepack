@@ -1,0 +1,12 @@
+name: LegendaryRais
+version: 2.1.2-FIX
+main: id.raisnet.legendaryrais.LegendaryRais
+api-version: '1.21'
+softdepend: [Geyser-Spigot, floodgate]
+commands:
+  riswp:
+    description: LegendaryRais admin weapon GUI
+    permission: legendaryrais.admin
+permissions:
+  legendaryrais.admin:
+    default: op
