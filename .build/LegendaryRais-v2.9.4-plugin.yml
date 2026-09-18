@@ -1,0 +1,16 @@
+name: LegendaryRais
+version: 2.9.4
+main: id.raisnet.legendaryrais.LegendaryRais
+api-version: '26.2'
+author: RaisNet
+softdepend: [Geyser-Spigot, floodgate]
+description: Crossplay legendary weapon system for RaisNet - Sovereign Blade + Leviathan Impact Rework.
+commands:
+  riswp:
+    description: Open LegendaryRais weapon arsenal.
+    usage: /riswp
+    permission: legendaryrais.admin
+permissions:
+  legendaryrais.admin:
+    description: Allows opening/reloading the LegendaryRais administrator arsenal.
+    default: op
