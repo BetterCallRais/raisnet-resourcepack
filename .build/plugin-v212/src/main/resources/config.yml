@@ -15,3 +15,6 @@ effects:
 held-aura:
   enabled: true
   interval-ticks: 2
+leviathan-water-passive:
+  enabled: true
+  effect-duration-ticks: 60
