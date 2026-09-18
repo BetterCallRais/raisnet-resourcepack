@@ -1,0 +1,30 @@
+name: Build LegendaryRais Resource Pack v2.3.0 ULTRA HD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v220.py"
+      - ".build/build_v230.py"
+      - ".build/trigger-v230.txt"
+      - ".github/workflows/build-legendaryrais-v230.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and validate ULTRA HD pack
+        run: python3 .build/build_v230.py
+      - name: Publish pack
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26plus-v2.3.0-ULTRA-HD.zip LegendaryRais-Java-26plus-v2.3.0-ULTRA-HD.sha1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish LegendaryRais v2.3.0 ULTRA HD resource pack"
+          git pull --rebase origin main
+          git push
