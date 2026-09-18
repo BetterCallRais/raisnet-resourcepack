@@ -1,0 +1,31 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:netherite_sword": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910041,
+        "bedrock_identifier": "raisnet:soul_tide_katana",
+        "display_name": "Soul Tide Katana",
+        "bedrock_options": {
+          "icon": "raisnet:soul_tide_katana",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:trident": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910042,
+        "bedrock_identifier": "raisnet:abyss_leviathan_trident",
+        "display_name": "Abyss Leviathan Trident",
+        "bedrock_options": {
+          "icon": "raisnet:abyss_leviathan_trident",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ]
+  }
+}
