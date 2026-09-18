@@ -12,6 +12,8 @@ effects:
   java:
     particle-multiplier: 3.20
     force-particles: true
+  model-fallback:
+    enabled: true
 held-aura:
   enabled: true
   interval-ticks: 2
