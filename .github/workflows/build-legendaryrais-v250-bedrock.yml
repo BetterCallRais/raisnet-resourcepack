@@ -25,5 +25,7 @@ jobs:
           git add LegendaryRais-Bedrock-v2.5.0-LIVE-AURA.mcpack LegendaryRais-Bedrock-v2.5.0-LIVE-AURA.sha1 LegendaryRais-Geyser-v2.5.0-mappings.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Publish LegendaryRais v2.5 Bedrock LIVE AURA pack"
+          git reset --hard HEAD
+          git clean -fd
           git pull --rebase origin main
           git push
