@@ -34,6 +34,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  private final Map<UUID,Boolean> oldGravity=new HashMap<>();
  private final Map<UUID,Long> lastSprint=new HashMap<>();
  private final Map<UUID,ItemDisplay> leviathanVisuals=new HashMap<>();
+ private long auraClock=0L;
  private static final String GUI="LegendaryRais • Weapons";
 
  @Override public void onEnable(){
@@ -41,7 +42,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   getServer().getPluginManager().registerEvents(this,this);
   Objects.requireNonNull(getCommand("riswp")).setExecutor(this);
   Bukkit.getScheduler().runTaskTimer(this,this::tickSystems,1L,1L);
-  getLogger().info("LegendaryRais 2.4.0-FINAL enabled");
+  getLogger().info("LegendaryRais 2.5.0-LIVE-AURA enabled");
  }
 
  @Override public void onDisable(){
@@ -284,6 +285,14 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  }
 
  private void tickSystems(){
+  auraClock++;
+  if((auraClock&1L)==0L){
+   for(Player p:Bukkit.getOnlinePlayers()){
+    String id=weapon(p.getInventory().getItemInMainHand());
+    if(id!=null)skills.heldAura(p,id,auraClock);
+   }
+  }
+
   // Smooth Soul Tide surface lock. No horizontal velocity or steering is ever applied.
   for(UUID id:new ArrayList<>(tideWalking)){
    Player p=Bukkit.getPlayer(id);
