@@ -1,1 +1,1 @@
-build LegendaryRais v2.7.0 MYTHIC OCEAN
+build LegendaryRais v2.8.0 REALISM FX
