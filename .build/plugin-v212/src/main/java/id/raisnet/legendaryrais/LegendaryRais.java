@@ -42,7 +42,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   getServer().getPluginManager().registerEvents(this,this);
   Objects.requireNonNull(getCommand("riswp")).setExecutor(this);
   Bukkit.getScheduler().runTaskTimer(this,this::tickSystems,1L,1L);
-  getLogger().info("LegendaryRais 2.6.0-AQUATIC-AWAKENING enabled");
+  getLogger().info("LegendaryRais 2.7.0-MYTHIC-OCEAN enabled");
  }
 
  @Override public void onDisable(){
