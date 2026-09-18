@@ -1,0 +1,42 @@
+LegendaryRais v2.8.0 REALISM FX - Java + Bedrock
+
+WHAT CHANGED
+- Soul Tide Katana rebuilt with a restrained real-katana silhouette:
+  slim tsuka, compact tsuba, subtle curvature, tapered kissaki.
+- Abyss Leviathan rebuilt as a cleaner three-tined trident:
+  long slim shaft, central tine longest, side tines shorter and gently swept.
+- Java skill FX no longer depends only on particles.
+  v2.8 adds short-lived ItemDisplay model FX (water rings / slashes / abyss rings / slashes)
+  in addition to normal server particles.
+- Bedrock keeps Geyser-translated particles and gets mappings for the FX custom items.
+- Existing live aura, underwater Leviathan passive, damage, cooldowns and water-walk fixes remain.
+
+INSTALL
+1) STOP server. Do not /reload.
+
+2) Plugin:
+   Remove old LegendaryRais jars from plugins/
+   Add:
+   LegendaryRais-2.8.0-REALISM-FX.jar
+
+3) Java server.properties:
+require-resource-pack=true
+resource-pack=https\://raw.githubusercontent.com/BetterCallRais/raisnet-resourcepack/main/LegendaryRais-Java-26plus-v2.8.0-REALISM-FX.zip
+resource-pack-id=904cbe2e-92c3-4b67-9449-7b2fdd04f592
+resource-pack-prompt={"text"\:"RaisNet LegendaryRais v2.8 REALISM FX - realistic models + crossplay skill FX.","color"\:"aqua","bold"\:true}
+resource-pack-sha1=6b22915bf32c6adda814d00a59a3141ee7b7b34c
+
+4) Bedrock/Geyser:
+   plugins/Geyser-Spigot/packs/
+     LegendaryRais-Bedrock-v2.8.0-REALISM-FX.mcpack
+
+   plugins/Geyser-Spigot/custom_mappings/
+     LegendaryRais-Geyser-v2.8.0-mappings.json
+
+5) START server.
+
+6) Java player:
+   Delete .minecraft/server-resource-packs cache, reconnect, accept the new pack.
+   Keep Particles = All.
+
+7) Take fresh weapons from /riswp and test S1/S2/S3/ULT.
