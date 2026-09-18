@@ -1,0 +1,29 @@
+name: Build LegendaryRais Resource Pack v2.2.0 FIX
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v220.py"
+      - ".build/trigger-v220.txt"
+      - ".github/workflows/build-legendaryrais-v220.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and validate pack
+        run: python3 .build/build_v220.py
+      - name: Publish pack
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26plus-v2.2.0-FIX.zip LegendaryRais-Java-26plus-v2.2.0-FIX.sha1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish LegendaryRais v2.2.0 FIX resource pack"
+          git pull --rebase origin main
+          git push
