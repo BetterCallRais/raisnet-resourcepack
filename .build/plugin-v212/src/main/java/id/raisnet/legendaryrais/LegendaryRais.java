@@ -41,7 +41,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   getServer().getPluginManager().registerEvents(this,this);
   Objects.requireNonNull(getCommand("riswp")).setExecutor(this);
   Bukkit.getScheduler().runTaskTimer(this,this::tickSystems,1L,1L);
-  getLogger().info("LegendaryRais 2.3.0-ULTRA-HD enabled");
+  getLogger().info("LegendaryRais 2.4.0-FINAL enabled");
  }
 
  @Override public void onDisable(){
@@ -145,8 +145,8 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   if(!(e.getDamager() instanceof Player p)||!(e.getEntity() instanceof LivingEntity t))return;
   String id=weapon(p.getInventory().getItemInMainHand()); if(id==null)return;
   if(p.isSneaking()){e.setCancelled(true);if(SOUL.equals(id))skills.crescent(p);else skills.fang(p);return;}
-  double mult=Math.max(0.0,getConfig().getDouble("skills.damage-multiplier",1.30));
-  e.setDamage(e.getDamage()*mult);
+  double lethal=Math.max(40.0,getConfig().getDouble("combat.base-melee-damage",40.0));
+  e.setDamage(lethal);
   skills.basicHit(p,t,id);
  }
 
@@ -196,39 +196,72 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
  @EventHandler(ignoreCancelled=true,priority=EventPriority.HIGHEST)
  public void waterWalk(PlayerMoveEvent e){
   Player p=e.getPlayer(); Location to=e.getTo(); if(to==null)return;
-  if(!getConfig().getBoolean("water-walk.enabled",true)||!soul(p)||p.isFlying()||p.isGliding()){stopTideWalk(p);return;}
+  if(!getConfig().getBoolean("water-walk.enabled",true)||!soul(p)||p.isFlying()||p.isGliding()){
+   stopTideWalk(p); return;
+  }
 
-  double surface=findWaterSurface(to);
+  // FINAL FIX: Soul Tide activates only on DIRECT water contact.
+  // Water hidden under dirt/stone/planks will never activate it.
+  if(!directWaterContact(to)){
+   stopTideWalk(p); return;
+  }
+
+  double surface=directWaterSurface(to);
   if(Double.isNaN(surface)){stopTideWalk(p);return;}
-  double target=surface+0.11;
+  double target=surface+0.10;
   double dy=to.getY()-e.getFrom().getY();
 
-  // Real player-controlled jump: release the surface lock while rising.
-  if(dy>0.06 && to.getY()>target+0.08){stopTideWalk(p);return;}
+  // Do not pull a deeply submerged player up to the surface.
+  if(!tideWalking.contains(p.getUniqueId()) && Math.abs(to.getY()-target)>0.65)return;
+
+  // Preserve normal player-controlled jumping.
+  if(dy>0.055 && to.getY()>target+0.08){stopTideWalk(p);return;}
 
   UUID id=p.getUniqueId();
   if(!tideWalking.contains(id)){
-   // One vertical correction when stepping onto water. X/Z, yaw and pitch stay untouched.
    beginTideWalk(p,target);
-   Location n=to.clone(); n.setY(target); e.setTo(n);
+   if(Math.abs(to.getY()-target)>0.055){
+    Location n=to.clone(); n.setY(target); e.setTo(n);
+   }
   }else{
    tideY.put(id,target);
    p.setGravity(false);
-   try{p.setSwimming(false);}catch(Throwable ignored){}
    p.setFallDistance(0f);
+   try{p.setSwimming(false);}catch(Throwable ignored){}
 
-   // Do NOT snap every movement packet. Only recover from a large vertical desync.
-   // This removes the constant "kedut-kedut" while keeping the player above water.
-   if(Math.abs(to.getY()-target)>0.32){
+   // Safety correction only. No constant packet snapping and NEVER X/Z steering.
+   if(Math.abs(to.getY()-target)>0.38 && dy<=0.02){
     Location n=to.clone(); n.setY(target); e.setTo(n);
    }
   }
 
   long now=System.currentTimeMillis(),next=walkFx.getOrDefault(id,0L);
   if(getConfig().getBoolean("water-walk.effects",true)&&now>=next){
-   walkFx.put(id,now+Math.max(70,getConfig().getLong("water-walk.effect-interval-ms",90)));
+   walkFx.put(id,now+Math.max(70,getConfig().getLong("water-walk.effect-interval-ms",85)));
    skills.walkFx(p,e.getTo()==null?to:e.getTo());
   }
+ }
+
+ private boolean directWaterContact(Location l){
+  World w=l.getWorld(); if(w==null)return false;
+  Material feet=l.getBlock().getType();
+  Material justBelow=l.clone().subtract(0,0.18,0).getBlock().getType();
+  return feet==Material.WATER || justBelow==Material.WATER;
+ }
+
+ private double directWaterSurface(Location l){
+  World w=l.getWorld(); if(w==null)return Double.NaN;
+  Location probe=l.clone().subtract(0,0.18,0);
+  int x=probe.getBlockX(), z=probe.getBlockZ();
+  int y=probe.getBlockY();
+  if(w.getBlockAt(x,y,z).getType()!=Material.WATER){
+   y=l.getBlockY();
+   if(w.getBlockAt(x,y,z).getType()!=Material.WATER)return Double.NaN;
+  }
+  // Only climb through contiguous water; never search downward through solid blocks.
+  int top=y;
+  while(top<w.getMaxHeight()-2 && w.getBlockAt(x,top+1,z).getType()==Material.WATER)top++;
+  return top+1.0;
  }
 
  private void beginTideWalk(Player p,double y){
@@ -241,23 +274,13 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   p.setGravity(false);
   p.setFallDistance(0f);
   try{p.setSwimming(false);}catch(Throwable ignored){}
-  // Keep the player's existing walk speed. This makes water-walking feel like normal blocks.
  }
+
  private void stopTideWalk(Player p){
   UUID id=p.getUniqueId(); if(!tideWalking.remove(id))return;
   Boolean g=oldGravity.remove(id); Float s=oldWalkSpeed.remove(id); tideY.remove(id);
   if(g!=null)p.setGravity(g); else p.setGravity(true);
   if(s!=null&&Math.abs(p.getWalkSpeed()-s)>0.0001f)p.setWalkSpeed(s);
- }
- private double findWaterSurface(Location l){
-  World w=l.getWorld(); if(w==null)return Double.NaN;
-  int x=l.getBlockX(),z=l.getBlockZ(),base=l.getBlockY();
-  for(int y=Math.min(w.getMaxHeight()-2,base+2);y>=Math.max(w.getMinHeight(),base-5);y--){
-   if(w.getBlockAt(x,y,z).getType()!=Material.WATER)continue;
-   int top=y; while(top<w.getMaxHeight()-2&&w.getBlockAt(x,top+1,z).getType()==Material.WATER)top++;
-   return top+1.0;
-  }
-  return Double.NaN;
  }
 
  private void tickSystems(){
@@ -265,9 +288,10 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
   for(UUID id:new ArrayList<>(tideWalking)){
    Player p=Bukkit.getPlayer(id);
    if(p==null||!p.isOnline()||!soul(p)){if(p!=null)stopTideWalk(p);continue;}
-   double surface=findWaterSurface(p.getLocation());
+   if(!directWaterContact(p.getLocation())){stopTideWalk(p);continue;}
+   double surface=directWaterSurface(p.getLocation());
    if(Double.isNaN(surface)){stopTideWalk(p);continue;}
-   double target=surface+0.11;
+   double target=surface+0.10;
    tideY.put(id,target);
    p.setGravity(false);
    p.setFallDistance(0f);
