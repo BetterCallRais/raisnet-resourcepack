@@ -40,11 +40,16 @@ final class Skills {
   else bar(p,"LEVIATHAN | S1 "+left(p,"Abyssal Harpoon")+" | S2 "+left(p,"Leviathan Fang")+" | S3 "+left(p,"Maelstrom Prison")+" | ULT "+left(p,"Wrath Leviathan")+" | "+g+"%");
  }
  private void bar(Player p,String s){try{p.sendActionBar(Component.text(s));}catch(Throwable x){p.sendMessage(s);}}
+ private int fxCount(int base){
+  double m=Math.max(1.0,pl.getConfig().getDouble("effects.java.particle-multiplier",1.85));
+  return Math.max(1,(int)Math.round(base*m));
+ }
  private void part(World w,String n,Location l,int c,double ox,double oy,double oz,double sp){
-  try{w.spawnParticle(Particle.valueOf(n),l,c,ox,oy,oz,sp);}catch(Throwable x){try{w.spawnParticle(Particle.SOUL,l,c,ox,oy,oz,sp);}catch(Throwable ignored){}}
+  int count=fxCount(c);
+  try{w.spawnParticle(Particle.valueOf(n),l,count,ox,oy,oz,sp);}catch(Throwable x){try{w.spawnParticle(Particle.SOUL,l,count,ox,oy,oz,sp);}catch(Throwable ignored){}}
  }
  private void dust(World w,Location l,int c,double ox,double oy,double oz,Particle.DustOptions d){
-  try{w.spawnParticle(Particle.DUST,l,c,ox,oy,oz,0,d);}catch(Throwable ignored){}
+  try{w.spawnParticle(Particle.DUST,l,fxCount(c),ox,oy,oz,0,d);}catch(Throwable ignored){}
  }
  private void sound(World w,String n,Location l,float v,float pitch){try{w.playSound(l,Sound.valueOf(n),v,pitch);}catch(Throwable ignored){}}
  private void ring(World w,Location c,String p,double r,int pts,double phase){
@@ -69,7 +74,10 @@ final class Skills {
  private List<LivingEntity> mobs(Location l,double r,Player owner){
   List<LivingEntity> o=new ArrayList<>(); for(Entity e:l.getWorld().getNearbyEntities(l,r,r,r))if(e instanceof LivingEntity le&&!e.getUniqueId().equals(owner.getUniqueId()))o.add(le); return o;
  }
- private void dmg(LivingEntity t,double d,Player p){try{t.damage(d,p);}catch(Throwable ignored){}}
+ private double scaledDamage(double base){
+  return base*Math.max(0.0,pl.getConfig().getDouble("skills.damage-multiplier",1.30));
+ }
+ private void dmg(LivingEntity t,double d,Player p){try{t.damage(scaledDamage(d),p);}catch(Throwable ignored){}}
  private void waterBurst(Player p,Location l,int scale,boolean abyss){
   World w=p.getWorld();
   part(w,"SPLASH",l,45*scale,1.05,.5,1.05,.16);
