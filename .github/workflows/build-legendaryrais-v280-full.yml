@@ -1,0 +1,47 @@
+name: Build LegendaryRais v2.8 FULL Java Bedrock Bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/LegendaryRais-v280-INSTALL.txt"
+      - ".build/trigger-v280-full.txt"
+      - ".github/workflows/build-legendaryrais-v280-full.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build full installer bundle
+        run: |
+          rm -rf .build/v280-bundle
+          mkdir -p .build/v280-bundle/plugins
+          mkdir -p .build/v280-bundle/java-resourcepack
+          mkdir -p .build/v280-bundle/geyser/packs
+          mkdir -p .build/v280-bundle/geyser/custom_mappings
+          cp LegendaryRais-2.8.0-REALISM-FX.jar .build/v280-bundle/plugins/
+          cp LegendaryRais-Java-26plus-v2.8.0-REALISM-FX.zip .build/v280-bundle/java-resourcepack/
+          cp LegendaryRais-Java-26plus-v2.8.0-REALISM-FX.sha1 .build/v280-bundle/java-resourcepack/
+          cp LegendaryRais-Bedrock-v2.8.0-REALISM-FX.mcpack .build/v280-bundle/geyser/packs/
+          cp LegendaryRais-Bedrock-v2.8.0-REALISM-FX.sha1 .build/v280-bundle/geyser/packs/
+          cp LegendaryRais-Geyser-v2.8.0-mappings.json .build/v280-bundle/geyser/custom_mappings/
+          cp .build/LegendaryRais-v280-INSTALL.txt .build/v280-bundle/INSTALL.txt
+          cd .build/v280-bundle
+          zip -9 -r ../../LegendaryRais-v2.8.0-FULL-JAVA-BEDROCK.zip .
+          cd ../..
+          sha1sum LegendaryRais-v2.8.0-FULL-JAVA-BEDROCK.zip | awk '{print $1}' > LegendaryRais-v2.8.0-FULL-JAVA-BEDROCK.sha1
+      - name: Publish full installer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-v2.8.0-FULL-JAVA-BEDROCK.zip LegendaryRais-v2.8.0-FULL-JAVA-BEDROCK.sha1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish LegendaryRais v2.8 FULL Java Bedrock bundle"
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
