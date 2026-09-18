@@ -1,0 +1,47 @@
+name: Build LegendaryRais v2.5 FULL Java Bedrock Bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/LegendaryRais-v250-INSTALL.txt"
+      - ".build/trigger-v250-full.txt"
+      - ".github/workflows/build-legendaryrais-v250-full.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build full installer bundle
+        run: |
+          rm -rf .build/v250-bundle
+          mkdir -p .build/v250-bundle/plugins
+          mkdir -p .build/v250-bundle/java-resourcepack
+          mkdir -p .build/v250-bundle/geyser/packs
+          mkdir -p .build/v250-bundle/geyser/custom_mappings
+          cp LegendaryRais-2.5.0-LIVE-AURA.jar .build/v250-bundle/plugins/
+          cp LegendaryRais-Java-26plus-v2.5.0-LIVE-AURA.zip .build/v250-bundle/java-resourcepack/
+          cp LegendaryRais-Java-26plus-v2.5.0-LIVE-AURA.sha1 .build/v250-bundle/java-resourcepack/
+          cp LegendaryRais-Bedrock-v2.5.0-LIVE-AURA.mcpack .build/v250-bundle/geyser/packs/
+          cp LegendaryRais-Bedrock-v2.5.0-LIVE-AURA.sha1 .build/v250-bundle/geyser/packs/
+          cp LegendaryRais-Geyser-v2.5.0-mappings.json .build/v250-bundle/geyser/custom_mappings/
+          cp .build/LegendaryRais-v250-INSTALL.txt .build/v250-bundle/INSTALL.txt
+          cd .build/v250-bundle
+          zip -9 -r ../../LegendaryRais-v2.5.0-FULL-JAVA-BEDROCK.zip .
+          cd ../..
+          sha1sum LegendaryRais-v2.5.0-FULL-JAVA-BEDROCK.zip | awk '{print $1}' > LegendaryRais-v2.5.0-FULL-JAVA-BEDROCK.sha1
+      - name: Publish full installer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-v2.5.0-FULL-JAVA-BEDROCK.zip LegendaryRais-v2.5.0-FULL-JAVA-BEDROCK.sha1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish LegendaryRais v2.5 FULL Java Bedrock bundle"
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
