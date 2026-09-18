@@ -1,0 +1,18 @@
+from pathlib import Path
+
+src=Path(".build/build_v220.py").read_text(encoding="utf-8")
+src=src.replace("LegendaryRais-Java-26plus-v2.2.0-FIX.zip","LegendaryRais-Java-26plus-v2.3.0-ULTRA-HD.zip")
+src=src.replace("LegendaryRais-Java-26plus-v2.2.0-FIX.sha1","LegendaryRais-Java-26plus-v2.3.0-ULTRA-HD.sha1")
+src=src.replace("generated-v220","generated-v230")
+src=src.replace("v2.2.0 FIX","v2.3.0 ULTRA HD")
+src=src.replace('png(texdir/"dark_metal.png",64,64,','png(texdir/"dark_metal.png",128,128,')
+src=src.replace('png(texdir/"blue_steel.png",64,64,','png(texdir/"blue_steel.png",128,128,')
+src=src.replace('png(texdir/"cyan_rune.png",64,64,','png(texdir/"cyan_rune.png",128,128,')
+src=src.replace('png(texdir/"soul_sand.png",64,64,','png(texdir/"soul_sand.png",128,128,')
+src=src.replace('png(texdir/"black_wrap.png",64,64,','png(texdir/"black_wrap.png",128,128,')
+src=src.replace('png(texdir/"bone.png",64,64,','png(texdir/"bone.png",128,128,')
+src=src.replace('png(texdir/"void.png",64,64,','png(texdir/"void.png",128,128,')
+src=src.replace("f=y//64; yy=y%64","f=y//128; yy=y%128")
+src=src.replace('png(texdir/"water.png",64,256,water_anim)','png(texdir/"water.png",128,512,water_anim)')
+src=src.replace("HD Soul Tide + Abyss Leviathan","ULTRA HD 128px Soul Tide + Abyss Leviathan")
+exec(compile(src,"build_v230_generated.py","exec"),{})
