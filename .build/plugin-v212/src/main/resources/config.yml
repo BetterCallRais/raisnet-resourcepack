@@ -1,0 +1,7 @@
+cooldown-seconds: 30
+water-walk:
+  enabled: true
+  effects: true
+  effect-interval-ms: 90
+skills:
+  damage-multiplier: 1.0
