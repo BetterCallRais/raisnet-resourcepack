@@ -1,0 +1,47 @@
+name: Build LegendaryRais v2.6 FULL Java Bedrock Bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/LegendaryRais-v260-INSTALL.txt"
+      - ".build/trigger-v260-full.txt"
+      - ".github/workflows/build-legendaryrais-v260-full.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build full installer bundle
+        run: |
+          rm -rf .build/v260-bundle
+          mkdir -p .build/v260-bundle/plugins
+          mkdir -p .build/v260-bundle/java-resourcepack
+          mkdir -p .build/v260-bundle/geyser/packs
+          mkdir -p .build/v260-bundle/geyser/custom_mappings
+          cp LegendaryRais-2.6.0-AQUATIC-AWAKENING.jar .build/v260-bundle/plugins/
+          cp LegendaryRais-Java-26plus-v2.6.0-AQUATIC-AWAKENING.zip .build/v260-bundle/java-resourcepack/
+          cp LegendaryRais-Java-26plus-v2.6.0-AQUATIC-AWAKENING.sha1 .build/v260-bundle/java-resourcepack/
+          cp LegendaryRais-Bedrock-v2.6.0-AQUATIC-AWAKENING.mcpack .build/v260-bundle/geyser/packs/
+          cp LegendaryRais-Bedrock-v2.6.0-AQUATIC-AWAKENING.sha1 .build/v260-bundle/geyser/packs/
+          cp LegendaryRais-Geyser-v2.6.0-mappings.json .build/v260-bundle/geyser/custom_mappings/
+          cp .build/LegendaryRais-v260-INSTALL.txt .build/v260-bundle/INSTALL.txt
+          cd .build/v260-bundle
+          zip -9 -r ../../LegendaryRais-v2.6.0-FULL-JAVA-BEDROCK.zip .
+          cd ../..
+          sha1sum LegendaryRais-v2.6.0-FULL-JAVA-BEDROCK.zip | awk '{print $1}' > LegendaryRais-v2.6.0-FULL-JAVA-BEDROCK.sha1
+      - name: Publish full installer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-v2.6.0-FULL-JAVA-BEDROCK.zip LegendaryRais-v2.6.0-FULL-JAVA-BEDROCK.sha1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish LegendaryRais v2.6 FULL Java Bedrock bundle"
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
