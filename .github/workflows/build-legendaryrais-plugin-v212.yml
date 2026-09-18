@@ -1,4 +1,4 @@
-name: Build LegendaryRais Plugin v2.2.0 FIX
+name: Build LegendaryRais Plugin v2.3.0 FIX
 
 on:
   push:
@@ -25,9 +25,9 @@ jobs:
         run: mvn -B -U clean package
       - name: Publish JAR
         run: |
-          cp .build/plugin-v212/target/LegendaryRais-2.2.0-FIX.jar LegendaryRais-2.2.0-FIX.jar
+          cp .build/plugin-v212/target/LegendaryRais-2.3.0-ULTRA-HD.jar LegendaryRais-2.3.0-ULTRA-HD.jar
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add LegendaryRais-2.2.0-FIX.jar
-          git commit -m "Publish LegendaryRais 2.2.0 FIX plugin"
+          git add LegendaryRais-2.3.0-ULTRA-HD.jar
+          git commit -m "Publish LegendaryRais 2.3.0 ULTRA HD plugin"
           git push
