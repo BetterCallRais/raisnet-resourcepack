@@ -1,0 +1,89 @@
+name: Smoke Test LegendaryRais v2.9.4 Paper 26.2 Build112
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/smoke-legendaryrais-v294.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Download exact Paper 26.2 build 112
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-SmokeTest/2.9.4 (https://github.com/BetterCallRais/raisnet-resourcepack)"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 112) or (.number == 112)) | .downloads."server:default".url) // empty')
+          if [ -z "$URL" ]; then
+            echo "Paper build 112 URL not found"
+            echo "$BUILDS" | jq .
+            exit 1
+          fi
+          mkdir -p .build/smoke-v294/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v294/paper.jar
+          cp LegendaryRais-2.9.4-PAPER-26.2-BUILD112.jar .build/smoke-v294/plugins/
+          echo "eula=true" > .build/smoke-v294/eula.txt
+          cat > .build/smoke-v294/server.properties <<'EOF'
+          online-mode=false
+          server-port=25565
+          view-distance=2
+          simulation-distance=2
+          max-players=2
+          spawn-protection=0
+          enable-query=false
+          enable-rcon=false
+          require-resource-pack=false
+          EOF
+
+      - name: Boot Paper and verify LegendaryRais enables
+        shell: bash
+        run: |
+          set +e
+          cd .build/smoke-v294
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          ENABLED=0
+          for i in $(seq 1 120); do
+            if grep -Fq "LegendaryRais v2.9.4 REAL PAPER 26.2 BUILD112 enabled." server.log; then
+              ENABLED=1
+              break
+            fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then
+              break
+            fi
+            if grep -Fq "Could not load server plugin LegendaryRais" server.log; then
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          echo "===== LEGENDARYRAIS LINES ====="
+          grep -i -C 6 "LegendaryRais" server.log || true
+          echo "===== SERVER TAIL ====="
+          tail -n 80 server.log
+          if [ "$ENABLED" -ne 1 ]; then
+            echo "LegendaryRais did NOT reach enabled state"
+            exit 1
+          fi
+          if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then
+            echo "LegendaryRais enable error detected"
+            exit 1
+          fi
+          echo "SMOKE_TEST_OK: LegendaryRais 2.9.4 enabled on Paper 26.2 build 112 / Java 25"
