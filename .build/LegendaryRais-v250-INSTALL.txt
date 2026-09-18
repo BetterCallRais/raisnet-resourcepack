@@ -1,0 +1,41 @@
+LegendaryRais v2.5.0 LIVE AURA - Java + Bedrock
+
+1) STOP server.
+
+2) Plugin:
+   Hapus semua LegendaryRais lama dari plugins/
+   Masukkan:
+   LegendaryRais-2.5.0-LIVE-AURA.jar
+
+3) Java Resource Pack - server.properties:
+require-resource-pack=true
+resource-pack=https\://raw.githubusercontent.com/BetterCallRais/raisnet-resourcepack/main/LegendaryRais-Java-26plus-v2.5.0-LIVE-AURA.zip
+resource-pack-id=4f8c13ea-c4a1-4d5e-b9c8-2b84f12f9d53
+resource-pack-prompt={"text"\:"RaisNet LegendaryRais v2.5 LIVE AURA - Java + Bedrock Legendary Weapons.","color"\:"aqua","bold"\:true}
+resource-pack-sha1=b3fe3f79efc363720af5fc007472308d5f6936be
+
+4) Bedrock/Geyser:
+   Pastikan gameplay.enable-custom-content: true di config Geyser.
+   Copy LegendaryRais-Bedrock-v2.5.0-LIVE-AURA.mcpack ke:
+   plugins/Geyser-Spigot/packs/
+
+   Copy LegendaryRais-Geyser-v2.5.0-mappings.json ke:
+   plugins/Geyser-Spigot/custom_mappings/
+
+   (Jika nama folder Geyser platform berbeda, gunakan folder data Geyser platform tersebut.)
+
+5) START server. Jangan /reload.
+
+6) Java:
+   Hapus cache .minecraft/server-resource-packs lalu join ulang.
+
+7) Ambil item baru dengan /riswp.
+
+v2.5:
+- Live water aura saat Soul Tide dipegang, terlihat oleh pemegang dan player lain.
+- Live abyss-water aura pada Abyss Leviathan.
+- Java skill FX: forced world broadcast + direct per-player particle packets.
+- Bedrock FX menggunakan vanilla particle types agar dapat diterjemahkan Geyser.
+- Water-walk hanya aktif pada kontak air langsung.
+- Basic melee damage 40 raw damage.
+- Skill damage multiplier 3.0x.
