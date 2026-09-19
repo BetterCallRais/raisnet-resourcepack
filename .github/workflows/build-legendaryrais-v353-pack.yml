@@ -1,0 +1,48 @@
+name: Build LegendaryRais Java Pack v3.5.3 Full Reforge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v353_java_pack.py"
+      - ".github/workflows/build-legendaryrais-v353-pack.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: Build Java pack
+        run: python .build/build_v353_java_pack.py
+      - name: Verify semantic-safe pack
+        run: |
+          unzip -t LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.zip
+          test -s LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.sha1
+          unzip -l LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.zip | grep -q 'legendaryv34/equipment/phoenix_set.json'
+          unzip -l LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.zip | grep -q 'legendaryv34/items/stormpiercer_recurve_bow.json'
+          unzip -l LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.zip | grep -q 'soultide'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-Java-v3.5.3-FULL-REFORGE
+          path: |
+            LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.zip
+            LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.sha1
+          retention-days: 7
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.zip LegendaryRais-Java-26.1.2-v3.5.3-FULL-REFORGE.sha1
+          git commit -m "Publish LegendaryRais Java v3.5.3 Full Reforge pack" || exit 0
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
