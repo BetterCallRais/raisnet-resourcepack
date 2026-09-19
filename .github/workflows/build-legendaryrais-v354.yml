@@ -1,0 +1,86 @@
+name: Build LegendaryRais v3.5.4 Visual Integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v354/**"
+      - ".github/workflows/build-legendaryrais-v354.yml"
+permissions:
+  contents: write
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+      - name: Reconstruct base and apply v3.5.4
+        run: |
+          set -euo pipefail
+          rm -rf .build/v354-src .build/v354-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v354-source.zip
+          mkdir -p .build/v354-src
+          unzip -q .build/v354-source.zip -d .build/v354-src
+          cp .build/extracted-v354/LegendaryRais.java .build/v354-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v354/ArsenalExpansion.java .build/v354-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v354/plugin.yml .build/v354-src/src/main/resources/plugin.yml
+          cp .build/extracted-v354/pom.xml .build/v354-src/pom.xml
+      - name: Guards
+        run: |
+          grep -q 'version >= 354' .build/v354-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'config-version", 354' .build/v354-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' .build/v354-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' .build/v354-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'stormpiercerImpact' .build/v354-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q 'armor.java-3d-overlay", false' .build/v354-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+      - name: Compile
+        run: |
+          cd .build/v354-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.5.4.jar ../../LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar > ../../LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.sha256
+      - name: Verify
+        run: |
+          unzip -t LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.5.4"
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v354"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v354/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v354/paper.jar
+          cp LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar .build/smoke-v354/plugins/
+          echo "eula=true" > .build/smoke-v354/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v354/server.properties
+          cd .build/smoke-v354
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0
+          for i in $(seq 1 140); do
+            grep -Fq "LegendaryRais v3.5.4" server.log && OK=1 && break
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          test "$OK" -eq 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-3.5.4-VISUAL-INTEGRITY
+          path: |
+            LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar
+            LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.sha256
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.jar LegendaryRais-3.5.4-VISUAL-INTEGRITY-PAPER-26.1.2.sha256
+          git commit -m "Publish LegendaryRais v3.5.4 Visual Integrity plugin" || exit 0
+          git pull --rebase origin main
+          git push
