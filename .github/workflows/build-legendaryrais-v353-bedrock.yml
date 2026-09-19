@@ -1,0 +1,50 @@
+name: Build LegendaryRais Bedrock Pack v3.5.3 Full Reforge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v353_bedrock.py"
+      - ".github/workflows/build-legendaryrais-v353-bedrock.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: Build Bedrock pack
+        run: python .build/build_v353_bedrock.py
+      - name: Verify pack + mappings
+        run: |
+          unzip -t LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.mcpack
+          test -s LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.sha1
+          python -m json.tool LegendaryRais-Geyser-v3.5.3-mappings.json >/dev/null
+          unzip -l LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.mcpack | grep -q 'stormpiercer_recurve_bow.geo.json'
+          unzip -l LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.mcpack | grep -q 'soul_tide_katana.geo.json'
+          unzip -l LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.mcpack | grep -q 'abyss_leviathan_trident.geo.json'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE
+          path: |
+            LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.mcpack
+            LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.sha1
+            LegendaryRais-Geyser-v3.5.3-mappings.json
+          retention-days: 7
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.mcpack LegendaryRais-Bedrock-v3.5.3-FULL-REFORGE.sha1 LegendaryRais-Geyser-v3.5.3-mappings.json
+          git commit -m "Publish LegendaryRais Bedrock v3.5.3 Full Reforge" || exit 0
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
