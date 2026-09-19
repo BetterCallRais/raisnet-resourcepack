@@ -23,9 +23,11 @@ permissions:
     description: Allows console/admin gacha rewards via /risgive.
     default: op
   legendaryrais.admin:
-    description: Allows opening/reloading the LegendaryRais administrator arsenal.
+    description: Full LegendaryRais administrator access.
     default: op
-
+    children:
+      legendaryrais.legend: true
+      legendaryrais.give: true
   legendaryrais.legend:
     description: Open /rislegend full arsenal GUI.
     default: op
