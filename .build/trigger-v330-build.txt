@@ -1,1 +1,1 @@
-trigger v3.3 final rebuild\n
+trigger v3.3 final rebuild after compile fix\n
