@@ -1,0 +1,53 @@
+name: Inspect LegendaryRais v3 Source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/trigger-inspect-v310.txt"
+      - ".github/workflows/inspect-v310.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct source
+        run: |
+          set -euo pipefail
+          rm -rf .build/inspect-src .build/inspect-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/inspect-source.zip
+          unzip -q .build/inspect-source.zip -d .build/inspect-src
+      - name: Extract relevant code
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('.build/inspect-src/src/main/java/id/raisnet/legendaryrais')
+          out=[]
+          for fn in ['LegendaryRais.java','ArsenalExpansion.java']:
+              p=root/fn
+              lines=p.read_text(encoding='utf-8').splitlines()
+              out.append('\n===== '+fn+' =====\n')
+              keys=['water','Water','TIDE','Tide','ABYSSAL','Abyssal','sovereign','Sovereign','PlayerMoveEvent','EntityDamageEvent','Throne','armor','Armor']
+              hit=set()
+              for i,l in enumerate(lines):
+                  if any(k in l for k in keys):
+                      a=max(0,i-8); b=min(len(lines),i+18)
+                      key=(a,b)
+                      if key in hit: continue
+                      hit.add(key)
+                      out.append(f'--- lines {a+1}-{b} ---')
+                      out.extend(f'{j+1}: {lines[j]}' for j in range(a,b))
+          Path('.build/inspect-v310.txt').write_text('\n'.join(out),encoding='utf-8')
+          PY
+      - name: Publish inspect
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .build/inspect-v310.txt
+          git commit -m "Inspect v3.0 source for v3.1 rebuild" || exit 0
+          git pull --rebase origin main
+          git push
