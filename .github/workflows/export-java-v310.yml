@@ -1,0 +1,36 @@
+name: Export LegendaryRais v3 Java Sources
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/trigger-export-java-v310.txt"
+      - ".github/workflows/export-java-v310.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct source
+        run: |
+          set -euo pipefail
+          rm -rf .build/export-src .build/export-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/export-source.zip
+          unzip -q .build/export-source.zip -d .build/export-src
+          mkdir -p .build/extracted-v310
+          cp .build/export-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java .build/extracted-v310/LegendaryRais.java
+          cp .build/export-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java .build/extracted-v310/ArsenalExpansion.java
+          cp .build/export-src/src/main/resources/plugin.yml .build/extracted-v310/plugin.yml
+          cp .build/export-src/pom.xml .build/extracted-v310/pom.xml
+      - name: Publish source extracts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .build/extracted-v310
+          git commit -m "Export v3 sources for v3.1 rebuild" || exit 0
+          git pull --rebase origin main
+          git push
