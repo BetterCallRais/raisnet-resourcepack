@@ -1,0 +1,40 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< id.raisnet:legendaryrais >----------------------
+[INFO] Building LegendaryRais 2.9.5
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ legendaryrais ---
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ legendaryrais ---
+[INFO] Artifact javax.inject:javax.inject:jar:1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact javax.inject:javax.inject:jar:1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ legendaryrais ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1 source file with javac [debug release 25] to target/classes
+[WARNING] /home/runner/work/raisnet-resourcepack/raisnet-resourcepack/.build/v295-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java:[1585,32] [removal] valueOf(@org.jetbrains.annotations.NotNull java.lang.String) in org.bukkit.Sound has been deprecated and marked for removal
+            Sound sound = Sound.valueOf(soundName);
+                               ^
+[INFO] /home/runner/work/raisnet-resourcepack/raisnet-resourcepack/.build/v295-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java: /home/runner/work/raisnet-resourcepack/raisnet-resourcepack/.build/v295-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java uses or overrides a deprecated API.
+[INFO] /home/runner/work/raisnet-resourcepack/raisnet-resourcepack/.build/v295-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ legendaryrais ---
+[INFO] skip non existing resourceDirectory /home/runner/work/raisnet-resourcepack/raisnet-resourcepack/.build/v295-src/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ legendaryrais ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ legendaryrais ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ legendaryrais ---
+[INFO] Building jar: /home/runner/work/raisnet-resourcepack/raisnet-resourcepack/.build/v295-src/target/legendaryrais-2.9.5.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.661 s
+[INFO] Finished at: 2026-09-19T05:08:46Z
+[INFO] ------------------------------------------------------------------------
