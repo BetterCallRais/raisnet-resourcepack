@@ -1,5 +1,5 @@
 from pathlib import Path
-import base64,gzip,hashlib,importlib.util,json,shutil,zipfile
+import hashlib,importlib.util,json,shutil,zipfile
 from PIL import Image
 
 ROOT=Path(".build/generated-v355")
@@ -21,10 +21,10 @@ MAP_OUT=Path("LegendaryRais-Geyser-v3.5.5-mappings.json")
 shutil.rmtree(ROOT,ignore_errors=True)
 ROOT.mkdir(parents=True)
 
-# Decode the compressed art generator committed to the repository.
-payload=Path(".build/v355_art_assets.py.gz.b64").read_text(encoding="utf-8").strip()
-gen_py=ROOT/"v355_art_assets.py"
-gen_py.write_bytes(gzip.decompress(base64.b64decode(payload)))
+# Load the plain source generator. Keeping this uncompressed makes the build reproducible
+# and avoids opaque/corrupt archive payloads in CI.
+gen_py=Path(".build/v355_art_assets.py")
+if not gen_py.is_file(): raise FileNotFoundError(gen_py)
 spec=importlib.util.spec_from_file_location("v355_art_assets",gen_py)
 mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
 mod.generate(ASSETS)
