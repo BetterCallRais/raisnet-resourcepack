@@ -1,0 +1,41 @@
+name: Build LegendaryRais v2.9.6 HD Resource Pack
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v296_pack.py"
+      - ".build/trigger-v296-pack.txt"
+      - ".github/workflows/build-legendaryrais-v296-pack.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build + validate v2.9.6 Java pack
+        run: python3 .build/build_v296_pack.py
+
+      - name: Upload pack artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-Java-26.1.2-v2.9.6-ABSOLUTE-WATER
+          path: |
+            LegendaryRais-Java-26.1.2-v2.9.6-ABSOLUTE-WATER.zip
+            LegendaryRais-Java-26.1.2-v2.9.6-ABSOLUTE-WATER.sha1
+          retention-days: 7
+
+      - name: Publish pack
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26.1.2-v2.9.6-ABSOLUTE-WATER.zip LegendaryRais-Java-26.1.2-v2.9.6-ABSOLUTE-WATER.sha1
+          git commit -m "Publish LegendaryRais Java v2.9.6 Absolute Water pack" || exit 0
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
