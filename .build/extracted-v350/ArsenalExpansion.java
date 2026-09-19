@@ -409,23 +409,36 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
 
     private void runSelfCheck(){
         List<String> errors=new ArrayList<>();int checked=0;
+        if(plugin.getCommand("rislegend")==null)errors.add("/rislegend missing from plugin.yml");
+        if(plugin.getCommand("risgive")==null)errors.add("/risgive missing from plugin.yml");
+
         for(String id:List.of(EMBERFALL,NOCTIS,STORMPIERCER,GAIA,ASTRAL)){
             ItemStack i=createWeapon(id);checked++;
             ItemMeta m=i.getItemMeta();
             if(m==null||!m.isUnbreakable())errors.add("weapon "+id+" not unbreakable");
             if(m==null||!id.equals(m.getPersistentDataContainer().get(weaponKey,PersistentDataType.STRING)))errors.add("weapon "+id+" missing PDC");
         }
+
         for(String set:List.of(PHOENIX,VOIDWALKER,TITAN,CELESTIAL,WATER_SOVEREIGN))for(String piece:List.of("helmet","chest","legs","boots")){
             ItemStack i=createArmorPiece(set,piece);checked++;ItemMeta m=i.getItemMeta();
             if(m==null||!m.isUnbreakable())errors.add("armor "+set+"/"+piece+" not unbreakable");
             if(m==null||!set.equals(m.getPersistentDataContainer().get(armorSetKey,PersistentDataType.STRING)))errors.add("armor "+set+"/"+piece+" missing set PDC");
             if(i.getType()!=armorMaterial(set,piece))errors.add("armor "+set+"/"+piece+" wrong material");
+            if(armorHealthPerPiece(set)<=0||armorDefensePerPiece(set)<=0||armorToughnessPerPiece(set)<=0)errors.add("armor "+set+" has invalid legendary stats");
+            if(m!=null)try{
+                Object eq=m.getEquippable();
+                Object slot=eq.getClass().getMethod("getSlot").invoke(eq);
+                if(slot!=armorSlot(piece))errors.add("armor "+set+"/"+piece+" wrong equip slot: "+slot);
+            }catch(Throwable ex){errors.add("armor "+set+"/"+piece+" equippable validation failed");}
         }
+
         if(plugin instanceof LegendaryRais core){
-            for(ItemStack i:List.of(core.createSoulTideKatana(false),core.createLeviathanTrident(false))){checked++;ItemMeta m=i.getItemMeta();if(m==null||!m.isUnbreakable())errors.add("premium Water relic not unbreakable");}
+            for(ItemStack i:List.of(core.createSoulTideKatana(false),core.createLeviathanTrident(false))){
+                checked++;ItemMeta m=i.getItemMeta();if(m==null||!m.isUnbreakable())errors.add("premium Water relic not unbreakable");
+            }
         }
-        if(errors.isEmpty())plugin.getLogger().info("[SELF-CHECK] PASS • "+checked+" Legendary weapon/armor definitions valid + unbreakable.");
-        else{plugin.getLogger().severe("[SELF-CHECK] FAIL • "+errors.size()+" issue(s): "+String.join(" | ",errors));}
+        if(errors.isEmpty())plugin.getLogger().info("[SELF-CHECK] PASS • "+checked+" definitions • GUI registered • equip slots valid • Legendary stats valid • unbreakable.");
+        else plugin.getLogger().severe("[SELF-CHECK] FAIL • "+errors.size()+" issue(s): "+String.join(" | ",errors));
     }
 
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=false) public void interact(PlayerInteractEvent e){if(e.getHand()!=null&&e.getHand()!=EquipmentSlot.HAND)return;Player p=e.getPlayer();String id=weaponId(p.getInventory().getItemInMainHand());if(!expansionWeapon(id))return;Action a=e.getAction();boolean right=a==Action.RIGHT_CLICK_AIR||a==Action.RIGHT_CLICK_BLOCK,left=a==Action.LEFT_CLICK_AIR||a==Action.LEFT_CLICK_BLOCK;if(p.isSneaking()&&right){e.setCancelled(true);cast(p,id,3);}else if(p.isSneaking()&&left){e.setCancelled(true);cast(p,id,2);}else if(!p.isSneaking()&&right){e.setCancelled(true);cast(p,id,1);}}
