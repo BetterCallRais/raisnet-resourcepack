@@ -269,6 +269,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         lore.add(set.equals(WATER_SOVEREIGN)?"§bPremium Water Relic Armor":"§7Free-Gacha Legendary Armor");
         lore.add("");
         lore.add("§eFull Set Skill: §f"+armorSkillName(set));
+        lore.add("§7Aktif: §eDouble Sneak §8→ §fTangan kosong §8→ §cPukul target");
         lore.add("§7Sneak + Drop/Q untuk cast.");
         lore.add("§7Drop dibatalkan saat skill aktif.");
         lore.add("");
