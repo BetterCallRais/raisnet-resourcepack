@@ -1,0 +1,194 @@
+name: Build LegendaryRais v3.5.5 Art Rebuild
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v355/**"
+      - ".build/v355_art_assets.py.gz.b64"
+      - ".build/build_v355_packs.py"
+      - ".github/workflows/build-legendaryrais-v355.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pack builder dependency
+        run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v355-src .build/v355-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v355-source.zip
+          unzip -t .build/v355-source.zip
+          mkdir -p .build/v355-src
+          unzip -q .build/v355-source.zip -d .build/v355-src
+          cp .build/extracted-v355/LegendaryRais.java .build/v355-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v355/ArsenalExpansion.java .build/v355-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v355/plugin.yml .build/v355-src/src/main/resources/plugin.yml
+          cp .build/extracted-v355/pom.xml .build/v355-src/pom.xml
+
+      - name: Guard critical fixes and frozen water relics
+        run: |
+          set -euo pipefail
+          grep -q 'version >= 355' .build/v355-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'config-version", 355' .build/v355-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' .build/v355-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' .build/v355-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'purgeLegacyArmorDisplays' .build/v355-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q 'arrow.setDamage(0.0)' .build/v355-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q 'stormpiercerImpact' .build/v355-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q 'armor.java-3d-overlay", false' .build/v355-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v355-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.5.5.jar ../../LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar > ../../LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.sha256
+
+      - name: Verify plugin jar
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.5.5"
+          unzip -p LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar plugin.yml | grep -q "rislegend:"
+          jar tf LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build Java + Bedrock packs
+        run: |
+          set -euo pipefail
+          python .build/build_v355_packs.py
+
+      - name: Deep pack validation
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.zip
+          unzip -t LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.5.5-mappings.json >/dev/null
+          unzip -p LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack models/entity/stormpiercer_recurve_bow.geo.json | grep -q '"texture_meshes"'
+          unzip -p LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack models/entity/stormpiercer_recurve_bow.geo.json | grep -q '"use_pixel_depth":true'
+          unzip -l LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack | grep -q 'models/entity/soul_tide_katana.geo.json'
+          unzip -l LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack | grep -q 'models/entity/abyss_leviathan_trident.geo.json'
+          unzip -l LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.zip | grep -q 'assets/soultide/'
+          unzip -l LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.zip | grep -q 'assets/legendaryrais/'
+
+      - name: Visual integrity audit
+        run: |
+          python - <<'PY'
+          import zipfile,io,json
+          from PIL import Image
+          J='LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.zip'
+          B='LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack'
+          weapons=['emberfall_claymore','noctis_longsword','stormpiercer_recurve_bow','gaia_war_spear','astral_twin_daggers']
+          sets=['phoenix','voidwalker','titan','celestial','water_sovereign']
+          with zipfile.ZipFile(J) as z:
+              for n in weapons:
+                  im=Image.open(io.BytesIO(z.read(f'assets/legendaryv34/textures/item/v355/{n}.png'))).convert('RGBA')
+                  assert im.size==(256,256)
+                  a=list(im.getchannel('A').getdata())
+                  occ=sum(v>16 for v in a)/len(a)
+                  assert .025 < occ < .40, (n,'alpha occupancy',occ)
+              for s in sets:
+                  for sub in ('humanoid','humanoid_leggings'):
+                      im=Image.open(io.BytesIO(z.read(f'assets/legendaryv34/textures/entity/equipment/{sub}/{s}_set.png'))).convert('RGB')
+                      assert im.size==(64,32)
+                      px=list(im.getdata())
+                      white=sum(r>220 and g>220 and b>220 for r,g,b in px)/len(px)
+                      assert white < .025, (s,sub,'too much white/grid',white)
+          with zipfile.ZipFile(B) as z:
+              names=set(z.namelist())
+              armor=[n for n in names if n.startswith('attachables/armor_') and n.endswith('.json')]
+              assert len(armor)>=20, len(armor)
+              for n in weapons:
+                  im=Image.open(io.BytesIO(z.read(f'textures/items/{n}.png'))).convert('RGBA')
+                  assert im.size==(64,64)
+                  a=list(im.getchannel('A').getdata())
+                  occ=sum(v>16 for v in a)/len(a)
+                  assert .02 < occ < .45, (n,'bed alpha occupancy',occ)
+          m=json.load(open('LegendaryRais-Geyser-v3.5.5-mappings.json'))
+          assert m['format_version']==2
+          defs=[d for arr in m['items'].values() for d in arr if d.get('type')=='definition']
+          assert len(defs)>=25, len(defs)
+          print('VISUAL_AUDIT PASS',len(defs),'mapping definitions')
+          PY
+
+      - name: Smoke boot exact Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v355"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v355/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v355/paper.jar
+          cp LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar .build/smoke-v355/plugins/
+          echo "eula=true" > .build/smoke-v355/eula.txt
+          cat > .build/smoke-v355/server.properties <<'EOF'
+          online-mode=false
+          server-port=25565
+          view-distance=2
+          simulation-distance=2
+          max-players=2
+          spawn-protection=0
+          enable-query=false
+          enable-rcon=false
+          require-resource-pack=false
+          EOF
+          cd .build/smoke-v355
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 140); do
+            grep -Fq "LegendaryRais v3.5.5" server.log && grep -Fq "enabled" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 14 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.5.5-ART-REBUILD
+          path: |
+            LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar
+            LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.zip
+            LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.sha1
+            LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack
+            LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.sha1
+            LegendaryRais-Geyser-v3.5.5-mappings.json
+          retention-days: 7
+
+      - name: Publish verified v3.5.5
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.jar             LegendaryRais-3.5.5-ART-REBUILD-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.zip             LegendaryRais-Java-26.1.2-v3.5.5-ART-REBUILD.sha1             LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.mcpack             LegendaryRais-Bedrock-v3.5.5-ART-REBUILD.sha1             LegendaryRais-Geyser-v3.5.5-mappings.json
+          git commit -m "Publish LegendaryRais v3.5.5 Art Rebuild" || exit 0
+          git pull --rebase origin main
+          git push
