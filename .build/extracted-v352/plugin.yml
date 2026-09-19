@@ -1,0 +1,33 @@
+name: LegendaryRais
+version: 3.5.2
+main: id.raisnet.legendaryrais.LegendaryRais
+api-version: '26.1.2'
+author: RaisNet
+softdepend: [Geyser-Spigot, floodgate]
+description: LegendaryRais v3.5.2 Reforged Hotfix - real explosive bow projectiles, body-locked armor rendering, refined weapons, Soul Tide + Leviathan preserved.
+commands:
+  risgive:
+    description: Give LegendaryRais gacha weapons or armor sets.
+    usage: /risgive <player> <id> [amount]
+    permission: legendaryrais.give
+  rislegend:
+    description: Open the full LegendaryRais weapon and armor GUI.
+    usage: /rislegend
+    permission: legendaryrais.legend
+  riswp:
+    description: Open LegendaryRais weapon arsenal.
+    usage: /riswp
+    permission: legendaryrais.admin
+permissions:
+  legendaryrais.give:
+    description: Allows console/admin gacha rewards via /risgive.
+    default: op
+  legendaryrais.admin:
+    description: Full LegendaryRais administrator access.
+    default: op
+    children:
+      legendaryrais.legend: true
+      legendaryrais.give: true
+  legendaryrais.legend:
+    description: Open /rislegend full arsenal GUI.
+    default: op
