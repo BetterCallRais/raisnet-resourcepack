@@ -162,6 +162,12 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         if(set!=null){for(String piece:List.of("helmet","chest","legs","boots"))giveSafe(p,createArmorPiece(set,piece));legendPickupFx(p,"§6"+set.toUpperCase(Locale.ROOT)+" SET");}
     }
 
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=false)
+    public void legendMenuDrag(InventoryDragEvent e){
+        if(!LEGEND_MENU_TITLE.equals(e.getView().getTitle()))return;
+        for(int raw:e.getRawSlots())if(raw<e.getView().getTopInventory().getSize()){e.setCancelled(true);return;}
+    }
+
     private void legendPickupFx(Player p,String what){
         Location c=p.getLocation().clone().add(0,1.0,0);
         particle(p.getWorld(),"END_ROD",c,24,.45,.7,.45,.05);sound(p.getWorld(),c,"minecraft:block.amethyst_block.chime",.9f,1.4f);
