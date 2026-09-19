@@ -138,6 +138,8 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         getConfig().set("water-walk.jump-grace-ms", 780L);
         getConfig().set("water-walk.jump-velocity", 0.42);
         getConfig().set("water-walk.jump-forward-multiplier", 1.08);
+        getConfig().set("armor.java-3d-overlay", true);
+        getConfig().set("armor.java-3d-update-ticks", 2);
         saveConfig();
         getConfig().set("gacha.cooldowns.skill-1", 10);
         getConfig().set("gacha.cooldowns.skill-2", 16);
