@@ -36,5 +36,7 @@ jobs:
           git add LegendaryRais-Java-26.1.2-v2.9.5-FIX.zip LegendaryRais-Java-26.1.2-v2.9.5-FIX.sha1
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Publish LegendaryRais Java v2.9.5 for Minecraft 26.1.2"
+          git reset --hard HEAD
+          git clean -fd
           git pull --rebase origin main
           git push
