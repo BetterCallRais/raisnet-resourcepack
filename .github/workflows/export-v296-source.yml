@@ -1,0 +1,27 @@
+name: Export LegendaryRais v2.9.6 Final Source
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".build/trigger-export-v296-source.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct final v2.9.6 source
+        run: |
+          python3 .build/build_v296_plugin.py
+          cd .build/v296-src
+          zip -qr ../../LegendaryRais-v2.9.6-FINAL-SOURCE.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v2.9.6-FINAL-SOURCE
+          path: LegendaryRais-v2.9.6-FINAL-SOURCE.zip
+          retention-days: 7
