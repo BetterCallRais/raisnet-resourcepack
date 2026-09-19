@@ -1,0 +1,111 @@
+name: Build LegendaryRais v3.0 Legendary Arsenal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/v300-source-part-00.b64"
+      - ".build/v300-source-part-01.b64"
+      - ".build/v300-source-part-02.b64"
+      - ".build/v300-source-part-03.b64"
+      - ".build/trigger-v300-build.txt"
+      - ".github/workflows/build-legendaryrais-v300.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - name: Reconstruct v3.0 source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v300-src .build/v300-source.zip
+          cat .build/v300-source-part-00.b64 .build/v300-source-part-01.b64 .build/v300-source-part-02.b64 .build/v300-source-part-03.b64 | tr -d '\n\r ' | base64 -d > .build/v300-source.zip
+          unzip -t .build/v300-source.zip
+          mkdir -p .build/v300-src
+          unzip -q .build/v300-source.zip -d .build/v300-src
+          grep -q "version: 3.0.0" .build/v300-src/src/main/resources/plugin.yml
+          grep -q "risgive:" .build/v300-src/src/main/resources/plugin.yml
+
+      - name: Compile exact Paper API
+        run: |
+          cd .build/v300-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.0.0.jar ../../LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar > ../../LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.sha256
+
+      - name: Verify jar contents
+        run: |
+          unzip -t LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar
+          jar tf LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar | grep -q "id/raisnet/legendaryrais/ArsenalExpansion.class"
+          unzip -p LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar plugin.yml | grep -q "risgive:"
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v300"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v300/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v300/paper.jar
+          cp LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar .build/smoke-v300/plugins/
+          echo "eula=true" > .build/smoke-v300/eula.txt
+          cat > .build/smoke-v300/server.properties <<'EOF'
+          online-mode=false
+          server-port=25565
+          view-distance=2
+          simulation-distance=2
+          max-players=2
+          spawn-protection=0
+          enable-query=false
+          enable-rcon=false
+          require-resource-pack=false
+          EOF
+          cd .build/smoke-v300
+          set +e
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0
+          for i in $(seq 1 130); do
+            if grep -Fq "LegendaryRais v3.0.0 LEGENDARY ARSENAL enabled." server.log; then OK=1; break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if grep -Fq "Could not load plugin 'LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 10 "LegendaryRais" server.log || true
+          test "$OK" -eq 1
+          ! grep -Fq "Error occurred while enabling LegendaryRais" server.log
+
+      - name: Upload verified plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2
+          path: |
+            LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar
+            LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.sha256
+          retention-days: 7
+
+      - name: Publish verified plugin
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.jar LegendaryRais-3.0.0-LEGENDARY-ARSENAL-PAPER-26.1.2.sha256
+          git commit -m "Publish LegendaryRais v3.0 Legendary Arsenal plugin" || exit 0
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
