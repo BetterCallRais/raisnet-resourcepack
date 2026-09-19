@@ -1,0 +1,37 @@
+name: Build LegendaryRais Java Pack v3.5.4 Visual Integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v354_java_pack.py"
+      - ".github/workflows/build-legendaryrais-v354-pack.yml"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pillow
+      - run: python .build/build_v354_java_pack.py
+      - name: Verify
+        run: |
+          unzip -t LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.zip
+          test -s LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.sha1
+          unzip -l LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.zip | grep -q 'legendaryv34/equipment/phoenix_set.json'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-Java-v3.5.4-VISUAL-INTEGRITY
+          path: |
+            LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.zip
+            LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.sha1
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.zip LegendaryRais-Java-26.1.2-v3.5.4-VISUAL-INTEGRITY.sha1
+          git commit -m "Publish LegendaryRais Java v3.5.4 Visual Integrity" || exit 0
+          git pull --rebase origin main
+          git push
