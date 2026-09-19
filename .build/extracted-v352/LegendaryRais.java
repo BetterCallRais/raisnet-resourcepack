@@ -99,7 +99,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         if (command != null) command.setExecutor(this);
         new ArsenalExpansion(this).enable();
 
-        getLogger().info("LegendaryRais v3.5.0 ULTIMATE ARSENAL enabled. Premium Water Relics locked + Ultimate Arsenal registered.");
+        getLogger().info("LegendaryRais v3.5.2 REFORGED HOTFIX enabled. Soul Tide + Leviathan locked; explosive Stormpiercer + body-locked armor active.");
         getLogger().info("/rislegend is the primary admin arsenal GUI; /riswp remains a legacy alias.");
         getLogger().info("Cooldowns: 30s default per active skill. Java + Geyser/Floodgate input supported.");
     }
