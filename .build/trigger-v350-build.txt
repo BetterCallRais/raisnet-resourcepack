@@ -1,1 +1,1 @@
-trigger v3.5 legend gui fx\n
+trigger v3.5 serial final publish\n
