@@ -100,7 +100,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         new ArsenalExpansion(this).enable();
 
         getLogger().info("LegendaryRais v3.5.0 ULTIMATE ARSENAL enabled. Premium Water Relics locked + Ultimate Arsenal registered.");
-        getLogger().info("/riswp is admin-only; any player holding an authentic LegendaryRais weapon can use its skills.");
+        getLogger().info("/rislegend is the primary admin arsenal GUI; /riswp remains a legacy alias.");
         getLogger().info("Cooldowns: 30s default per active skill. Java + Geyser/Floodgate input supported.");
     }
 
@@ -189,7 +189,8 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
             player.sendMessage("§bLegendaryRais §7config berhasil di-reload.");
             return true;
         }
-        openWeaponMenu(player);
+        player.sendMessage("§7/riswp sekarang legacy alias. Membuka §e/rislegend§7...");
+        Bukkit.dispatchCommand(player,"rislegend");
         return true;
     }
 
