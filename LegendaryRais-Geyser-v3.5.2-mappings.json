@@ -1,0 +1,134 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:netherite_sword": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910041,
+        "bedrock_identifier": "raisnet:soul_tide_katana",
+        "display_name": "Soul Tide Katana",
+        "bedrock_options": {
+          "icon": "raisnet:soul_tide_katana",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910051,
+        "bedrock_identifier": "raisnet:emberfall_claymore",
+        "display_name": "Emberfall Claymore",
+        "bedrock_options": {
+          "icon": "raisnet:emberfall_claymore",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910052,
+        "bedrock_identifier": "raisnet:noctis_longsword",
+        "display_name": "Noctis Longsword",
+        "bedrock_options": {
+          "icon": "raisnet:noctis_longsword",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:trident": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910042,
+        "bedrock_identifier": "raisnet:abyss_leviathan_trident",
+        "display_name": "Abyss Leviathan Trident",
+        "bedrock_options": {
+          "icon": "raisnet:abyss_leviathan_trident",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:prismarine_shard": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910051,
+        "bedrock_identifier": "raisnet:fx_water_slash",
+        "display_name": "FX Water Slash",
+        "bedrock_options": {
+          "icon": "raisnet:fx_water_slash",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910052,
+        "bedrock_identifier": "raisnet:fx_water_ring",
+        "display_name": "FX Water Ring",
+        "bedrock_options": {
+          "icon": "raisnet:fx_water_ring",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910053,
+        "bedrock_identifier": "raisnet:fx_abyss_ring",
+        "display_name": "FX Abyss Ring",
+        "bedrock_options": {
+          "icon": "raisnet:fx_abyss_ring",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "legacy",
+        "custom_model_data": 910054,
+        "bedrock_identifier": "raisnet:fx_abyss_slash",
+        "display_name": "FX Abyss Slash",
+        "bedrock_options": {
+          "icon": "raisnet:fx_abyss_slash",
+          "display_handheld": false
+        }
+      }
+    ],
+    "minecraft:bow": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910053,
+        "bedrock_identifier": "raisnet:stormpiercer_recurve_bow",
+        "display_name": "Stormpiercer Tempest Bow",
+        "bedrock_options": {
+          "icon": "raisnet:stormpiercer_recurve_bow",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:netherite_shovel": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910054,
+        "bedrock_identifier": "raisnet:gaia_war_spear",
+        "display_name": "Gaia War Spear",
+        "bedrock_options": {
+          "icon": "raisnet:gaia_war_spear",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:shears": [
+      {
+        "type": "legacy",
+        "custom_model_data": 910055,
+        "bedrock_identifier": "raisnet:astral_twin_daggers",
+        "display_name": "Astral Twin Daggers",
+        "bedrock_options": {
+          "icon": "raisnet:astral_twin_daggers",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ]
+  }
+}
