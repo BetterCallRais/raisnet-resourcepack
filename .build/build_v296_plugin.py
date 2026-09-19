@@ -21,7 +21,50 @@ must("private static final int FX_LIGHTNING_SPEAR_MODEL_DATA = 910108;",
      "private static final int FX_LIGHTNING_SPEAR_MODEL_DATA = 910108;\n    private static final int FX_LEVIATHAN_PROJECTILE_MODEL_DATA = 910109;")
 must("LegendaryRais v2.9.0 REWORK enabled. Soul Tide Sovereign Blade + Abyss Leviathan Trident registered.",
      "LegendaryRais v2.9.6 ABSOLUTE WATER REWORK enabled. HD Sovereign Blade + HD Abyss Leviathan registered.")
-s=s.replace("§8[V5]","§8[V6]").replace("Abyss Leviathan Trident V5","Abyss Leviathan Trident V6").replace("§3Abyss Leviathan V5:","§3Abyss Leviathan V6:")
+s=s.replace("§8[V5]","§8[V6]").replace("§b[V5]","§b[V6]").replace("Abyss Leviathan Trident V5","Abyss Leviathan Trident V6").replace("§3Abyss Leviathan V5:","§3Abyss Leviathan V6:")
+s=s.replace("§7Semua active skill cooldown: §f30 detik§7 (default).","§7Cooldown V6: Sword 30s • Spear 1/8/12/20s.")
+
+must("        saveDefaultConfig();", "        saveDefaultConfig();\n        applyV296ConfigMigration();")
+
+migration = r'''    private void applyV296ConfigMigration() {
+        int version = getConfig().getInt("config-version", 0);
+        if (version >= 296) return;
+        getConfig().set("config-version", 296);
+        getConfig().set("base-hit.sword", 38.0);
+        getConfig().set("base-hit.trident", 44.0);
+        getConfig().set("abyssal-step.damage", 650.0);
+        getConfig().set("tidal-crescent.damage", 650.0);
+        getConfig().set("soul-undertow.damage", 650.0);
+        getConfig().set("soul-undertow.swirl-force", 0.36);
+        getConfig().set("combo.soul-break-bonus-damage", 42.0);
+        getConfig().set("ultimate.pulse-damage", 165.0);
+        getConfig().set("ultimate.collapse-damage", 900.0);
+        getConfig().set("leviathan.cooldowns.abyssal-harpoon", 1);
+        getConfig().set("leviathan.cooldowns.leviathan-fang", 8);
+        getConfig().set("leviathan.cooldowns.maelstrom-prison", 12);
+        getConfig().set("leviathan.cooldowns.wrath-of-the-leviathan", 20);
+        getConfig().set("leviathan.thrown.projectile-damage", 650.0);
+        getConfig().set("leviathan.thrown.impact-bonus-damage", 650.0);
+        getConfig().set("leviathan.thrown.lightning-aoe-damage", 320.0);
+        getConfig().set("leviathan.thrown.lightning-radius", 5.8);
+        getConfig().set("leviathan.thrown.gauge-on-throw", 6);
+        getConfig().set("leviathan.thrown.gauge-on-impact", 16);
+        getConfig().set("leviathan.thrown.max-flight-ticks", 34);
+        getConfig().set("leviathan.thrown.blocks-per-tick", 1.55);
+        getConfig().set("leviathan.thrown.hit-radius", 1.15);
+        getConfig().set("leviathan.thrown.projectile-scale", 1.15);
+        getConfig().set("leviathan.leviathan-fang.damage", 650.0);
+        getConfig().set("leviathan.maelstrom-prison.pulse-damage", 165.0);
+        getConfig().set("leviathan.ultimate.charge-damage", 650.0);
+        getConfig().set("leviathan.ultimate.collapse-damage", 1000.0);
+        saveConfig();
+        getLogger().info("Migrated existing LegendaryRais config to v2.9.6 ABSOLUTE WATER defaults.");
+    }
+
+'''
+anchor = "    @Override\n    public void onDisable() {"
+if anchor not in s: raise RuntimeError("onDisable anchor missing")
+s=s.replace(anchor, migration + anchor)
 
 must("""            else if (!player.isSneaking() && right) {
                 // V5: allow vanilla trident charging/throwing. ProjectileLaunchEvent owns Skill I.
@@ -184,6 +227,8 @@ p.write_text(s,encoding="utf-8")
 
 cfg=root/"src/main/resources/config.yml"
 c=cfg.read_text()
+if not c.startswith("config-version: 296"):
+    c="config-version: 296\n"+c
 repls={
 "# LegendaryRais v2.9.0 REWORK — Sword + Leviathan visual/damage rework":"# LegendaryRais v2.9.6 ABSOLUTE WATER REWORK — Paper 26.1.2 build 74",
 "  sword: 14.0":"  sword: 38.0","  trident: 16.0":"  trident: 44.0",
