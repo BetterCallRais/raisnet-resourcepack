@@ -1,0 +1,156 @@
+name: Build LegendaryRais v3.6.0 Elemental Elite
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v360/**"
+      - ".build/build_v360_packs.py"
+      - ".github/workflows/build-legendaryrais-v360.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v360-src .build/v360-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v360-source.zip
+          unzip -t .build/v360-source.zip
+          mkdir -p .build/v360-src
+          unzip -q .build/v360-source.zip -d .build/v360-src
+          cp .build/extracted-v360/LegendaryRais.java .build/v360-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v360/ArsenalExpansion.java .build/v360-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v360/plugin.yml .build/v360-src/src/main/resources/plugin.yml
+          cp .build/extracted-v360/pom.xml .build/v360-src/pom.xml
+
+      - name: Guard elemental rules
+        run: |
+          set -euo pipefail
+          grep -q 'version >= 360' .build/v360-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'config-version", 360' .build/v360-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q '455.0' .build/v360-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q '\[WIND\] GAIA • WINDBURST' .build/v360-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q '\[ICE\] ASTRAL • ABSOLUTE ZERO' .build/v360-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q '\[ELECTRO\] STORMPIERCER • OVERCHARGE FIELD' .build/v360-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q 'LEGEND ARMOR' .build/v360-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' .build/v360-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' .build/v360-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v360-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.0.jar ../../LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.sha256
+
+      - name: Verify plugin
+        run: |
+          unzip -t LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.6.0"
+          jar tf LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build Java + Bedrock packs
+        run: python .build/build_v360_packs.py
+
+      - name: Validate true 3D + crossplay
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.0-ELEMENTAL-ELITE.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.0-ELEMENTAL-ELITE.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.0-mappings.json >/dev/null
+          python - <<'PY'
+          import zipfile,json
+          W=['emberfall_claymore','noctis_longsword','stormpiercer_recurve_bow','gaia_war_spear','astral_twin_daggers']
+          with zipfile.ZipFile('LegendaryRais-Java-26.1.2-v3.6.0-ELEMENTAL-ELITE.zip') as z:
+              for n in W:
+                  d=json.loads(z.read(f'assets/legendaryv34/models/item/{n}.json'))
+                  assert len(d.get('elements',[]))>=8,(n,len(d.get('elements',[])))
+                  depths=[abs(e['to'][2]-e['from'][2]) for e in d['elements']]
+                  assert max(depths)>.5,(n,'flat Java model')
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.6.0-ELEMENTAL-ELITE.mcpack') as z:
+              names=set(z.namelist())
+              for n in W:
+                  d=json.loads(z.read(f'models/entity/{n}.geo.json'))
+                  cubes=d['minecraft:geometry'][0]['bones'][0].get('cubes',[])
+                  assert len(cubes)>=4,(n,len(cubes))
+                  assert max(c['size'][2] for c in cubes)>.5,(n,'flat Bedrock model')
+              assert len([n for n in names if n.startswith('attachables/armor_') and n.endswith('.json')])>=20
+          m=json.load(open('LegendaryRais-Geyser-v3.6.0-mappings.json'))
+          assert m['format_version']==2
+          defs=[d for arr in m['items'].values() for d in arr if d.get('type')=='definition']
+          assert len(defs)>=40,len(defs)
+          print('V360_3D_CROSSPLAY PASS',len(defs))
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v360"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v360/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v360/paper.jar
+          cp LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar .build/smoke-v360/plugins/
+          echo "eula=true" > .build/smoke-v360/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v360/server.properties
+          cd .build/smoke-v360
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 140); do
+            grep -Fq "LegendaryRais v3.6.0" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 12 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.0-ELEMENTAL-ELITE
+          path: |
+            LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar
+            LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.0-ELEMENTAL-ELITE.zip
+            LegendaryRais-Java-26.1.2-v3.6.0-ELEMENTAL-ELITE.sha1
+            LegendaryRais-Bedrock-v3.6.0-ELEMENTAL-ELITE.mcpack
+            LegendaryRais-Bedrock-v3.6.0-ELEMENTAL-ELITE.sha1
+            LegendaryRais-Geyser-v3.6.0-mappings.json
+          retention-days: 7
+
+      - name: Publish verified v3.6.0
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.jar             LegendaryRais-3.6.0-ELEMENTAL-ELITE-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.0-ELEMENTAL-ELITE.zip             LegendaryRais-Java-26.1.2-v3.6.0-ELEMENTAL-ELITE.sha1             LegendaryRais-Bedrock-v3.6.0-ELEMENTAL-ELITE.mcpack             LegendaryRais-Bedrock-v3.6.0-ELEMENTAL-ELITE.sha1             LegendaryRais-Geyser-v3.6.0-mappings.json
+          git commit -m "Publish LegendaryRais v3.6.0 Elemental Elite" || exit 0
+          git pull --rebase origin main
+          git push
