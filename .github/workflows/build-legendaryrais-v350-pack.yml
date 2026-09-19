@@ -1,0 +1,48 @@
+name: Build LegendaryRais v3.5 Crosschecked Java Pack
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/v350pack-*.b64"
+      - ".build/trigger-v350-pack.txt"
+      - ".github/workflows/build-legendaryrais-v350-pack.yml"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reconstruct builder
+        run: |
+          set -euo pipefail
+          cat .build/v350pack-00.b64 .build/v350pack-01.b64 .build/v350pack-02.b64 .build/v350pack-03.b64 | tr -d '\n\r ' | base64 -d > .build/build_v350_pack.py
+          python -m py_compile .build/build_v350_pack.py
+      - run: pip install pillow
+      - name: Build and strict validate
+        run: python .build/build_v350_pack.py
+      - name: Verify ZIP
+        run: |
+          unzip -t LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX.zip
+          test -s LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX.sha1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX
+          path: |
+            LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX.zip
+            LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX.sha1
+          retention-days: 7
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX.zip LegendaryRais-Java-26.1.2-v3.5.0-CROSSCHECKED-FX.sha1
+          git commit -m "Publish LegendaryRais Java v3.5 crosschecked FX pack" || exit 0
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
