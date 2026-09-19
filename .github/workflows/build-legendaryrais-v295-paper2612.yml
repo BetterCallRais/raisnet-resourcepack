@@ -1,0 +1,98 @@
+name: Build LegendaryRais v2.9.5 Paper 26.1.2 Build74
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/v294-source-part-00.b64"
+      - ".build/v294-source-part-01.b64"
+      - ".build/v294-source-part-02.b64"
+      - ".build/v294-source-part-03.b64"
+      - ".build/trigger-v295-plugin.txt"
+      - ".github/workflows/build-legendaryrais-v295-paper2612.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - name: Reconstruct and patch source for Paper 26.1.2
+        run: |
+          set -euo pipefail
+          rm -rf .build/v295-src .build/LegendaryRais-v295-source.zip
+          cat             .build/v294-source-part-00.b64             .build/v294-source-part-01.b64             .build/v294-source-part-02.b64             .build/v294-source-part-03.b64             | tr -d '\n\r '             | base64 -d > .build/LegendaryRais-v295-source.zip
+          unzip -t .build/LegendaryRais-v295-source.zip
+          mkdir -p .build/v295-src
+          unzip -q .build/LegendaryRais-v295-source.zip -d .build/v295-src
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path(".build/v295-src")
+
+          p = root / "pom.xml"
+          s = p.read_text(encoding="utf-8")
+          s = s.replace("<version>2.9.0</version>", "<version>2.9.5</version>", 1)
+          s = s.replace("<maven.compiler.release>21</maven.compiler.release>", "<maven.compiler.release>25</maven.compiler.release>")
+          s = s.replace("<version>1.21.1-R0.1-SNAPSHOT</version>", "<version>26.1.2.build.74-stable</version>")
+          p.write_text(s, encoding="utf-8")
+
+          y = root / "src/main/resources/plugin.yml"
+          t = y.read_text(encoding="utf-8")
+          t = t.replace("version: 2.9.0", "version: 2.9.5")
+          t = t.replace("api-version: '1.21'", "api-version: '26.1.2'")
+          y.write_text(t, encoding="utf-8")
+
+          j = root / "src/main/java/id/raisnet/legendaryrais/LegendaryRais.java"
+          q = j.read_text(encoding="utf-8")
+          q = q.replace("LegendaryRais v2.9.0 REWORK enabled.", "LegendaryRais v2.9.5 PAPER 26.1.2 BUILD74 enabled.")
+          j.write_text(q, encoding="utf-8")
+          PY
+
+      - name: Compile against exact Paper 26.1.2 API
+        shell: bash
+        run: |
+          set +e
+          cd .build/v295-src
+          mvn -B -U clean package > ../LegendaryRais-v2.9.5-build.log 2>&1
+          status=$?
+          echo "$status" > ../LegendaryRais-v2.9.5-build.status
+          if [ "$status" -eq 0 ]; then
+            cp target/legendaryrais-2.9.5.jar ../../LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar
+            sha256sum ../../LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar > ../../LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.sha256
+            javap -classpath ../../LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar -verbose id.raisnet.legendaryrais.LegendaryRais > ../LegendaryRais-v2.9.5-javap.txt 2>&1
+            unzip -p ../../LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar plugin.yml > ../LegendaryRais-v2.9.5-plugin.yml
+          fi
+          exit 0
+
+      - name: Upload verified plugin artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74
+          path: LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Publish build result
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .build/LegendaryRais-v2.9.5-build.log .build/LegendaryRais-v2.9.5-build.status
+          if [ -f .build/LegendaryRais-v2.9.5-javap.txt ]; then git add .build/LegendaryRais-v2.9.5-javap.txt; fi
+          if [ -f .build/LegendaryRais-v2.9.5-plugin.yml ]; then git add .build/LegendaryRais-v2.9.5-plugin.yml; fi
+          if [ -f LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar ]; then
+            git add LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.jar LegendaryRais-2.9.5-PAPER-26.1.2-BUILD74.sha256
+          fi
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Build LegendaryRais v2.9.5 for Paper 26.1.2 build 74"
+          git pull --rebase origin main
+          git push
