@@ -17,39 +17,42 @@ def save(rel,obj):
     p.write_text(json.dumps(obj,separators=(",",":")),encoding="utf-8")
 
 def tex(name,c1,c2,accent,kind="metal"):
-    W=1024;H=1024
+    # 256px procedural master -> 1024px Lanczos output: same final resolution, much faster CI.
+    W=256;H=256
     im=Image.new("RGBA",(W,H)); px=im.load()
     for y in range(H):
         t=y/(H-1)
         for x in range(W):
-            grain=(math.sin(y*.11)+math.sin(x*.017+y*.037)+math.cos(x*.029))*.018
+            X=x*4;Y=y*4
+            grain=(math.sin(Y*.11)+math.sin(X*.017+Y*.037)+math.cos(X*.029))*.018
             r=int(max(0,min(255,(c1[0]*(1-t)+c2[0]*t)*(0.90+0.10*math.sin(math.pi*x/W))+grain*255)))
             g=int(max(0,min(255,(c1[1]*(1-t)+c2[1]*t)*(0.90+0.10*math.sin(math.pi*x/W))+grain*255)))
             b=int(max(0,min(255,(c1[2]*(1-t)+c2[2]*t)*(0.90+0.10*math.sin(math.pi*x/W))+grain*255)))
             mark=False
-            if kind=="ember": mark=((x+2*y)%257)<5
-            elif kind=="void": mark=((3*x-y)%331)<4
-            elif kind=="storm": mark=abs(((x-y)%353)-176)<2
-            elif kind=="gaia": mark=((x//96+y//96)%9==0 and x%96<4)
-            elif kind=="astral": mark=((2*x+3*y)%401)<3
+            if kind=="ember": mark=((X+2*Y)%257)<6
+            elif kind=="void": mark=((3*X-Y)%331)<5
+            elif kind=="storm": mark=abs(((X-Y)%353)-176)<4
+            elif kind=="gaia": mark=((X//96+Y//96)%9==0 and X%96<6)
+            elif kind=="astral": mark=((2*X+3*Y)%401)<5
             if mark:r,g,b=accent
             px[x,y]=(r,g,b,255)
-    p=ROOT/f"assets/legendaryrais/textures/item/{name}.png";p.parent.mkdir(parents=True,exist_ok=True);im.save(p,optimize=True)
+    im=im.resize((1024,1024),Image.Resampling.LANCZOS)
+    p=ROOT/f"assets/legendaryrais/textures/item/{name}.png";p.parent.mkdir(parents=True,exist_ok=True);im.save(p,optimize=True,compress_level=6)
 
 def equiptex(name,c1,c2,accent,leggings=False):
-    W,H=1024,512
+    W,H=256,128
     im=Image.new("RGBA",(W,H));d=ImageDraw.Draw(im)
     for y in range(H):
         t=y/(H-1);c=tuple(int(c1[i]*(1-t)+c2[i]*t) for i in range(3))+(255,)
         d.line((0,y,W,y),fill=c)
-    # dark segmented plate seams + colored rivets; deliberately no white
     dark=tuple(max(0,int(v*.38)) for v in c1)+(255,)
-    for x in range(0,W,128): d.rectangle((x,0,x+5,H),fill=dark)
-    for y in range(0,H,128): d.rectangle((0,y,W,y+5),fill=dark)
-    for x in range(64,W,128):
-        for y in range(64,H,128): d.ellipse((x-5,y-5,x+5,y+5),fill=accent+(255,))
+    for x in range(0,W,32): d.rectangle((x,0,x+2,H),fill=dark)
+    for y in range(0,H,32): d.rectangle((0,y,W,y+2),fill=dark)
+    for x in range(16,W,32):
+        for y in range(16,H,32): d.ellipse((x-2,y-2,x+2,y+2),fill=accent+(255,))
+    im=im.resize((1024,512),Image.Resampling.LANCZOS)
     p=ROOT/f"assets/legendaryrais/textures/entity/equipment/{'humanoid_leggings' if leggings else 'humanoid'}/{name}.png"
-    p.parent.mkdir(parents=True,exist_ok=True);im.save(p,optimize=True)
+    p.parent.mkdir(parents=True,exist_ok=True);im.save(p,optimize=True,compress_level=6)
 
 def cube(a,b,t,rot=None):
     f={k:{"texture":"#"+t} for k in ("north","south","east","west","up","down")}
