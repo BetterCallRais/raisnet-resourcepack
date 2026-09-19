@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * v3.0 free-gacha expansion. The two premium water relics remain in LegendaryRais core
+ * v3.1 realistic free-gacha expansion. The two premium water relics remain in LegendaryRais core
  * and intentionally keep dramatically higher damage than every item in this class.
  */
 public final class ArsenalExpansion implements Listener, CommandExecutor {
@@ -91,30 +91,73 @@ public final class ArsenalExpansion implements Listener, CommandExecutor {
 
     private ItemStack createWeapon(String id){Material mat;String name,model;int cmd;List<String> lore;
         switch(id){
-            case EMBERFALL->{mat=Material.NETHERITE_SWORD;name="§6§lEMBERFALL §c§lGREATSWORD";model="emberfall_greatsword";cmd=EMBERFALL_CMD;lore=List.of("§7Free-Gacha Legendary • Volcanic execution blade.","","§6I §fFlame Rift §8• §7Right Click","§cII §fMeteor Brand §8• §7Sneak + Left Click","§4III §fInferno Crown §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha §8≪ Premium Water");}
-            case NOCTIS->{mat=Material.NETHERITE_HOE;name="§5§lNOCTIS §8§lREAPER";model="noctis_reaper";cmd=NOCTIS_CMD;lore=List.of("§7Free-Gacha Legendary • Reaper of the silent eclipse.","","§5I §fShade Step §8• §7Right Click","§dII §fSoul Harvest §8• §7Sneak + Left Click","§8III §fEclipse Cage §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha");}
-            case STORMPIERCER->{mat=Material.BOW;name="§f§lSTORMPIERCER §b§lBOW";model="stormpiercer_bow";cmd=STORM_CMD;lore=List.of("§7Free-Gacha Legendary • Bow carved from a storm core.","","§bI §fGale Bolt §8• §7Right Click","§fII §fCyclone Volley §8• §7Sneak + Left Click","§9III §fThunderhead §8• §7Sneak + Right Click","","§7Skill tidak membutuhkan arrow.");}
-            case GAIA->{mat=Material.NETHERITE_SHOVEL;name="§2§lGAIA THORN §a§lSPEAR";model="gaia_thorn_spear";cmd=GAIA_CMD;lore=List.of("§7Free-Gacha Legendary • Living spear of the old earth.","","§2I §fRootline §8• §7Right Click","§aII §fStoneguard §8• §7Sneak + Left Click","§6III §fWorldspike §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha");}
-            case ASTRAL->{mat=Material.SHEARS;name="§d§lASTRAL RIFT §5§lKATARS";model="astral_rift_katars";cmd=ASTRAL_CMD;lore=List.of("§7Free-Gacha Legendary • Paired rift blades in one relic.","","§dI §fRift Blink §8• §7Right Click","§fII §fStar Shards §8• §7Sneak + Left Click","§5III §fDimension Rend §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha");}
+            case EMBERFALL->{mat=Material.NETHERITE_SWORD;name="§6§lEMBERFALL §c§lCLAYMORE";model="emberfall_claymore";cmd=EMBERFALL_CMD;lore=List.of("§7Free-Gacha Legendary • Realistic two-handed volcanic claymore.","","§6I §fBlazing Cleave §8• §7Right Click","§cII §fCinder Rush §8• §7Sneak + Left Click","§4III §fMeteor Breaker §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha §8≪ Premium Water");}
+            case NOCTIS->{mat=Material.NETHERITE_SWORD;name="§5§lNOCTIS §8§lLONGSWORD";model="noctis_longsword";cmd=NOCTIS_CMD;lore=List.of("§7Free-Gacha Legendary • Black knight longsword with an eclipse edge.","","§5I §fShadow Step §8• §7Right Click","§dII §fNight Sever §8• §7Sneak + Left Click","§8III §fEclipse Lock §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha");}
+            case STORMPIERCER->{mat=Material.BOW;name="§f§lSTORMPIERCER §b§lRECURVE BOW";model="stormpiercer_recurve_bow";cmd=STORM_CMD;lore=List.of("§7Free-Gacha Legendary • Realistic recurve war bow built around a storm core.","","§bI §fWindshot §8• §7Right Click","§fII §fThunder Volley §8• §7Sneak + Left Click","§9III §fTempest Mark §8• §7Sneak + Right Click","","§7Skill tidak membutuhkan arrow.");}
+            case GAIA->{mat=Material.NETHERITE_SHOVEL;name="§2§lGAIA §a§lWAR SPEAR";model="gaia_war_spear";cmd=GAIA_CMD;lore=List.of("§7Free-Gacha Legendary • Realistic leaf-bladed war spear with an ancient oak haft.","","§2I §fRoot Thrust §8• §7Right Click","§aII §fStonewake §8• §7Sneak + Left Click","§6III §fEarthshatter Line §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha");}
+            case ASTRAL->{mat=Material.SHEARS;name="§d§lASTRAL §5§lTWIN DAGGERS";model="astral_twin_daggers";cmd=ASTRAL_CMD;lore=List.of("§7Free-Gacha Legendary • Paired realistic daggers forged around a small rift.","","§dI §fRift Dash §8• §7Right Click","§fII §fStar Fang §8• §7Sneak + Left Click","§5III §fAstral Rend §8• §7Sneak + Right Click","","§7Damage: §eLegendary Gacha");}
             default->{return new ItemStack(Material.BARRIER);}}
         ItemStack item=new ItemStack(mat);ItemMeta m=item.getItemMeta();if(m==null)return item;m.setDisplayName(name);m.setLore(lore);applyVisual(m,cmd,model);m.getPersistentDataContainer().set(weaponKey,PersistentDataType.STRING,id);item.setItemMeta(m);return item;
     }
 
     private ItemStack createArmorPiece(String set,String piece){
-        Material mat=armorMaterial(set,piece);ItemStack item=new ItemStack(mat);ItemMeta m=item.getItemMeta();if(m==null)return item;
+        Material mat=armorMaterial(set,piece);
+        ItemStack item=new ItemStack(mat);
+        ItemMeta m=item.getItemMeta(); if(m==null)return item;
+
         String color=switch(set){case PHOENIX->"§6";case VOIDWALKER->"§5";case TITAN->"§2";case WATER_SOVEREIGN->"§3";default->"§b";};
-        String title=switch(set){case PHOENIX->"PHOENIX REGALIA";case VOIDWALKER->"VOIDWALKER SHROUD";case TITAN->"TITAN WARD";case WATER_SOVEREIGN->"WATER SOVEREIGN REGALIA";default->"CELESTIAL AEGIS";};
+        String title=switch(set){case PHOENIX->"PHOENIX PLATE";case VOIDWALKER->"VOIDWALKER SET";case TITAN->"TITAN GUARD";case WATER_SOVEREIGN->"WATER SOVEREIGN REGALIA";default->"CELESTIAL KNIGHT";};
+
         List<String> lore=new ArrayList<>();
         lore.add(set.equals(WATER_SOVEREIGN)?"§bPremium Water Relic Armor":"§7Free-Gacha Legendary Armor");
-        lore.add(""); lore.add("§eFull Set Skill: §f"+armorSkillName(set)); lore.add("§7Sneak + Drop/Q untuk cast."); lore.add("§7Drop dibatalkan saat skill aktif.");
-        if(set.equals(WATER_SOVEREIGN)){lore.add("");lore.add("§3✦ Passive: §bAbyssal Bulwark");lore.add("§7Legendary basic hit ≈ §c2.5 hearts§7.");lore.add("§7Legendary skill hit ≈ §c5 hearts§7.");lore.add("§7Water Breathing + Dolphins Grace + Regen air.");}
-        m.setDisplayName(color+"§l"+title+" §8• §f"+piece.toUpperCase(Locale.ROOT));m.setLore(lore);applyVisual(m,armorCmd(set,piece),"armor/"+set+"_"+piece);
-        try{var eq=m.getEquippable();eq.setModel(new NamespacedKey("legendaryrais",set+"_set"));m.setEquippable(eq);}catch(Throwable ignored){}
-        m.getPersistentDataContainer().set(armorSetKey,PersistentDataType.STRING,set);m.getPersistentDataContainer().set(armorPieceKey,PersistentDataType.STRING,piece);item.setItemMeta(m);return item;
+        lore.add("");
+        lore.add("§eFull Set Skill: §f"+armorSkillName(set));
+        lore.add("§7Sneak + Drop/Q untuk cast.");
+        lore.add("§7Drop dibatalkan saat skill aktif.");
+        lore.add("");
+        lore.addAll(armorPassiveLore(set));
+
+        m.setDisplayName(color+"§l"+title+" §8• §f"+piece.toUpperCase(Locale.ROOT));
+        m.setLore(lore);
+        applyVisual(m,armorCmd(set,piece),"armor/"+set+"_"+piece);
+
+        // Explicit slot + swappable fixes right-click equipping on modern Paper.
+        try{
+            var eq=m.getEquippable();
+            eq.setSlot(armorSlot(piece));
+            eq.setModel(new NamespacedKey("legendaryrais",set+"_set"));
+            eq.setSwappable(true);
+            eq.setDamageOnHurt(false);
+            m.setEquippable(eq);
+        }catch(Throwable ex){plugin.getLogger().warning("Could not apply equippable component to "+set+"/"+piece+": "+ex.getMessage());}
+
+        m.getPersistentDataContainer().set(armorSetKey,PersistentDataType.STRING,set);
+        m.getPersistentDataContainer().set(armorPieceKey,PersistentDataType.STRING,piece);
+        item.setItemMeta(m);
+        return item;
+    }
+
+    private EquipmentSlot armorSlot(String piece){
+        return switch(piece){
+            case "helmet"->EquipmentSlot.HEAD;
+            case "chest"->EquipmentSlot.CHEST;
+            case "legs"->EquipmentSlot.LEGS;
+            default->EquipmentSlot.FEET;
+        };
+    }
+
+    private List<String> armorPassiveLore(String set){
+        return switch(set){
+            case PHOENIX->List.of("§6✦ Passive: §eAshen Heart","§7Fire Resistance; regen saat HP kritis.");
+            case VOIDWALKER->List.of("§5✦ Passive: §dNightstride","§7Speed + Night Vision; fall damage sangat berkurang.");
+            case TITAN->List.of("§2✦ Passive: §aIron Mountain","§7Resistance konstan dan anti-burst.");
+            case WATER_SOVEREIGN->List.of("§3✦ Passive: §bAbyssal Bulwark","§7Legendary basic hit = §c2.5 hearts§7.","§7Legendary skill hit = §c5 hearts§7.","§7Water Breathing + Dolphins Grace + regen di air.");
+            default->List.of("§b✦ Passive: §fStarlight Grace","§7Regeneration ringan + Slow Falling.");
+        };
     }
     private Material armorMaterial(String set,String piece){String p=switch(set){case PHOENIX->"GOLDEN_";case VOIDWALKER,WATER_SOVEREIGN->"NETHERITE_";case TITAN->"DIAMOND_";default->"IRON_";};String q=switch(piece){case "helmet"->"HELMET";case "chest"->"CHESTPLATE";case "legs"->"LEGGINGS";default->"BOOTS";};return Material.valueOf(p+q);}
     private int armorCmd(String set,String piece){int b=switch(set){case PHOENIX->920100;case VOIDWALKER->920104;case TITAN->920108;case CELESTIAL->920112;case WATER_SOVEREIGN->920116;default->920112;};return b+switch(piece){case "helmet"->1;case "chest"->2;case "legs"->3;default->4;};}
-    private String armorSkillName(String set){return switch(set){case PHOENIX->"Solar Rebirth";case VOIDWALKER->"Phase Veil";case TITAN->"Seismic Bastion";case WATER_SOVEREIGN->"Throne of the Abyss";default->"Astral Sanctuary";};}
+    private String armorSkillName(String set){return switch(set){case PHOENIX->"Phoenix Rebirth";case VOIDWALKER->"Void Slip";case TITAN->"Titan Bastion";case WATER_SOVEREIGN->"Throne of the Abyss";default->"Astral Sanctuary";};}
 
     private void applyVisual(ItemMeta m,int cmd,String model){m.setUnbreakable(true);try{m.setCustomModelData(cmd);}catch(Throwable ignored){}try{m.setItemModel(new NamespacedKey("legendaryrais",model));}catch(Throwable ignored){}try{m.setEnchantmentGlintOverride(true);}catch(Throwable ignored){}}
     private String weaponId(ItemStack item){if(item==null||item.getType()==Material.AIR)return "";ItemMeta m=item.getItemMeta();if(m==null)return "";String id=m.getPersistentDataContainer().get(weaponKey,PersistentDataType.STRING);return id==null?"":id;}
@@ -126,19 +169,44 @@ public final class ArsenalExpansion implements Listener, CommandExecutor {
     public void waterSovereignDamageCap(EntityDamageByEntityEvent e){
         if(!(e.getEntity() instanceof Player target))return;
         if(!WATER_SOVEREIGN.equals(fullSet(target)))return;
+
         Player attacker=null;
         if(e.getDamager() instanceof Player p)attacker=p;
         else if(e.getDamager() instanceof Projectile pr && pr.getShooter() instanceof Player p)attacker=p;
         if(attacker==null)return;
+
         String wid=weaponId(attacker.getInventory().getItemInMainHand());
         boolean legendary=expansionWeapon(wid)||wid.equals("soul_tide_katana_v4")||wid.equals("abyss_leviathan_trident_v3");
         if(!legendary)return;
+
         double raw=e.getDamage();
-        double cap=raw>=55.0?10.0:5.0;
-        e.setDamage(Math.min(raw,cap));
-        particle(target.getWorld(),"SPLASH",target.getLocation().clone().add(0,1,0),26,.55,.75,.55,.08);
-        pulse(target.getWorld(),target.getLocation().clone().add(0,1,0),"fx_water_sovereign_guard",FX_WATER_ARMOR,1.8f,7,target.getLocation().getYaw(),0);
-        bar(target,"ABYSSAL BULWARK • damage Legendary dibatasi ke "+(cap/2.0)+" hearts");
+        double desired=raw>=55.0?10.0:5.0; // 5 damage = 2.5 hearts, 10 = 5 hearts.
+        double healthBefore=target.getHealth();
+
+        // Keep vanilla hurt animation/knockback, then correct the final health loss after armor/resistance.
+        e.setDamage(Math.min(raw,desired));
+        Bukkit.getScheduler().runTask(plugin,()->{
+            if(!target.isValid()||target.isDead())return;
+            double actual=Math.max(0.0,healthBefore-target.getHealth());
+            double diff=desired-actual;
+            if(Math.abs(diff)<0.01)return;
+            double corrected=Math.max(0.0,Math.min(target.getMaxHealth(),target.getHealth()-diff));
+            target.setHealth(corrected);
+        });
+
+        particle(target.getWorld(),"SPLASH",target.getLocation().clone().add(0,1,0),34,.65,.85,.65,.10);
+        particle(target.getWorld(),"BUBBLE_POP",target.getLocation().clone().add(0,1,0),24,.5,.7,.5,.06);
+        pulse(target.getWorld(),target.getLocation().clone().add(0,1,0),"fx_water_sovereign_guard",FX_WATER_ARMOR,2.15f,8,target.getLocation().getYaw(),0);
+        bar(target,"ABYSSAL BULWARK • "+(desired/2.0)+" hearts");
+    }
+
+    @EventHandler(ignoreCancelled=true)
+    public void armorEnvironmentalDefense(org.bukkit.event.entity.EntityDamageEvent e){
+        if(!(e.getEntity() instanceof Player p))return;
+        String set=fullSet(p); if(set==null)return;
+        if(VOIDWALKER.equals(set)&&e.getCause()==org.bukkit.event.entity.EntityDamageEvent.DamageCause.FALL){
+            e.setDamage(e.getDamage()*.18);
+        }
     }
 
     @EventHandler(ignoreCancelled=true) public void swing(PlayerAnimationEvent e){Player p=e.getPlayer();if(!p.isSneaking())return;String id=weaponId(p.getInventory().getItemInMainHand());if(expansionWeapon(id))cast(p,id,2);}
@@ -150,11 +218,11 @@ public final class ArsenalExpansion implements Listener, CommandExecutor {
     private boolean ready(Player p,String key,int sec,String name){long now=System.currentTimeMillis();Map<String,Long> m=cooldowns.computeIfAbsent(p.getUniqueId(),u->new ConcurrentHashMap<>());long end=m.getOrDefault(key,0L);if(now<end){bar(p,name+" • "+String.format(Locale.US,"%.1fs",(end-now)/1000.0));return false;}m.put(key,now+sec*1000L);return true;}
     private void cast(Player p,String id,int skill){if(!ready(p,id+":"+skill,skillCd(skill),"Skill "+skill))return;switch(id){case EMBERFALL->ember(p,skill);case NOCTIS->noctis(p,skill);case STORMPIERCER->storm(p,skill);case GAIA->gaia(p,skill);case ASTRAL->astral(p,skill);}}
 
-    private void ember(Player p,int s){double dmg=damage(EMBERFALL,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){Set<UUID> hit=new HashSet<>();for(int i=1;i<=12;i++){Location c=p.getLocation().clone().add(d.clone().multiply(i*.75));pulse(w,c,"fx_ember_rift",FX_EMBER_RIFT,1.25f,5,p.getLocation().getYaw(),0);particle(w,"FLAME",c,9,.25,.15,.25,.03);for(Entity e:w.getNearbyEntities(c,.9,.9,.9))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())&&hit.add(l.getUniqueId())){hurt(l,dmg,p);l.setFireTicks(50);}}bar(p,"EMBERFALL • Flame Rift");}else if(s==2){Location c=p.getLocation().clone().add(d.clone().multiply(8));pulse(w,c.clone().add(0,5,0),"fx_ember_meteor",FX_EMBER_METEOR,3.4f,20,p.getLocation().getYaw(),0);new BukkitRunnable(){public void run(){blockFx(w,c.clone().add(0,.4,0),Material.MAGMA_BLOCK,2.4f,12);particle(w,"EXPLOSION_EMITTER",c,2,.1,.1,.1,0);for(Entity e:w.getNearbyEntities(c,4,3,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg,p);l.setFireTicks(70);Vector v=l.getLocation().toVector().subtract(c.toVector());if(v.lengthSquared()>.01)l.setVelocity(v.normalize().multiply(.6).setY(.35));}}}.runTaskLater(plugin,18);bar(p,"EMBERFALL • Meteor Brand");}else{new BukkitRunnable(){int t=0;public void run(){if(!p.isOnline()||t++>40){cancel();return;}Location c=p.getLocation().clone().add(0,.2,0);pulse(w,c,"fx_inferno_crown",FX_INFERNO,2.8f,5,t*18,0);ring(w,c,"FLAME",3.2,24,t*.18);if(t%10==0)for(Entity e:w.getNearbyEntities(c,3.5,2.5,3.5))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg/3,p);l.setFireTicks(45);}}}.runTaskTimer(plugin,0,1);bar(p,"EMBERFALL • Inferno Crown");}}
-    private void noctis(Player p,int s){double dmg=damage(NOCTIS,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){Location from=p.getLocation().clone(),to=safeForward(p,6.5);for(int i=0;i<12;i++){Location q=from.clone().add(to.toVector().subtract(from.toVector()).multiply(i/11.0)).add(0,1,0);particle(w,"SCULK_SOUL",q,3,.15,.2,.15,.01);}for(Entity e:w.getNearbyEntities(from.clone().add(d.clone().multiply(3)),4,2.5,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId()))hurt(l,dmg,p);p.teleport(to);pulse(w,to.clone().add(0,1,0),"fx_shade_step",FX_SHADE,2.2f,10,p.getLocation().getYaw(),0);bar(p,"NOCTIS • Shade Step");}else if(s==2){int hits=0;for(LivingEntity l:targets(p,6,6,true)){Vector n=l.getLocation().toVector().subtract(p.getLocation().toVector()).normalize();if(n.dot(d)<.25)continue;hurt(l,dmg,p);hits++;pulse(w,l.getLocation().clone().add(0,1,0),"fx_soul_harvest",FX_HARVEST,1.8f,8,0,0);}if(hits>0)p.setHealth(Math.min(p.getMaxHealth(),p.getHealth()+Math.min(10,hits*2.0)));bar(p,"NOCTIS • Soul Harvest • "+hits);}else{Location c=p.getLocation().clone().add(d.clone().multiply(5));new BukkitRunnable(){int t=0;public void run(){if(t++>55){cancel();return;}pulse(w,c,"fx_eclipse_cage",FX_ECLIPSE,3.3f,6,t*16,0);ring(w,c,"PORTAL",4,28,t*.12);if(t%15==0)for(Entity e:w.getNearbyEntities(c,4,3,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg/3,p);try{l.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS,35,2,true,false,false));l.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.DARKNESS,35,0,true,false,false));}catch(Throwable ignored){}}}}.runTaskTimer(plugin,0,1);bar(p,"NOCTIS • Eclipse Cage");}}
-    private void storm(Player p,int s){double dmg=damage(STORMPIERCER,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){LivingEntity h=ray(p,d,18,1);beam(w,p.getEyeLocation(),d,18,"CLOUD","fx_gale_bolt",FX_GALE);if(h!=null){hurt(h,dmg,p);h.setVelocity(d.clone().multiply(1).setY(.18));}bar(p,"STORMPIERCER • Gale Bolt");}else if(s==2){for(int k=-2;k<=2;k++){Vector v=rotateY(d,Math.toRadians(k*8));LivingEntity h=ray(p,v,15,.85);beam(w,p.getEyeLocation(),v,15,"CLOUD","fx_cyclone_volley",FX_CYCLONE);if(h!=null)hurt(h,dmg/2.2,p);}bar(p,"STORMPIERCER • Cyclone Volley");}else{Location c=p.getLocation().clone().add(d.clone().multiply(9));pulse(w,c.clone().add(0,4,0),"fx_thunderhead",FX_THUNDER,4,24,0,0);new BukkitRunnable(){int t=0;public void run(){if(t++>30){cancel();return;}if(t%6==0){Location q=c.clone().add(t%12==0?2:-2,0,t%18==0?2:-2);w.strikeLightningEffect(q);for(Entity e:w.getNearbyEntities(q,2.5,3,2.5))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId()))hurt(l,dmg/4,p);}}}.runTaskTimer(plugin,10,1);bar(p,"STORMPIERCER • Thunderhead");}}
-    private void gaia(Player p,int s){double dmg=damage(GAIA,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){Set<UUID> hit=new HashSet<>();for(int i=1;i<=10;i++){Location c=p.getLocation().clone().add(d.clone().multiply(i));blockFx(w,c,Material.MOSS_BLOCK,.75f,8);pulse(w,c.clone().add(0,.5,0),"fx_rootline",FX_ROOT,1.25f,6,0,0);for(Entity e:w.getNearbyEntities(c,1.1,1.5,1.1))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())&&hit.add(l.getUniqueId())){hurt(l,dmg,p);try{l.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS,45,5,true,false,false));}catch(Throwable ignored){}}}bar(p,"GAIA • Rootline");}else if(s==2){try{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE,100,1,true,false,false));p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.ABSORPTION,100,1,true,false,false));}catch(Throwable ignored){}pulse(w,p.getLocation().clone().add(0,1,0),"fx_stoneguard",FX_STONE,3,18,0,0);for(Entity e:w.getNearbyEntities(p.getLocation(),3,2,3))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg*.5,p);Vector v=l.getLocation().toVector().subtract(p.getLocation().toVector());if(v.lengthSquared()>.01)l.setVelocity(v.normalize().multiply(.55).setY(.25));}bar(p,"GAIA • Stoneguard");}else{Location c=p.getLocation().clone().add(d.clone().multiply(5));for(int i=0;i<12;i++){double a=Math.PI*2*i/12;Location q=c.clone().add(Math.cos(a)*3,0,Math.sin(a)*3);blockFx(w,q,Material.POINTED_DRIPSTONE,1.1f,14);pulse(w,q.clone().add(0,1,0),"fx_worldspike",FX_SPIKE,1.7f,10,(float)Math.toDegrees(a),0);}for(Entity e:w.getNearbyEntities(c,4,3,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg,p);l.setVelocity(new Vector(0,.75,0));}bar(p,"GAIA • Worldspike");}}
-    private void astral(Player p,int s){double dmg=damage(ASTRAL,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){LivingEntity t=nearest(p,8);Location from=p.getLocation().clone(),to=t!=null?t.getLocation().clone().subtract(d.clone().multiply(1.4)):safeForward(p,6);p.teleport(to);pulse(w,from.clone().add(0,1,0),"fx_rift_blink",FX_RIFT,2,10,0,0);pulse(w,to.clone().add(0,1,0),"fx_rift_blink",FX_RIFT,2.4f,10,180,0);if(t!=null)hurt(t,dmg,p);bar(p,"ASTRAL • Rift Blink");}else if(s==2){List<LivingEntity> ts=targets(p,10,6,false);for(int i=0;i<6;i++){double a=Math.PI*2*i/6;Location star=p.getLocation().clone().add(Math.cos(a)*2,1.4,Math.sin(a)*2);pulse(w,star,"fx_star_shards",FX_STAR,1,20,(float)Math.toDegrees(a),0);}new BukkitRunnable(){public void run(){int i=0;for(LivingEntity l:ts){if(l.isValid()&&!l.isDead()){hurt(l,dmg/Math.max(1,Math.min(3,ts.size())),p);pulse(w,l.getLocation().clone().add(0,1,0),"fx_star_shards",FX_STAR,1.6f,8,i++*45,0);}}}}.runTaskLater(plugin,12);bar(p,"ASTRAL • Star Shards");}else{Location c=p.getLocation().clone().add(d.clone().multiply(4));pulse(w,c.clone().add(0,1,0),"fx_dimension_rend",FX_REND,4.4f,18,p.getLocation().getYaw(),0);for(int axis=0;axis<2;axis++)for(int i=-5;i<=5;i++){Vector v=axis==0?d.clone().multiply(i):new Vector(-d.getZ(),0,d.getX()).normalize().multiply(i);particle(w,"END_ROD",c.clone().add(v).add(0,1,0),3,.1,.2,.1,.01);}for(Entity e:w.getNearbyEntities(c,5.5,3,5.5))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg,p);Vector v=l.getLocation().toVector().subtract(c.toVector());if(v.lengthSquared()>.01)l.setVelocity(v.normalize().multiply(-.35).setY(.18));}bar(p,"ASTRAL • Dimension Rend");}}
+    private void ember(Player p,int s){double dmg=damage(EMBERFALL,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){Set<UUID> hit=new HashSet<>();for(int i=1;i<=12;i++){Location c=p.getLocation().clone().add(d.clone().multiply(i*.75));pulse(w,c,"fx_ember_rift",FX_EMBER_RIFT,1.25f,5,p.getLocation().getYaw(),0);particle(w,"FLAME",c,9,.25,.15,.25,.03);for(Entity e:w.getNearbyEntities(c,.9,.9,.9))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())&&hit.add(l.getUniqueId())){hurt(l,dmg,p);l.setFireTicks(50);}}bar(p,"EMBERFALL • Blazing Cleave");}else if(s==2){Location c=p.getLocation().clone().add(d.clone().multiply(8));pulse(w,c.clone().add(0,5,0),"fx_ember_meteor",FX_EMBER_METEOR,3.4f,20,p.getLocation().getYaw(),0);new BukkitRunnable(){public void run(){blockFx(w,c.clone().add(0,.4,0),Material.MAGMA_BLOCK,2.4f,12);particle(w,"EXPLOSION_EMITTER",c,2,.1,.1,.1,0);for(Entity e:w.getNearbyEntities(c,4,3,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg,p);l.setFireTicks(70);Vector v=l.getLocation().toVector().subtract(c.toVector());if(v.lengthSquared()>.01)l.setVelocity(v.normalize().multiply(.6).setY(.35));}}}.runTaskLater(plugin,18);bar(p,"EMBERFALL • Cinder Rush");}else{new BukkitRunnable(){int t=0;public void run(){if(!p.isOnline()||t++>40){cancel();return;}Location c=p.getLocation().clone().add(0,.2,0);pulse(w,c,"fx_inferno_crown",FX_INFERNO,2.8f,5,t*18,0);ring(w,c,"FLAME",3.2,24,t*.18);if(t%10==0)for(Entity e:w.getNearbyEntities(c,3.5,2.5,3.5))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg/3,p);l.setFireTicks(45);}}}.runTaskTimer(plugin,0,1);bar(p,"EMBERFALL • Meteor Breaker");}}
+    private void noctis(Player p,int s){double dmg=damage(NOCTIS,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){Location from=p.getLocation().clone(),to=safeForward(p,6.5);for(int i=0;i<12;i++){Location q=from.clone().add(to.toVector().subtract(from.toVector()).multiply(i/11.0)).add(0,1,0);particle(w,"SCULK_SOUL",q,3,.15,.2,.15,.01);}for(Entity e:w.getNearbyEntities(from.clone().add(d.clone().multiply(3)),4,2.5,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId()))hurt(l,dmg,p);p.teleport(to);pulse(w,to.clone().add(0,1,0),"fx_shade_step",FX_SHADE,2.2f,10,p.getLocation().getYaw(),0);bar(p,"NOCTIS • Shadow Step");}else if(s==2){int hits=0;for(LivingEntity l:targets(p,6,6,true)){Vector n=l.getLocation().toVector().subtract(p.getLocation().toVector()).normalize();if(n.dot(d)<.25)continue;hurt(l,dmg,p);hits++;pulse(w,l.getLocation().clone().add(0,1,0),"fx_soul_harvest",FX_HARVEST,1.8f,8,0,0);}if(hits>0)p.setHealth(Math.min(p.getMaxHealth(),p.getHealth()+Math.min(10,hits*2.0)));bar(p,"NOCTIS • Night Sever • "+hits);}else{Location c=p.getLocation().clone().add(d.clone().multiply(5));new BukkitRunnable(){int t=0;public void run(){if(t++>55){cancel();return;}pulse(w,c,"fx_eclipse_cage",FX_ECLIPSE,3.3f,6,t*16,0);ring(w,c,"PORTAL",4,28,t*.12);if(t%15==0)for(Entity e:w.getNearbyEntities(c,4,3,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg/3,p);try{l.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS,35,2,true,false,false));l.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.DARKNESS,35,0,true,false,false));}catch(Throwable ignored){}}}}.runTaskTimer(plugin,0,1);bar(p,"NOCTIS • Eclipse Lock");}}
+    private void storm(Player p,int s){double dmg=damage(STORMPIERCER,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){LivingEntity h=ray(p,d,18,1);beam(w,p.getEyeLocation(),d,18,"CLOUD","fx_gale_bolt",FX_GALE);if(h!=null){hurt(h,dmg,p);h.setVelocity(d.clone().multiply(1).setY(.18));}bar(p,"STORMPIERCER • Windshot");}else if(s==2){for(int k=-2;k<=2;k++){Vector v=rotateY(d,Math.toRadians(k*8));LivingEntity h=ray(p,v,15,.85);beam(w,p.getEyeLocation(),v,15,"CLOUD","fx_cyclone_volley",FX_CYCLONE);if(h!=null)hurt(h,dmg/2.2,p);}bar(p,"STORMPIERCER • Thunder Volley");}else{Location c=p.getLocation().clone().add(d.clone().multiply(9));pulse(w,c.clone().add(0,4,0),"fx_thunderhead",FX_THUNDER,4,24,0,0);new BukkitRunnable(){int t=0;public void run(){if(t++>30){cancel();return;}if(t%6==0){Location q=c.clone().add(t%12==0?2:-2,0,t%18==0?2:-2);w.strikeLightningEffect(q);for(Entity e:w.getNearbyEntities(q,2.5,3,2.5))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId()))hurt(l,dmg/4,p);}}}.runTaskTimer(plugin,10,1);bar(p,"STORMPIERCER • Tempest Mark");}}
+    private void gaia(Player p,int s){double dmg=damage(GAIA,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){Set<UUID> hit=new HashSet<>();for(int i=1;i<=10;i++){Location c=p.getLocation().clone().add(d.clone().multiply(i));blockFx(w,c,Material.MOSS_BLOCK,.75f,8);pulse(w,c.clone().add(0,.5,0),"fx_rootline",FX_ROOT,1.25f,6,0,0);for(Entity e:w.getNearbyEntities(c,1.1,1.5,1.1))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())&&hit.add(l.getUniqueId())){hurt(l,dmg,p);try{l.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS,45,5,true,false,false));}catch(Throwable ignored){}}}bar(p,"GAIA • Root Thrust");}else if(s==2){try{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE,100,1,true,false,false));p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.ABSORPTION,100,1,true,false,false));}catch(Throwable ignored){}pulse(w,p.getLocation().clone().add(0,1,0),"fx_stoneguard",FX_STONE,3,18,0,0);for(Entity e:w.getNearbyEntities(p.getLocation(),3,2,3))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg*.5,p);Vector v=l.getLocation().toVector().subtract(p.getLocation().toVector());if(v.lengthSquared()>.01)l.setVelocity(v.normalize().multiply(.55).setY(.25));}bar(p,"GAIA • Stonewake");}else{Location c=p.getLocation().clone().add(d.clone().multiply(5));for(int i=0;i<12;i++){double a=Math.PI*2*i/12;Location q=c.clone().add(Math.cos(a)*3,0,Math.sin(a)*3);blockFx(w,q,Material.POINTED_DRIPSTONE,1.1f,14);pulse(w,q.clone().add(0,1,0),"fx_worldspike",FX_SPIKE,1.7f,10,(float)Math.toDegrees(a),0);}for(Entity e:w.getNearbyEntities(c,4,3,4))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg,p);l.setVelocity(new Vector(0,.75,0));}bar(p,"GAIA • Earthshatter Line");}}
+    private void astral(Player p,int s){double dmg=damage(ASTRAL,s);World w=p.getWorld();Vector d=p.getEyeLocation().getDirection().normalize();if(s==1){LivingEntity t=nearest(p,8);Location from=p.getLocation().clone(),to=t!=null?t.getLocation().clone().subtract(d.clone().multiply(1.4)):safeForward(p,6);p.teleport(to);pulse(w,from.clone().add(0,1,0),"fx_rift_blink",FX_RIFT,2,10,0,0);pulse(w,to.clone().add(0,1,0),"fx_rift_blink",FX_RIFT,2.4f,10,180,0);if(t!=null)hurt(t,dmg,p);bar(p,"ASTRAL • Rift Dash");}else if(s==2){List<LivingEntity> ts=targets(p,10,6,false);for(int i=0;i<6;i++){double a=Math.PI*2*i/6;Location star=p.getLocation().clone().add(Math.cos(a)*2,1.4,Math.sin(a)*2);pulse(w,star,"fx_star_shards",FX_STAR,1,20,(float)Math.toDegrees(a),0);}new BukkitRunnable(){public void run(){int i=0;for(LivingEntity l:ts){if(l.isValid()&&!l.isDead()){hurt(l,dmg/Math.max(1,Math.min(3,ts.size())),p);pulse(w,l.getLocation().clone().add(0,1,0),"fx_star_shards",FX_STAR,1.6f,8,i++*45,0);}}}}.runTaskLater(plugin,12);bar(p,"ASTRAL • Star Fang");}else{Location c=p.getLocation().clone().add(d.clone().multiply(4));pulse(w,c.clone().add(0,1,0),"fx_dimension_rend",FX_REND,4.4f,18,p.getLocation().getYaw(),0);for(int axis=0;axis<2;axis++)for(int i=-5;i<=5;i++){Vector v=axis==0?d.clone().multiply(i):new Vector(-d.getZ(),0,d.getX()).normalize().multiply(i);particle(w,"END_ROD",c.clone().add(v).add(0,1,0),3,.1,.2,.1,.01);}for(Entity e:w.getNearbyEntities(c,5.5,3,5.5))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())){hurt(l,dmg,p);Vector v=l.getLocation().toVector().subtract(c.toVector());if(v.lengthSquared()>.01)l.setVelocity(v.normalize().multiply(-.35).setY(.18));}bar(p,"ASTRAL • Astral Rend");}}
 
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void armorDrop(PlayerDropItemEvent e){Player p=e.getPlayer();if(!p.isSneaking())return;String set=fullSet(p);if(set==null)return;e.setCancelled(true);armorSkill(p,set);}
     private String fullSet(Player p){String found=null;ItemStack[] a={p.getInventory().getHelmet(),p.getInventory().getChestplate(),p.getInventory().getLeggings(),p.getInventory().getBoots()};for(ItemStack i:a){if(i==null||i.getType()==Material.AIR)return null;ItemMeta m=i.getItemMeta();if(m==null)return null;String s=m.getPersistentDataContainer().get(armorSetKey,PersistentDataType.STRING);if(s==null)return null;if(found==null)found=s;else if(!found.equals(s))return null;}return found;}
@@ -170,10 +238,53 @@ public final class ArsenalExpansion implements Listener, CommandExecutor {
         }
         bar(p,"ARMOR • "+armorSkillName(set));
     }
-    private void startArmorPassiveTask(){new BukkitRunnable(){public void run(){for(Player p:Bukkit.getOnlinePlayers()){String set=fullSet(p);if(set==null)continue;try{switch(set){case PHOENIX->p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.FIRE_RESISTANCE,45,0,true,false,false));case VOIDWALKER->{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SPEED,45,0,true,false,false));p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION,240,0,true,false,false));}case TITAN->p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE,45,0,true,false,false));case WATER_SOVEREIGN->{p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING,80,0,true,false,false));p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.DOLPHINS_GRACE,50,0,true,false,false));p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE,45,0,true,false,false));if(p.isInWater()&&p.getHealth()<p.getMaxHealth())p.setHealth(Math.min(p.getMaxHealth(),p.getHealth()+1.0));}default->p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.JUMP_BOOST,45,0,true,false,false));}}catch(Throwable ignored){}}}}.runTaskTimer(plugin,20,20);}
+    private void startArmorPassiveTask(){
+        new BukkitRunnable(){
+            public void run(){
+                for(Player p:Bukkit.getOnlinePlayers()){
+                    String set=fullSet(p); if(set==null)continue;
+                    try{
+                        switch(set){
+                            case PHOENIX->{
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.FIRE_RESISTANCE,45,0,true,false,false));
+                                if(p.getHealth()<=p.getMaxHealth()*.35)p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.REGENERATION,45,0,true,false,false));
+                            }
+                            case VOIDWALKER->{
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SPEED,45,0,true,false,false));
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION,240,0,true,false,false));
+                            }
+                            case TITAN->{
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE,45,0,true,false,false));
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.ABSORPTION,45,0,true,false,false));
+                            }
+                            case WATER_SOVEREIGN->{
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WATER_BREATHING,80,0,true,false,false));
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.DOLPHINS_GRACE,50,0,true,false,false));
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE,45,1,true,false,false));
+                                if(p.isInWater()&&p.getHealth()<p.getMaxHealth())p.setHealth(Math.min(p.getMaxHealth(),p.getHealth()+1.0));
+                            }
+                            default->{
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.REGENERATION,45,0,true,false,false));
+                                p.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SLOW_FALLING,45,0,true,false,false));
+                            }
+                        }
+                    }catch(Throwable ignored){}
+                }
+            }
+        }.runTaskTimer(plugin,20,20);
+    }
 
     private void hurt(LivingEntity t,double amount,Player p){if(amount<=0||!t.isValid()||t.isDead())return;internalDamage.add(t.getUniqueId());try{t.damage(amount,p);}finally{internalDamage.remove(t.getUniqueId());}}
-    private void hitFx(LivingEntity t,String id){String q=switch(id){case EMBERFALL->"FLAME";case NOCTIS->"SCULK_SOUL";case STORMPIERCER->"CLOUD";case GAIA->"COMPOSTER";default->"END_ROD";};particle(t.getWorld(),q,t.getLocation().clone().add(0,1,0),18,.35,.35,.35,.04);}
+    private void hitFx(LivingEntity t,String id){
+        Location c=t.getLocation().clone().add(0,1,0);World w=t.getWorld();
+        switch(id){
+            case EMBERFALL->{particle(w,"FLAME",c,24,.42,.38,.42,.06);particle(w,"LAVA",c,5,.28,.25,.28,.02);}
+            case NOCTIS->{particle(w,"SCULK_SOUL",c,20,.38,.45,.38,.035);particle(w,"REVERSE_PORTAL",c,12,.3,.35,.3,.02);}
+            case STORMPIERCER->{particle(w,"ELECTRIC_SPARK",c,22,.42,.5,.42,.08);particle(w,"CLOUD",c,10,.5,.25,.5,.02);}
+            case GAIA->{particle(w,"COMPOSTER",c,22,.45,.38,.45,.04);particle(w,"SPORE_BLOSSOM_AIR",c,14,.55,.45,.55,.01);}
+            default->{particle(w,"END_ROD",c,18,.35,.45,.35,.03);particle(w,"REVERSE_PORTAL",c,14,.4,.4,.4,.02);}
+        }
+    }
     private List<LivingEntity> targets(Player p,double r,int max,boolean los){List<LivingEntity> out=new ArrayList<>();for(Entity e:p.getWorld().getNearbyEntities(p.getLocation(),r,r,r)){if(!(e instanceof LivingEntity l)||l.getUniqueId().equals(p.getUniqueId())||!l.isValid()||l.isDead())continue;if(los&&!p.hasLineOfSight(l))continue;out.add(l);}out.sort(Comparator.comparingDouble(x->x.getLocation().distanceSquared(p.getLocation())));return out.size()>max?new ArrayList<>(out.subList(0,max)):out;}
     private LivingEntity nearest(Player p,double r){List<LivingEntity> l=targets(p,r,1,true);return l.isEmpty()?null:l.get(0);}
     private LivingEntity ray(Player p,Vector d,double range,double radius){Location o=p.getEyeLocation();for(double x=.5;x<=range;x+=.55){Location c=o.clone().add(d.clone().multiply(x));for(Entity e:p.getWorld().getNearbyEntities(c,radius,radius,radius))if(e instanceof LivingEntity l&&!l.getUniqueId().equals(p.getUniqueId())&&l.isValid()&&!l.isDead())return l;if(c.getBlock().getType().isSolid())break;}return null;}
