@@ -4,10 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - ".build/v300-source-part-00.b64"
-      - ".build/v300-source-part-01.b64"
-      - ".build/v300-source-part-02.b64"
-      - ".build/v300-source-part-03.b64"
+      - ".build/v300-source-full.b64"
       - ".build/trigger-v300-build.txt"
       - ".github/workflows/build-legendaryrais-v300.yml"
 
@@ -30,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf .build/v300-src .build/v300-source.zip
-          cat .build/v300-source-part-00.b64 .build/v300-source-part-01.b64 .build/v300-source-part-02.b64 .build/v300-source-part-03.b64 | tr -d '\n\r ' | base64 -d > .build/v300-source.zip
+          tr -d '\n\r ' < .build/v300-source-full.b64 | base64 -d > .build/v300-source.zip
           unzip -t .build/v300-source.zip
           mkdir -p .build/v300-src
           unzip -q .build/v300-source.zip -d .build/v300-src
