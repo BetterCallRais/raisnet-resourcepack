@@ -1,0 +1,94 @@
+name: Build LegendaryRais v2.9.6 Absolute Water
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v296_plugin.py"
+      - ".build/trigger-v296.txt"
+      - ".github/workflows/build-legendaryrais-v296.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - name: Prepare v2.9.6 source
+        run: python3 .build/build_v296_plugin.py
+
+      - name: Compile against Paper 26.1.2 build 74
+        run: |
+          cd .build/v296-src
+          mvn -B -U clean package
+          cp target/legendaryrais-2.9.6.jar ../../LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.jar > ../../LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.sha256
+          unzip -p ../../LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.jar plugin.yml > ../LegendaryRais-v2.9.6-plugin.yml
+
+      - name: Smoke boot exact Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v296"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v296/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v296/paper.jar
+          cp LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.jar .build/smoke-v296/plugins/
+          echo "eula=true" > .build/smoke-v296/eula.txt
+          cat > .build/smoke-v296/server.properties <<'EOF'
+          online-mode=false
+          server-port=25565
+          view-distance=2
+          simulation-distance=2
+          max-players=2
+          spawn-protection=0
+          enable-query=false
+          enable-rcon=false
+          require-resource-pack=false
+          EOF
+          cd .build/smoke-v296
+          set +e
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0
+          for i in $(seq 1 120); do
+            if grep -Fq "LegendaryRais v2.9.6 ABSOLUTE WATER REWORK enabled." server.log; then OK=1; break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if grep -Fq "Could not load plugin 'LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 8 "LegendaryRais" server.log || true
+          test "$OK" -eq 1
+
+      - name: Upload verified plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2
+          path: |
+            LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.jar
+            LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.sha256
+          retention-days: 7
+
+      - name: Publish plugin build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.jar LegendaryRais-2.9.6-ABSOLUTE-WATER-PAPER-26.1.2.sha256 .build/LegendaryRais-v2.9.6-plugin.yml
+          git commit -m "Publish LegendaryRais v2.9.6 Absolute Water plugin" || exit 0
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push
