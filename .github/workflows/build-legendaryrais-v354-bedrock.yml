@@ -1,0 +1,39 @@
+name: Build LegendaryRais Bedrock Pack v3.5.4 Visual Integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v354_bedrock.py"
+      - ".github/workflows/build-legendaryrais-v354-bedrock.yml"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pillow
+      - run: python .build/build_v354_bedrock.py
+      - name: Verify
+        run: |
+          unzip -t LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.5.4-mappings.json >/dev/null
+          unzip -l LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.mcpack | grep -q 'attachables/armor_phoenix_helmet.json'
+          unzip -l LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.mcpack | grep -q 'textures/models/armor/water_sovereign_2.png'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY
+          path: |
+            LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.mcpack
+            LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.sha1
+            LegendaryRais-Geyser-v3.5.4-mappings.json
+      - name: Publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.mcpack LegendaryRais-Bedrock-v3.5.4-VISUAL-INTEGRITY.sha1 LegendaryRais-Geyser-v3.5.4-mappings.json
+          git commit -m "Publish LegendaryRais Bedrock v3.5.4 Visual Integrity" || exit 0
+          git pull --rebase origin main
+          git push
