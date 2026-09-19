@@ -98,15 +98,15 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         if (command != null) command.setExecutor(this);
         new ArsenalExpansion(this).enable();
 
-        getLogger().info("LegendaryRais v3.0.0 LEGENDARY ARSENAL enabled. Premium Water Relics + Free-Gacha Arsenal registered.");
+        getLogger().info("LegendaryRais v3.1.0 LEGENDARY ARSENAL enabled. Premium Water Relics + Free-Gacha Arsenal registered.");
         getLogger().info("/riswp is admin-only; any player holding an authentic LegendaryRais weapon can use its skills.");
         getLogger().info("Cooldowns: 30s default per active skill. Java + Geyser/Floodgate input supported.");
     }
 
     private void applyV300ConfigMigration() {
         int version = getConfig().getInt("config-version", 0);
-        if (version >= 300) return;
-        getConfig().set("config-version", 300);
+        if (version >= 310) return;
+        getConfig().set("config-version", 310);
         getConfig().set("base-hit.sword", 38.0);
         getConfig().set("base-hit.trident", 44.0);
         getConfig().set("abyssal-step.damage", 650.0);
@@ -142,7 +142,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         getConfig().set("armor.cooldowns.voidwalker", 32);
         getConfig().set("armor.cooldowns.titan", 40);
         getConfig().set("armor.cooldowns.celestial", 38);
-        getLogger().info("Migrated LegendaryRais config to v3.0.0 Legendary Arsenal defaults.");
+        getLogger().info("Migrated LegendaryRais config to v3.1.0 Legendary Arsenal defaults.");
     }
 
     @Override
@@ -1321,32 +1321,100 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
     @EventHandler(ignoreCancelled = true)
     public void onWaterWalk(PlayerMoveEvent event) {
         Player player=event.getPlayer();
-        if(!getConfig().getBoolean("water-walk.enabled",true) || !isSoulTide(player.getInventory().getItemInMainHand()) || !canUseWeapon(player)
-                || booleanPlayerState(player,"isFlying") || booleanPlayerState(player,"isGliding")) {
-            restoreTidewalkerGravity(player); return;
-        }
-        if(player.isSneaking()){ restoreTidewalkerGravity(player); return; }
+        if(!isTidewalkerReady(player)){ restoreTidewalkerGravity(player); return; }
+
         Location to=event.getTo(); if(to==null)return;
         Double surface=findWaterSurfaceY(to);
         if(surface==null){ restoreTidewalkerGravity(player); return; }
+
         double delta=surface-to.getY();
-        if(delta>1.15){
+
+        // Coming up from below: gently lift to the surface once. No horizontal injection.
+        if(delta>1.10){
             restoreTidewalkerGravity(player);
             Vector v=player.getVelocity().clone();
-            v.setY(Math.min(.28,Math.max(.14,delta*.18)));
-            player.setVelocity(v); player.setFallDistance(0f); setPlayerBooleanState(player,"setSwimming",false);
-            renderWaterWalkFx(player,true); return;
+            v.setY(Math.min(.26,Math.max(.12,delta*.16)));
+            player.setVelocity(v);
+            player.setFallDistance(0f);
+            setPlayerBooleanState(player,"setSwimming",false);
+            renderWaterWalkFx(player,true);
+            return;
         }
-        if(delta < -0.48){ restoreTidewalkerGravity(player); return; }
+
+        // Player intentionally jumped above the surface: let vanilla gravity own the jump/fall.
+        if(delta < -0.55){ restoreTidewalkerGravity(player); return; }
+
+        Input input=player.getCurrentInput();
+        if(input.isSneak()){ restoreTidewalkerGravity(player); return; }
 
         if(!tidewalkerNoGravity.contains(player.getUniqueId())){
             try{player.setGravity(false);tidewalkerNoGravity.add(player.getUniqueId());}catch(Throwable ignored){}
+            // One snap only when entering Tidewalker. Repeated per-packet Y locking caused the old rubber-band.
+            if(Math.abs(to.getY()-surface)>.06){
+                Location snap=to.clone(); snap.setY(surface); event.setTo(snap);
+            }
         }
-        Location locked=to.clone();
-        if(Math.abs(locked.getY()-surface)>.018){locked.setY(surface);event.setTo(locked);}
-        Vector v=player.getVelocity().clone(); v.setY(0.0); player.setVelocity(v);
-        player.setFallDistance(0f); setPlayerBooleanState(player,"setSwimming",false);
+
+        if(input.isJump()){
+            Vector jump=tidewalkerInputVelocity(player,input);
+            jump.setY(.42);
+            restoreTidewalkerGravity(player);
+            player.setVelocity(jump);
+            player.setFallDistance(0f);
+            return;
+        }
+
+        Vector move=tidewalkerInputVelocity(player,input);
+        move.setY(0.0);
+        player.setVelocity(move);
+        player.setFallDistance(0f);
+        setPlayerBooleanState(player,"setSwimming",false);
         renderWaterWalkFx(player,false);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onTidewalkerInput(PlayerInputEvent event) {
+        Player player=event.getPlayer();
+        if(!tidewalkerNoGravity.contains(player.getUniqueId()))return;
+        if(!isTidewalkerReady(player)){restoreTidewalkerGravity(player);return;}
+
+        Input input=event.getInput();
+        if(input.isSneak()){restoreTidewalkerGravity(player);return;}
+        if(input.isJump()){
+            Vector jump=tidewalkerInputVelocity(player,input); jump.setY(.42);
+            restoreTidewalkerGravity(player); player.setVelocity(jump); return;
+        }
+
+        Vector move=tidewalkerInputVelocity(player,input);
+        move.setY(0.0);
+        player.setVelocity(move);
+    }
+
+    private boolean isTidewalkerReady(Player player){
+        return getConfig().getBoolean("water-walk.enabled",true)
+                && isSoulTide(player.getInventory().getItemInMainHand())
+                && canUseWeapon(player)
+                && !player.isSneaking()
+                && !booleanPlayerState(player,"isFlying")
+                && !booleanPlayerState(player,"isGliding");
+    }
+
+    private Vector tidewalkerInputVelocity(Player player, Input input){
+        Vector forward=player.getLocation().getDirection().clone(); forward.setY(0);
+        if(forward.lengthSquared()<0.0001)forward=new Vector(0,0,1); else forward.normalize();
+        Vector right=new Vector(-forward.getZ(),0,forward.getX());
+
+        double fb=(input.isForward()?1.0:0.0)-(input.isBackward()?1.0:0.0);
+        double lr=(input.isRight()?1.0:0.0)-(input.isLeft()?1.0:0.0);
+        Vector move=forward.multiply(fb).add(right.multiply(lr));
+
+        if(move.lengthSquared()<0.0001)return new Vector(0,0,0);
+        move.normalize();
+
+        double walkScale=Math.max(.35,Math.min(2.5,player.getWalkSpeed()/0.2f));
+        double speed=(input.isSprint()?.285:.215)*walkScale;
+        if(input.isBackward()&&!input.isForward())speed*=.82;
+        return move.multiply(speed);
     }
 
     private Double findWaterSurfaceY(Location loc){
