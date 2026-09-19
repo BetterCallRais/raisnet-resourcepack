@@ -1,0 +1,23 @@
+name: LegendaryRais
+version: 3.2.0
+main: id.raisnet.legendaryrais.LegendaryRais
+api-version: '26.1.2'
+author: RaisNet
+softdepend: [Geyser-Spigot, floodgate]
+description: RaisNet Legendary Arsenal - 2 premium Water Relics + 5 free-gacha weapons + 4 gacha armor sets + Water Sovereign premium armor.
+commands:
+  risgive:
+    description: Give LegendaryRais gacha weapons or armor sets.
+    usage: /risgive <player> <id> [amount]
+    permission: legendaryrais.give
+  riswp:
+    description: Open LegendaryRais weapon arsenal.
+    usage: /riswp
+    permission: legendaryrais.admin
+permissions:
+  legendaryrais.give:
+    description: Allows console/admin gacha rewards via /risgive.
+    default: op
+  legendaryrais.admin:
+    description: Allows opening/reloading the LegendaryRais administrator arsenal.
+    default: op
