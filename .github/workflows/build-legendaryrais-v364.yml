@@ -1,0 +1,173 @@
+name: Build LegendaryRais v3.6.4 Bedrock Rig Visor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v364/**"
+      - ".build/build_v364_packs.py"
+      - ".github/workflows/build-legendaryrais-v364.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v364-src .build/v364-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v364-source.zip
+          unzip -t .build/v364-source.zip
+          mkdir -p .build/v364-src
+          unzip -q .build/v364-source.zip -d .build/v364-src
+          cp .build/extracted-v364/LegendaryRais.java .build/v364-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v364/ArsenalExpansion.java .build/v364-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v364/plugin.yml .build/v364-src/src/main/resources/plugin.yml
+          cp .build/extracted-v364/pom.xml .build/v364-src/pom.xml
+
+      - name: Guard visor + crossplay rules
+        run: |
+          set -euo pipefail
+          SRC=.build/v364-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 364' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 364' "$SRC/LegendaryRais.java"
+          grep -q 'helmet_mode' "$SRC/ArsenalExpansion.java"
+          grep -q 'applyHelmetMode' "$SRC/ArsenalExpansion.java"
+          grep -q 'helmet_open' "$SRC/ArsenalExpansion.java"
+          grep -q 'helmet_closed' "$SRC/ArsenalExpansion.java"
+          grep -q 'rishelmet' .build/v364-src/src/main/resources/plugin.yml
+          grep -q 'PersistentDataType.INTEGER,364' "$SRC/ArsenalExpansion.java"
+          grep -q 'normal right-click is NEVER cancelled' "$SRC/ArsenalExpansion.java"
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' "$SRC/LegendaryRais.java"
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' "$SRC/LegendaryRais.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v364-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.4.jar ../../LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.sha256
+
+      - name: Verify plugin
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.6.4"
+          unzip -p LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar plugin.yml | grep -q "rishelmet:"
+          jar tf LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build and audit Java + Bedrock packs
+        run: python .build/build_v364_packs.py
+
+      - name: Validate final visor + Bedrock rig
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.4-BEDROCK-RIG-VISOR.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.4-BEDROCK-RIG-VISOR.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.4-mappings.json >/dev/null
+          python - <<'PY'
+          import zipfile,json
+          J='LegendaryRais-Java-26.1.2-v3.6.4-BEDROCK-RIG-VISOR.zip'
+          B='LegendaryRais-Bedrock-v3.6.4-BEDROCK-RIG-VISOR.mcpack'
+          sets=('phoenix','voidwalker','titan','celestial','water_sovereign')
+          with zipfile.ZipFile(J) as z:
+              names=set(z.namelist())
+              for s in sets:
+                  for mode in ('open','closed'):
+                      assert f'assets/legendaryv34/items/armor/{s}_helmet_{mode}.json' in names
+                      assert f'assets/legendaryv34/equipment/{s}_helmet_{mode}.json' in names
+          with zipfile.ZipFile(B) as z:
+              names=set(z.namelist())
+              for s in sets:
+                  for mode in ('open','closed'):
+                      ap=f'attachables/armor_{s}_helmet_{mode}.json'
+                      assert ap in names
+                      a=json.loads(z.read(ap))['minecraft:attachable']['description']
+                      assert a['identifier']==f'raisnet:{s}_helmet_{mode}'
+                      assert a['render_controllers']==['controller.render.armor']
+                  for p in ('chest','legs','boots'):
+                      ap=f'attachables/armor_{s}_{p}.json'
+                      assert ap in names
+                      a=json.loads(z.read(ap))['minecraft:attachable']['description']
+                      assert a['render_controllers']==['controller.render.armor']
+          m=json.load(open('LegendaryRais-Geyser-v3.6.4-mappings.json'))
+          all_defs=[d for arr in m['items'].values() for d in arr if d.get('type')=='definition']
+          for s in sets:
+              for mode in ('open','closed'):
+                  model=f'legendaryv34:armor/{s}_helmet_{mode}'
+                  defs=[d for d in all_defs if d.get('model')==model]
+                  assert len(defs)==1,(model,len(defs))
+                  assert defs[0]['components']['minecraft:equippable']['slot']=='head'
+          print('V364_VISOR_BEDROCK_RIG PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v364"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v364/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v364/paper.jar
+          cp LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar .build/smoke-v364/plugins/
+          echo "eula=true" > .build/smoke-v364/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v364/server.properties
+          cd .build/smoke-v364
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 140); do
+            grep -Fq "LegendaryRais v3.6.4" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 14 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.4-BEDROCK-RIG-VISOR
+          path: |
+            LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar
+            LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.4-BEDROCK-RIG-VISOR.zip
+            LegendaryRais-Java-26.1.2-v3.6.4-BEDROCK-RIG-VISOR.sha1
+            LegendaryRais-Bedrock-v3.6.4-BEDROCK-RIG-VISOR.mcpack
+            LegendaryRais-Bedrock-v3.6.4-BEDROCK-RIG-VISOR.sha1
+            LegendaryRais-Geyser-v3.6.4-mappings.json
+          retention-days: 7
+
+      - name: Publish verified v3.6.4
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.jar             LegendaryRais-3.6.4-BEDROCK-RIG-VISOR-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.4-BEDROCK-RIG-VISOR.zip             LegendaryRais-Java-26.1.2-v3.6.4-BEDROCK-RIG-VISOR.sha1             LegendaryRais-Bedrock-v3.6.4-BEDROCK-RIG-VISOR.mcpack             LegendaryRais-Bedrock-v3.6.4-BEDROCK-RIG-VISOR.sha1             LegendaryRais-Geyser-v3.6.4-mappings.json
+          git commit -m "Publish LegendaryRais v3.6.4 Bedrock Rig Visor" || exit 0
+          git pull --rebase origin main
+          git push
