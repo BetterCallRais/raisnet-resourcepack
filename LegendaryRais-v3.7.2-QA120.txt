@@ -1,0 +1,606 @@
+001. PASS - all JSON parses
+002. PASS - all PNG verifies
+003. PASS - mapping format 2
+004. PASS - fresh manifest UUID
+005. PASS - soul_tide geometry exists
+006. PASS - soul_tide has root bones
+007. PASS - soul_tide roots bind to item slot
+008. PASS - soul_tide modern attachable exists
+009. PASS - soul_tide modern identifier exact
+010. PASS - soul_tide modern has no hold animation offset
+011. PASS - soul_tide modern no animate script
+012. PASS - soul_tide modern item renderer
+013. PASS - soul_tide modern atlas entry
+014. PASS - soul_tide legacy attachable exists
+015. PASS - soul_tide legacy identifier exact
+016. PASS - soul_tide legacy has no hold animation offset
+017. PASS - soul_tide legacy no animate script
+018. PASS - soul_tide legacy item renderer
+019. PASS - soul_tide legacy atlas entry
+020. PASS - soul_tide modern mapping
+021. PASS - soul_tide legacy mapping
+022. PASS - leviathan geometry exists
+023. PASS - leviathan has root bones
+024. PASS - leviathan roots bind to item slot
+025. PASS - leviathan modern attachable exists
+026. PASS - leviathan modern identifier exact
+027. PASS - leviathan modern has no hold animation offset
+028. PASS - leviathan modern no animate script
+029. PASS - leviathan modern item renderer
+030. PASS - leviathan modern atlas entry
+031. PASS - leviathan legacy attachable exists
+032. PASS - leviathan legacy identifier exact
+033. PASS - leviathan legacy has no hold animation offset
+034. PASS - leviathan legacy no animate script
+035. PASS - leviathan legacy item renderer
+036. PASS - leviathan legacy atlas entry
+037. PASS - leviathan modern mapping
+038. PASS - leviathan legacy mapping
+039. PASS - emberfall geometry exists
+040. PASS - emberfall has root bones
+041. PASS - emberfall roots bind to item slot
+042. PASS - emberfall modern attachable exists
+043. PASS - emberfall modern identifier exact
+044. PASS - emberfall modern has no hold animation offset
+045. PASS - emberfall modern no animate script
+046. PASS - emberfall modern item renderer
+047. PASS - emberfall modern atlas entry
+048. PASS - emberfall legacy attachable exists
+049. PASS - emberfall legacy identifier exact
+050. PASS - emberfall legacy has no hold animation offset
+051. PASS - emberfall legacy no animate script
+052. PASS - emberfall legacy item renderer
+053. PASS - emberfall legacy atlas entry
+054. PASS - emberfall modern mapping
+055. PASS - emberfall legacy mapping
+056. PASS - noctis geometry exists
+057. PASS - noctis has root bones
+058. PASS - noctis roots bind to item slot
+059. PASS - noctis modern attachable exists
+060. PASS - noctis modern identifier exact
+061. PASS - noctis modern has no hold animation offset
+062. PASS - noctis modern no animate script
+063. PASS - noctis modern item renderer
+064. PASS - noctis modern atlas entry
+065. PASS - noctis legacy attachable exists
+066. PASS - noctis legacy identifier exact
+067. PASS - noctis legacy has no hold animation offset
+068. PASS - noctis legacy no animate script
+069. PASS - noctis legacy item renderer
+070. PASS - noctis legacy atlas entry
+071. PASS - noctis modern mapping
+072. PASS - noctis legacy mapping
+073. PASS - stormpiercer geometry exists
+074. PASS - stormpiercer has root bones
+075. PASS - stormpiercer roots bind to item slot
+076. PASS - stormpiercer modern attachable exists
+077. PASS - stormpiercer modern identifier exact
+078. PASS - stormpiercer modern has no hold animation offset
+079. PASS - stormpiercer modern no animate script
+080. PASS - stormpiercer modern item renderer
+081. PASS - stormpiercer modern atlas entry
+082. PASS - stormpiercer legacy attachable exists
+083. PASS - stormpiercer legacy identifier exact
+084. PASS - stormpiercer legacy has no hold animation offset
+085. PASS - stormpiercer legacy no animate script
+086. PASS - stormpiercer legacy item renderer
+087. PASS - stormpiercer legacy atlas entry
+088. PASS - stormpiercer modern mapping
+089. PASS - stormpiercer legacy mapping
+090. PASS - zephya geometry exists
+091. PASS - zephya has root bones
+092. PASS - zephya roots bind to item slot
+093. PASS - zephya modern attachable exists
+094. PASS - zephya modern identifier exact
+095. PASS - zephya modern has no hold animation offset
+096. PASS - zephya modern no animate script
+097. PASS - zephya modern item renderer
+098. PASS - zephya modern atlas entry
+099. PASS - zephya legacy attachable exists
+100. PASS - zephya legacy identifier exact
+101. PASS - zephya legacy has no hold animation offset
+102. PASS - zephya legacy no animate script
+103. PASS - zephya legacy item renderer
+104. PASS - zephya legacy atlas entry
+105. PASS - zephya modern mapping
+106. PASS - zephya legacy mapping
+107. PASS - astral geometry exists
+108. PASS - astral has root bones
+109. PASS - astral roots bind to item slot
+110. PASS - astral modern attachable exists
+111. PASS - astral modern identifier exact
+112. PASS - astral modern has no hold animation offset
+113. PASS - astral modern no animate script
+114. PASS - astral modern item renderer
+115. PASS - astral modern atlas entry
+116. PASS - astral legacy attachable exists
+117. PASS - astral legacy identifier exact
+118. PASS - astral legacy has no hold animation offset
+119. PASS - astral legacy no animate script
+120. PASS - astral legacy item renderer
+121. PASS - astral legacy atlas entry
+122. PASS - astral modern mapping
+123. PASS - astral legacy mapping
+124. PASS - phoenix helmet_closed geometry exists
+125. PASS - phoenix helmet_closed visible cube bones
+126. PASS - phoenix helmet_closed has body binding
+127. PASS - phoenix helmet_closed modern attachable
+128. PASS - phoenix helmet_closed modern identifier
+129. PASS - phoenix helmet_closed modern armor controller
+130. PASS - phoenix helmet_closed modern armor material
+131. PASS - phoenix helmet_closed modern no stale scripts
+132. PASS - phoenix helmet_closed modern atlas entry
+133. PASS - phoenix helmet_closed legacy attachable
+134. PASS - phoenix helmet_closed legacy identifier
+135. PASS - phoenix helmet_closed legacy armor controller
+136. PASS - phoenix helmet_closed legacy armor material
+137. PASS - phoenix helmet_closed legacy no stale scripts
+138. PASS - phoenix helmet_closed legacy atlas entry
+139. PASS - phoenix helmet_open geometry exists
+140. PASS - phoenix helmet_open visible cube bones
+141. PASS - phoenix helmet_open has body binding
+142. PASS - phoenix helmet_open modern attachable
+143. PASS - phoenix helmet_open modern identifier
+144. PASS - phoenix helmet_open modern armor controller
+145. PASS - phoenix helmet_open modern armor material
+146. PASS - phoenix helmet_open modern no stale scripts
+147. PASS - phoenix helmet_open modern atlas entry
+148. PASS - phoenix helmet_open legacy attachable
+149. PASS - phoenix helmet_open legacy identifier
+150. PASS - phoenix helmet_open legacy armor controller
+151. PASS - phoenix helmet_open legacy armor material
+152. PASS - phoenix helmet_open legacy no stale scripts
+153. PASS - phoenix helmet_open legacy atlas entry
+154. PASS - phoenix chest geometry exists
+155. PASS - phoenix chest visible cube bones
+156. PASS - phoenix chest has body binding
+157. PASS - phoenix chest modern attachable
+158. PASS - phoenix chest modern identifier
+159. PASS - phoenix chest modern armor controller
+160. PASS - phoenix chest modern armor material
+161. PASS - phoenix chest modern no stale scripts
+162. PASS - phoenix chest modern atlas entry
+163. PASS - phoenix chest legacy attachable
+164. PASS - phoenix chest legacy identifier
+165. PASS - phoenix chest legacy armor controller
+166. PASS - phoenix chest legacy armor material
+167. PASS - phoenix chest legacy no stale scripts
+168. PASS - phoenix chest legacy atlas entry
+169. PASS - phoenix legs geometry exists
+170. PASS - phoenix legs visible cube bones
+171. PASS - phoenix legs has body binding
+172. PASS - phoenix legs modern attachable
+173. PASS - phoenix legs modern identifier
+174. PASS - phoenix legs modern armor controller
+175. PASS - phoenix legs modern armor material
+176. PASS - phoenix legs modern no stale scripts
+177. PASS - phoenix legs modern atlas entry
+178. PASS - phoenix legs legacy attachable
+179. PASS - phoenix legs legacy identifier
+180. PASS - phoenix legs legacy armor controller
+181. PASS - phoenix legs legacy armor material
+182. PASS - phoenix legs legacy no stale scripts
+183. PASS - phoenix legs legacy atlas entry
+184. PASS - phoenix boots geometry exists
+185. PASS - phoenix boots visible cube bones
+186. PASS - phoenix boots has body binding
+187. PASS - phoenix boots modern attachable
+188. PASS - phoenix boots modern identifier
+189. PASS - phoenix boots modern armor controller
+190. PASS - phoenix boots modern armor material
+191. PASS - phoenix boots modern no stale scripts
+192. PASS - phoenix boots modern atlas entry
+193. PASS - phoenix boots legacy attachable
+194. PASS - phoenix boots legacy identifier
+195. PASS - phoenix boots legacy armor controller
+196. PASS - phoenix boots legacy armor material
+197. PASS - phoenix boots legacy no stale scripts
+198. PASS - phoenix boots legacy atlas entry
+199. PASS - voidwalker helmet_closed geometry exists
+200. PASS - voidwalker helmet_closed visible cube bones
+201. PASS - voidwalker helmet_closed has body binding
+202. PASS - voidwalker helmet_closed modern attachable
+203. PASS - voidwalker helmet_closed modern identifier
+204. PASS - voidwalker helmet_closed modern armor controller
+205. PASS - voidwalker helmet_closed modern armor material
+206. PASS - voidwalker helmet_closed modern no stale scripts
+207. PASS - voidwalker helmet_closed modern atlas entry
+208. PASS - voidwalker helmet_closed legacy attachable
+209. PASS - voidwalker helmet_closed legacy identifier
+210. PASS - voidwalker helmet_closed legacy armor controller
+211. PASS - voidwalker helmet_closed legacy armor material
+212. PASS - voidwalker helmet_closed legacy no stale scripts
+213. PASS - voidwalker helmet_closed legacy atlas entry
+214. PASS - voidwalker helmet_open geometry exists
+215. PASS - voidwalker helmet_open visible cube bones
+216. PASS - voidwalker helmet_open has body binding
+217. PASS - voidwalker helmet_open modern attachable
+218. PASS - voidwalker helmet_open modern identifier
+219. PASS - voidwalker helmet_open modern armor controller
+220. PASS - voidwalker helmet_open modern armor material
+221. PASS - voidwalker helmet_open modern no stale scripts
+222. PASS - voidwalker helmet_open modern atlas entry
+223. PASS - voidwalker helmet_open legacy attachable
+224. PASS - voidwalker helmet_open legacy identifier
+225. PASS - voidwalker helmet_open legacy armor controller
+226. PASS - voidwalker helmet_open legacy armor material
+227. PASS - voidwalker helmet_open legacy no stale scripts
+228. PASS - voidwalker helmet_open legacy atlas entry
+229. PASS - voidwalker chest geometry exists
+230. PASS - voidwalker chest visible cube bones
+231. PASS - voidwalker chest has body binding
+232. PASS - voidwalker chest modern attachable
+233. PASS - voidwalker chest modern identifier
+234. PASS - voidwalker chest modern armor controller
+235. PASS - voidwalker chest modern armor material
+236. PASS - voidwalker chest modern no stale scripts
+237. PASS - voidwalker chest modern atlas entry
+238. PASS - voidwalker chest legacy attachable
+239. PASS - voidwalker chest legacy identifier
+240. PASS - voidwalker chest legacy armor controller
+241. PASS - voidwalker chest legacy armor material
+242. PASS - voidwalker chest legacy no stale scripts
+243. PASS - voidwalker chest legacy atlas entry
+244. PASS - voidwalker legs geometry exists
+245. PASS - voidwalker legs visible cube bones
+246. PASS - voidwalker legs has body binding
+247. PASS - voidwalker legs modern attachable
+248. PASS - voidwalker legs modern identifier
+249. PASS - voidwalker legs modern armor controller
+250. PASS - voidwalker legs modern armor material
+251. PASS - voidwalker legs modern no stale scripts
+252. PASS - voidwalker legs modern atlas entry
+253. PASS - voidwalker legs legacy attachable
+254. PASS - voidwalker legs legacy identifier
+255. PASS - voidwalker legs legacy armor controller
+256. PASS - voidwalker legs legacy armor material
+257. PASS - voidwalker legs legacy no stale scripts
+258. PASS - voidwalker legs legacy atlas entry
+259. PASS - voidwalker boots geometry exists
+260. PASS - voidwalker boots visible cube bones
+261. PASS - voidwalker boots has body binding
+262. PASS - voidwalker boots modern attachable
+263. PASS - voidwalker boots modern identifier
+264. PASS - voidwalker boots modern armor controller
+265. PASS - voidwalker boots modern armor material
+266. PASS - voidwalker boots modern no stale scripts
+267. PASS - voidwalker boots modern atlas entry
+268. PASS - voidwalker boots legacy attachable
+269. PASS - voidwalker boots legacy identifier
+270. PASS - voidwalker boots legacy armor controller
+271. PASS - voidwalker boots legacy armor material
+272. PASS - voidwalker boots legacy no stale scripts
+273. PASS - voidwalker boots legacy atlas entry
+274. PASS - titan helmet_closed geometry exists
+275. PASS - titan helmet_closed visible cube bones
+276. PASS - titan helmet_closed has body binding
+277. PASS - titan helmet_closed modern attachable
+278. PASS - titan helmet_closed modern identifier
+279. PASS - titan helmet_closed modern armor controller
+280. PASS - titan helmet_closed modern armor material
+281. PASS - titan helmet_closed modern no stale scripts
+282. PASS - titan helmet_closed modern atlas entry
+283. PASS - titan helmet_closed legacy attachable
+284. PASS - titan helmet_closed legacy identifier
+285. PASS - titan helmet_closed legacy armor controller
+286. PASS - titan helmet_closed legacy armor material
+287. PASS - titan helmet_closed legacy no stale scripts
+288. PASS - titan helmet_closed legacy atlas entry
+289. PASS - titan helmet_open geometry exists
+290. PASS - titan helmet_open visible cube bones
+291. PASS - titan helmet_open has body binding
+292. PASS - titan helmet_open modern attachable
+293. PASS - titan helmet_open modern identifier
+294. PASS - titan helmet_open modern armor controller
+295. PASS - titan helmet_open modern armor material
+296. PASS - titan helmet_open modern no stale scripts
+297. PASS - titan helmet_open modern atlas entry
+298. PASS - titan helmet_open legacy attachable
+299. PASS - titan helmet_open legacy identifier
+300. PASS - titan helmet_open legacy armor controller
+301. PASS - titan helmet_open legacy armor material
+302. PASS - titan helmet_open legacy no stale scripts
+303. PASS - titan helmet_open legacy atlas entry
+304. PASS - titan chest geometry exists
+305. PASS - titan chest visible cube bones
+306. PASS - titan chest has body binding
+307. PASS - titan chest modern attachable
+308. PASS - titan chest modern identifier
+309. PASS - titan chest modern armor controller
+310. PASS - titan chest modern armor material
+311. PASS - titan chest modern no stale scripts
+312. PASS - titan chest modern atlas entry
+313. PASS - titan chest legacy attachable
+314. PASS - titan chest legacy identifier
+315. PASS - titan chest legacy armor controller
+316. PASS - titan chest legacy armor material
+317. PASS - titan chest legacy no stale scripts
+318. PASS - titan chest legacy atlas entry
+319. PASS - titan legs geometry exists
+320. PASS - titan legs visible cube bones
+321. PASS - titan legs has body binding
+322. PASS - titan legs modern attachable
+323. PASS - titan legs modern identifier
+324. PASS - titan legs modern armor controller
+325. PASS - titan legs modern armor material
+326. PASS - titan legs modern no stale scripts
+327. PASS - titan legs modern atlas entry
+328. PASS - titan legs legacy attachable
+329. PASS - titan legs legacy identifier
+330. PASS - titan legs legacy armor controller
+331. PASS - titan legs legacy armor material
+332. PASS - titan legs legacy no stale scripts
+333. PASS - titan legs legacy atlas entry
+334. PASS - titan boots geometry exists
+335. PASS - titan boots visible cube bones
+336. PASS - titan boots has body binding
+337. PASS - titan boots modern attachable
+338. PASS - titan boots modern identifier
+339. PASS - titan boots modern armor controller
+340. PASS - titan boots modern armor material
+341. PASS - titan boots modern no stale scripts
+342. PASS - titan boots modern atlas entry
+343. PASS - titan boots legacy attachable
+344. PASS - titan boots legacy identifier
+345. PASS - titan boots legacy armor controller
+346. PASS - titan boots legacy armor material
+347. PASS - titan boots legacy no stale scripts
+348. PASS - titan boots legacy atlas entry
+349. PASS - celestial helmet_closed geometry exists
+350. PASS - celestial helmet_closed visible cube bones
+351. PASS - celestial helmet_closed has body binding
+352. PASS - celestial helmet_closed modern attachable
+353. PASS - celestial helmet_closed modern identifier
+354. PASS - celestial helmet_closed modern armor controller
+355. PASS - celestial helmet_closed modern armor material
+356. PASS - celestial helmet_closed modern no stale scripts
+357. PASS - celestial helmet_closed modern atlas entry
+358. PASS - celestial helmet_closed legacy attachable
+359. PASS - celestial helmet_closed legacy identifier
+360. PASS - celestial helmet_closed legacy armor controller
+361. PASS - celestial helmet_closed legacy armor material
+362. PASS - celestial helmet_closed legacy no stale scripts
+363. PASS - celestial helmet_closed legacy atlas entry
+364. PASS - celestial helmet_open geometry exists
+365. PASS - celestial helmet_open visible cube bones
+366. PASS - celestial helmet_open has body binding
+367. PASS - celestial helmet_open modern attachable
+368. PASS - celestial helmet_open modern identifier
+369. PASS - celestial helmet_open modern armor controller
+370. PASS - celestial helmet_open modern armor material
+371. PASS - celestial helmet_open modern no stale scripts
+372. PASS - celestial helmet_open modern atlas entry
+373. PASS - celestial helmet_open legacy attachable
+374. PASS - celestial helmet_open legacy identifier
+375. PASS - celestial helmet_open legacy armor controller
+376. PASS - celestial helmet_open legacy armor material
+377. PASS - celestial helmet_open legacy no stale scripts
+378. PASS - celestial helmet_open legacy atlas entry
+379. PASS - celestial chest geometry exists
+380. PASS - celestial chest visible cube bones
+381. PASS - celestial chest has body binding
+382. PASS - celestial chest modern attachable
+383. PASS - celestial chest modern identifier
+384. PASS - celestial chest modern armor controller
+385. PASS - celestial chest modern armor material
+386. PASS - celestial chest modern no stale scripts
+387. PASS - celestial chest modern atlas entry
+388. PASS - celestial chest legacy attachable
+389. PASS - celestial chest legacy identifier
+390. PASS - celestial chest legacy armor controller
+391. PASS - celestial chest legacy armor material
+392. PASS - celestial chest legacy no stale scripts
+393. PASS - celestial chest legacy atlas entry
+394. PASS - celestial legs geometry exists
+395. PASS - celestial legs visible cube bones
+396. PASS - celestial legs has body binding
+397. PASS - celestial legs modern attachable
+398. PASS - celestial legs modern identifier
+399. PASS - celestial legs modern armor controller
+400. PASS - celestial legs modern armor material
+401. PASS - celestial legs modern no stale scripts
+402. PASS - celestial legs modern atlas entry
+403. PASS - celestial legs legacy attachable
+404. PASS - celestial legs legacy identifier
+405. PASS - celestial legs legacy armor controller
+406. PASS - celestial legs legacy armor material
+407. PASS - celestial legs legacy no stale scripts
+408. PASS - celestial legs legacy atlas entry
+409. PASS - celestial boots geometry exists
+410. PASS - celestial boots visible cube bones
+411. PASS - celestial boots has body binding
+412. PASS - celestial boots modern attachable
+413. PASS - celestial boots modern identifier
+414. PASS - celestial boots modern armor controller
+415. PASS - celestial boots modern armor material
+416. PASS - celestial boots modern no stale scripts
+417. PASS - celestial boots modern atlas entry
+418. PASS - celestial boots legacy attachable
+419. PASS - celestial boots legacy identifier
+420. PASS - celestial boots legacy armor controller
+421. PASS - celestial boots legacy armor material
+422. PASS - celestial boots legacy no stale scripts
+423. PASS - celestial boots legacy atlas entry
+424. PASS - water_sovereign helmet_closed geometry exists
+425. PASS - water_sovereign helmet_closed visible cube bones
+426. PASS - water_sovereign helmet_closed has body binding
+427. PASS - water_sovereign helmet_closed modern attachable
+428. PASS - water_sovereign helmet_closed modern identifier
+429. PASS - water_sovereign helmet_closed modern armor controller
+430. PASS - water_sovereign helmet_closed modern armor material
+431. PASS - water_sovereign helmet_closed modern no stale scripts
+432. PASS - water_sovereign helmet_closed modern atlas entry
+433. PASS - water_sovereign helmet_closed legacy attachable
+434. PASS - water_sovereign helmet_closed legacy identifier
+435. PASS - water_sovereign helmet_closed legacy armor controller
+436. PASS - water_sovereign helmet_closed legacy armor material
+437. PASS - water_sovereign helmet_closed legacy no stale scripts
+438. PASS - water_sovereign helmet_closed legacy atlas entry
+439. PASS - water_sovereign helmet_open geometry exists
+440. PASS - water_sovereign helmet_open visible cube bones
+441. PASS - water_sovereign helmet_open has body binding
+442. PASS - water_sovereign helmet_open modern attachable
+443. PASS - water_sovereign helmet_open modern identifier
+444. PASS - water_sovereign helmet_open modern armor controller
+445. PASS - water_sovereign helmet_open modern armor material
+446. PASS - water_sovereign helmet_open modern no stale scripts
+447. PASS - water_sovereign helmet_open modern atlas entry
+448. PASS - water_sovereign helmet_open legacy attachable
+449. PASS - water_sovereign helmet_open legacy identifier
+450. PASS - water_sovereign helmet_open legacy armor controller
+451. PASS - water_sovereign helmet_open legacy armor material
+452. PASS - water_sovereign helmet_open legacy no stale scripts
+453. PASS - water_sovereign helmet_open legacy atlas entry
+454. PASS - water_sovereign chest geometry exists
+455. PASS - water_sovereign chest visible cube bones
+456. PASS - water_sovereign chest has body binding
+457. PASS - water_sovereign chest modern attachable
+458. PASS - water_sovereign chest modern identifier
+459. PASS - water_sovereign chest modern armor controller
+460. PASS - water_sovereign chest modern armor material
+461. PASS - water_sovereign chest modern no stale scripts
+462. PASS - water_sovereign chest modern atlas entry
+463. PASS - water_sovereign chest legacy attachable
+464. PASS - water_sovereign chest legacy identifier
+465. PASS - water_sovereign chest legacy armor controller
+466. PASS - water_sovereign chest legacy armor material
+467. PASS - water_sovereign chest legacy no stale scripts
+468. PASS - water_sovereign chest legacy atlas entry
+469. PASS - water_sovereign legs geometry exists
+470. PASS - water_sovereign legs visible cube bones
+471. PASS - water_sovereign legs has body binding
+472. PASS - water_sovereign legs modern attachable
+473. PASS - water_sovereign legs modern identifier
+474. PASS - water_sovereign legs modern armor controller
+475. PASS - water_sovereign legs modern armor material
+476. PASS - water_sovereign legs modern no stale scripts
+477. PASS - water_sovereign legs modern atlas entry
+478. PASS - water_sovereign legs legacy attachable
+479. PASS - water_sovereign legs legacy identifier
+480. PASS - water_sovereign legs legacy armor controller
+481. PASS - water_sovereign legs legacy armor material
+482. PASS - water_sovereign legs legacy no stale scripts
+483. PASS - water_sovereign legs legacy atlas entry
+484. PASS - water_sovereign boots geometry exists
+485. PASS - water_sovereign boots visible cube bones
+486. PASS - water_sovereign boots has body binding
+487. PASS - water_sovereign boots modern attachable
+488. PASS - water_sovereign boots modern identifier
+489. PASS - water_sovereign boots modern armor controller
+490. PASS - water_sovereign boots modern armor material
+491. PASS - water_sovereign boots modern no stale scripts
+492. PASS - water_sovereign boots modern atlas entry
+493. PASS - water_sovereign boots legacy attachable
+494. PASS - water_sovereign boots legacy identifier
+495. PASS - water_sovereign boots legacy armor controller
+496. PASS - water_sovereign boots legacy armor material
+497. PASS - water_sovereign boots legacy no stale scripts
+498. PASS - water_sovereign boots legacy atlas entry
+499. PASS - phoenix helmet closed modern mapping unique
+500. PASS - phoenix helmet closed legacy mapping unique
+501. PASS - phoenix helmet closed modern inherits armor component
+502. PASS - phoenix helmet closed legacy inherits armor component
+503. PASS - phoenix helmet open modern mapping unique
+504. PASS - phoenix helmet open legacy mapping unique
+505. PASS - phoenix helmet open modern inherits armor component
+506. PASS - phoenix helmet open legacy inherits armor component
+507. PASS - phoenix chest modern mapping unique
+508. PASS - phoenix chest legacy mapping unique
+509. PASS - phoenix chest modern inherits armor component
+510. PASS - phoenix chest legacy inherits armor component
+511. PASS - phoenix legs modern mapping unique
+512. PASS - phoenix legs legacy mapping unique
+513. PASS - phoenix legs modern inherits armor component
+514. PASS - phoenix legs legacy inherits armor component
+515. PASS - phoenix boots modern mapping unique
+516. PASS - phoenix boots legacy mapping unique
+517. PASS - phoenix boots modern inherits armor component
+518. PASS - phoenix boots legacy inherits armor component
+519. PASS - voidwalker helmet closed modern mapping unique
+520. PASS - voidwalker helmet closed legacy mapping unique
+521. PASS - voidwalker helmet closed modern inherits armor component
+522. PASS - voidwalker helmet closed legacy inherits armor component
+523. PASS - voidwalker helmet open modern mapping unique
+524. PASS - voidwalker helmet open legacy mapping unique
+525. PASS - voidwalker helmet open modern inherits armor component
+526. PASS - voidwalker helmet open legacy inherits armor component
+527. PASS - voidwalker chest modern mapping unique
+528. PASS - voidwalker chest legacy mapping unique
+529. PASS - voidwalker chest modern inherits armor component
+530. PASS - voidwalker chest legacy inherits armor component
+531. PASS - voidwalker legs modern mapping unique
+532. PASS - voidwalker legs legacy mapping unique
+533. PASS - voidwalker legs modern inherits armor component
+534. PASS - voidwalker legs legacy inherits armor component
+535. PASS - voidwalker boots modern mapping unique
+536. PASS - voidwalker boots legacy mapping unique
+537. PASS - voidwalker boots modern inherits armor component
+538. PASS - voidwalker boots legacy inherits armor component
+539. PASS - titan helmet closed modern mapping unique
+540. PASS - titan helmet closed legacy mapping unique
+541. PASS - titan helmet closed modern inherits armor component
+542. PASS - titan helmet closed legacy inherits armor component
+543. PASS - titan helmet open modern mapping unique
+544. PASS - titan helmet open legacy mapping unique
+545. PASS - titan helmet open modern inherits armor component
+546. PASS - titan helmet open legacy inherits armor component
+547. PASS - titan chest modern mapping unique
+548. PASS - titan chest legacy mapping unique
+549. PASS - titan chest modern inherits armor component
+550. PASS - titan chest legacy inherits armor component
+551. PASS - titan legs modern mapping unique
+552. PASS - titan legs legacy mapping unique
+553. PASS - titan legs modern inherits armor component
+554. PASS - titan legs legacy inherits armor component
+555. PASS - titan boots modern mapping unique
+556. PASS - titan boots legacy mapping unique
+557. PASS - titan boots modern inherits armor component
+558. PASS - titan boots legacy inherits armor component
+559. PASS - celestial helmet closed modern mapping unique
+560. PASS - celestial helmet closed legacy mapping unique
+561. PASS - celestial helmet closed modern inherits armor component
+562. PASS - celestial helmet closed legacy inherits armor component
+563. PASS - celestial helmet open modern mapping unique
+564. PASS - celestial helmet open legacy mapping unique
+565. PASS - celestial helmet open modern inherits armor component
+566. PASS - celestial helmet open legacy inherits armor component
+567. PASS - celestial chest modern mapping unique
+568. PASS - celestial chest legacy mapping unique
+569. PASS - celestial chest modern inherits armor component
+570. PASS - celestial chest legacy inherits armor component
+571. PASS - celestial legs modern mapping unique
+572. PASS - celestial legs legacy mapping unique
+573. PASS - celestial legs modern inherits armor component
+574. PASS - celestial legs legacy inherits armor component
+575. PASS - celestial boots modern mapping unique
+576. PASS - celestial boots legacy mapping unique
+577. PASS - celestial boots modern inherits armor component
+578. PASS - celestial boots legacy inherits armor component
+579. PASS - water_sovereign helmet closed modern mapping unique
+580. PASS - water_sovereign helmet closed legacy mapping unique
+581. PASS - water_sovereign helmet closed modern inherits armor component
+582. PASS - water_sovereign helmet closed legacy inherits armor component
+583. PASS - water_sovereign helmet open modern mapping unique
+584. PASS - water_sovereign helmet open legacy mapping unique
+585. PASS - water_sovereign helmet open modern inherits armor component
+586. PASS - water_sovereign helmet open legacy inherits armor component
+587. PASS - water_sovereign chest modern mapping unique
+588. PASS - water_sovereign chest legacy mapping unique
+589. PASS - water_sovereign chest modern inherits armor component
+590. PASS - water_sovereign chest legacy inherits armor component
+591. PASS - water_sovereign legs modern mapping unique
+592. PASS - water_sovereign legs legacy mapping unique
+593. PASS - water_sovereign legs modern inherits armor component
+594. PASS - water_sovereign legs legacy inherits armor component
+595. PASS - water_sovereign boots modern mapping unique
+596. PASS - water_sovereign boots legacy mapping unique
+597. PASS - water_sovereign boots modern inherits armor component
+598. PASS - water_sovereign boots legacy inherits armor component
+599. PASS - Java file count retained
+600. PASS - Java stable files byte-identical
+601. PASS - no v371 mapped identifiers remain
+602. PASS - FX mappings retained
+603. PASS - Soul Tide modern mapping present
+604. PASS - Leviathan modern mapping present
+
+QA120 MINIMUM EXCEEDED: 604/604 PASS
