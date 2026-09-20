@@ -1,0 +1,56 @@
+01. PASS - all JSON parses
+02. PASS - all PNG files verify
+03. PASS - Geyser mapping format_version is 2
+04. PASS - Java pack metadata exists
+05. PASS - Bedrock manifest exists
+06. PASS - stable Soul Tide namespace has files
+07. PASS - Soul Tide file count restored exactly
+08. PASS - Soul Tide stable files byte-identical
+09. PASS - Leviathan model byte-identical to stable
+10. PASS - Leviathan stable textures discovered
+11. PASS - Leviathan stable textures byte-identical
+12. PASS - soul_tide v368 item_model wrapper exists
+13. PASS - leviathan v368 item_model wrapper exists
+14. PASS - emberfall v368 item_model wrapper exists
+15. PASS - noctis v368 item_model wrapper exists
+16. PASS - storm v368 item_model wrapper exists
+17. PASS - zephya v368 item_model wrapper exists
+18. PASS - astral v368 item_model wrapper exists
+19. PASS - Soul wrapper points to exact old Soul model
+20. PASS - Leviathan wrapper points to exact old Leviathan model
+21. PASS - Storm wrapper preserves using_item
+22. PASS - Storm wrapper preserves use_duration
+23. PASS - five non-water source Java models still exist
+24. PASS - Java armor open/closed equipment retained
+25. PASS - soul_tide Bedrock stable cubes preserved exactly
+26. PASS - leviathan Bedrock stable cubes preserved exactly
+27. PASS - Soul Tide Bedrock stable texture pixels preserved
+28. PASS - Leviathan Bedrock stable texture pixels preserved
+29. PASS - soul_tide Bedrock geometry exists
+30. PASS - leviathan Bedrock geometry exists
+31. PASS - emberfall Bedrock geometry exists
+32. PASS - noctis Bedrock geometry exists
+33. PASS - storm Bedrock geometry exists
+34. PASS - zephya Bedrock geometry exists
+35. PASS - astral Bedrock geometry exists
+36. PASS - all seven Bedrock attachables exist
+37. PASS - all seven attachable identifiers exactly match new mapping IDs
+38. PASS - all seven first/third hold animations wired
+39. PASS - all seven hold-animation references resolve
+40. PASS - all seven geometries bind to hand slot bone
+41. PASS - all seven Bedrock atlas icons exist
+42. PASS - non-water v368 Bedrock textures are 256px
+43. PASS - all seven v368 modern definitions exist
+44. PASS - all seven new Bedrock IDs unique
+45. PASS - no v368 weapon mapping uses legacy type
+46. PASS - all seven request handheld rendering
+47. PASS - all seven mappings leave base components inherited
+48. PASS - Storm mapping base is minecraft:bow
+49. PASS - Leviathan mapping base is minecraft:trident
+50. PASS - Soul mapping base is minecraft:netherite_sword
+51. PASS - old water legacy mappings absent
+52. PASS - armor mappings retained
+53. PASS - FX mappings retained
+54. PASS - Bedrock armor attachables retained
+
+QA50 MINIMUM EXCEEDED: 54/54 PASS
