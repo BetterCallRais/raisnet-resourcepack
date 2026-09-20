@@ -1,0 +1,204 @@
+name: Build LegendaryRais v3.7.0 Recovery Stable
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v370/**"
+      - ".build/build_v370_packs.py"
+      - ".github/workflows/build-legendaryrais-v370.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v370-src .build/v370-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v370-source.zip
+          unzip -t .build/v370-source.zip
+          mkdir -p .build/v370-src
+          unzip -q .build/v370-source.zip -d .build/v370-src
+          cp .build/extracted-v370/LegendaryRais.java .build/v370-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v370/ArsenalExpansion.java .build/v370-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v370/plugin.yml .build/v370-src/src/main/resources/plugin.yml
+          cp .build/extracted-v370/pom.xml .build/v370-src/pom.xml
+
+      - name: Guard recovery-critical fixes
+        run: |
+          set -euo pipefail
+          SRC=.build/v370-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 370' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 370' "$SRC/LegendaryRais.java"
+          grep -q 'weapon-use-requires-op", false' "$SRC/LegendaryRais.java"
+          grep -q 'priority = EventPriority.HIGH, ignoreCancelled = true' "$SRC/LegendaryRais.java"
+          ! grep -A5 'if (player.isSneaking())' "$SRC/LegendaryRais.java" | grep -q 'event.setCancelled(true)'
+          grep -q 'priority=EventPriority.HIGH,ignoreCancelled=true' "$SRC/ArsenalExpansion.java"
+          grep -q 'Never cancel the real melee hit' "$SRC/ArsenalExpansion.java"
+          grep -q 'legendaryArmorPhysicalGuard' "$SRC/ArsenalExpansion.java"
+          grep -q 'Material.MACE' "$SRC/ArsenalExpansion.java"
+          grep -q 'startArmorVisualTask();' "$SRC/ArsenalExpansion.java"
+          grep -q 'armor.java-3d-overlay", true' "$SRC/LegendaryRais.java"
+          grep -q 'armor.java-3d-update-ticks", 1' "$SRC/LegendaryRais.java"
+          grep -q 'armorCmd(set,"helmet")+1000' "$SRC/ArsenalExpansion.java"
+          grep -q 'risdiag' .build/v370-src/src/main/resources/plugin.yml
+          grep -q 'enable-custom-content' "$SRC/ArsenalExpansion.java"
+          grep -q 'GROUND WINDBURST LEAP' "$SRC/ArsenalExpansion.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v370-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.7.0.jar ../../LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar > ../../LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.sha256
+
+      - name: Verify plugin JAR
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.7.0"
+          unzip -p LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar plugin.yml | grep -q "risdiag:"
+          unzip -p LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar plugin.yml | grep -q "risrepair:"
+          jar tf LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build Recovery Stable packs + QA70
+        run: python .build/build_v370_packs.py
+
+      - name: Require QA70
+        run: |
+          set -euo pipefail
+          COUNT="$(grep -c '^..\. PASS - ' LegendaryRais-v3.7.0-QA70.txt)"
+          test "$COUNT" -ge 70
+          grep -q 'QA70 MINIMUM EXCEEDED:' LegendaryRais-v3.7.0-QA70.txt
+          cat LegendaryRais-v3.7.0-QA70.txt
+
+      - name: Verify legacy mapping recovery strategy
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,zipfile
+          m=json.load(open('LegendaryRais-Geyser-v3.7.0-mappings.json'))
+          assert m['format_version']==2
+          defs=[d for arr in m['items'].values() for d in arr]
+          expected={
+            910041:'raisnet370:soul_tide',
+            910042:'raisnet370:leviathan',
+            910051:'raisnet370:emberfall',
+            910052:'raisnet370:noctis',
+            910053:'raisnet370:stormpiercer',
+            910054:'raisnet370:zephya',
+            910055:'raisnet370:astral_frost',
+          }
+          for cmd,bid in expected.items():
+              ds=[d for d in defs if d.get('type')=='legacy' and d.get('custom_model_data')==cmd]
+              assert len(ds)==1,(cmd,len(ds))
+              assert ds[0]['bedrock_identifier']==bid,(cmd,ds[0].get('bedrock_identifier'))
+              assert ds[0]['priority']==1000
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.7.0-RECOVERY-STABLE.mcpack') as z:
+              names=set(z.namelist())
+              for bid in expected.values():
+                  key=bid.split(':',1)[1]
+                  ap=f'attachables/v370_{key}.player.json'
+                  assert ap in names,ap
+                  a=json.loads(z.read(ap))['minecraft:attachable']['description']
+                  assert a['identifier']==bid,(ap,a['identifier'],bid)
+          print('LEGACY_RECOVERY_MAPPING PASS')
+          PY
+
+      - name: Verify Java v3.6.8 weapon freeze
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import zipfile
+          old='LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.zip'
+          new='LegendaryRais-Java-26.1.2-v3.7.0-RECOVERY-STABLE.zip'
+          frozen=[
+            'assets/legendaryv368/items/soul_tide.json',
+            'assets/legendaryv368/items/leviathan.json',
+            'assets/legendaryv368/items/emberfall_claymore.json',
+            'assets/legendaryv368/items/noctis_longsword.json',
+            'assets/legendaryv368/items/stormpiercer_recurve_bow.json',
+            'assets/legendaryv368/items/gaia_war_spear.json',
+            'assets/legendaryv368/items/astral_frost_greataxe.json',
+            'assets/legendaryrais/models/item/abyss_leviathan_trident.json',
+          ]
+          with zipfile.ZipFile(old) as a, zipfile.ZipFile(new) as b:
+              for n in frozen: assert a.read(n)==b.read(n),n
+              soul=[n for n in a.namelist() if n.startswith('assets/soultide/')]
+              assert soul
+              for n in soul: assert a.read(n)==b.read(n),n
+          print('JAVA_WEAPON_FREEZE PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v370"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v370/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v370/paper.jar
+          cp LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar .build/smoke-v370/plugins/
+          echo "eula=true" > .build/smoke-v370/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v370/server.properties
+          cd .build/smoke-v370
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 150); do
+            grep -Fq "LegendaryRais v3.7.0" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 18 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.7.0-RECOVERY-STABLE
+          path: |
+            LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar
+            LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.7.0-RECOVERY-STABLE.zip
+            LegendaryRais-Java-26.1.2-v3.7.0-RECOVERY-STABLE.sha1
+            LegendaryRais-Bedrock-v3.7.0-RECOVERY-STABLE.mcpack
+            LegendaryRais-Bedrock-v3.7.0-RECOVERY-STABLE.sha1
+            LegendaryRais-Geyser-v3.7.0-mappings.json
+            LegendaryRais-v3.7.0-QA70.txt
+          retention-days: 7
+
+      - name: Publish verified v3.7.0
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.jar             LegendaryRais-3.7.0-RECOVERY-STABLE-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.7.0-RECOVERY-STABLE.zip             LegendaryRais-Java-26.1.2-v3.7.0-RECOVERY-STABLE.sha1             LegendaryRais-Bedrock-v3.7.0-RECOVERY-STABLE.mcpack             LegendaryRais-Bedrock-v3.7.0-RECOVERY-STABLE.sha1             LegendaryRais-Geyser-v3.7.0-mappings.json             LegendaryRais-v3.7.0-QA70.txt
+          git commit -m "Publish LegendaryRais v3.7.0 Recovery Stable" || exit 0
+          git pull --rebase origin main
+          git push
