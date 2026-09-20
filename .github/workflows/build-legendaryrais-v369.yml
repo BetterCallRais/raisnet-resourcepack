@@ -1,0 +1,184 @@
+name: Build LegendaryRais v3.6.9 Armor Ascension HD3D
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v369/**"
+      - ".build/build_v369_packs.py"
+      - ".github/workflows/build-legendaryrais-v369.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v369-src .build/v369-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v369-source.zip
+          unzip -t .build/v369-source.zip
+          mkdir -p .build/v369-src
+          unzip -q .build/v369-source.zip -d .build/v369-src
+          cp .build/extracted-v369/LegendaryRais.java .build/v369-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v369/ArsenalExpansion.java .build/v369-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v369/plugin.yml .build/v369-src/src/main/resources/plugin.yml
+          cp .build/extracted-v369/pom.xml .build/v369-src/pom.xml
+
+      - name: Guard gameplay + armor migration
+        run: |
+          set -euo pipefail
+          SRC=.build/v369-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 369' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 369' "$SRC/LegendaryRais.java"
+          grep -q 'windburst-ground-leap.vertical", 1.55' "$SRC/LegendaryRais.java"
+          grep -q 'windLeapSafeUntil' "$SRC/ArsenalExpansion.java"
+          grep -q 'GROUND WINDBURST LEAP' "$SRC/ArsenalExpansion.java"
+          grep -q 'armor.damage.skill1.titan",7.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'armor.damage.skill1.phoenix",6.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'armor.damage.skill2.phoenix",4.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'armor.damage.skill2.celestial-pulse",1.5' "$SRC/ArsenalExpansion.java"
+          grep -q 'legendaryv369","armor/' "$SRC/ArsenalExpansion.java"
+          grep -q 'legendaryv369",piece.equals("helmet")' "$SRC/ArsenalExpansion.java"
+          grep -q 'isBedrock(p)||p.isDead()' "$SRC/ArsenalExpansion.java"
+          grep -q 'PersistentDataType.INTEGER,369' "$SRC/ArsenalExpansion.java"
+          grep -q 'legendaryv368", "soul_tide"' "$SRC/LegendaryRais.java"
+          grep -q 'legendaryv368", "leviathan"' "$SRC/LegendaryRais.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v369-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.9.jar ../../LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.sha256
+
+      - name: Verify plugin JAR
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.6.9"
+          jar tf LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build HD3D packs and run QA60
+        run: python .build/build_v369_packs.py
+
+      - name: Require at least QA60
+        run: |
+          set -euo pipefail
+          COUNT="$(grep -c '^..\. PASS - ' LegendaryRais-v3.6.9-QA60.txt)"
+          test "$COUNT" -ge 60
+          grep -q 'QA60 MINIMUM EXCEEDED:' LegendaryRais-v3.6.9-QA60.txt
+          cat LegendaryRais-v3.6.9-QA60.txt
+
+      - name: Cross-check armor mapping against Bedrock pack
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,zipfile
+          sets=('phoenix','voidwalker','titan','celestial','water_sovereign')
+          m=json.load(open('LegendaryRais-Geyser-v3.6.9-mappings.json'))
+          defs=[d for arr in m['items'].values() for d in arr if d.get('type')=='definition']
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.6.9-ARMOR-ASCENSION-HD3D.mcpack') as z:
+              names=set(z.namelist())
+              for s in sets:
+                  for p in ('chest','legs','boots','helmet_open','helmet_closed'):
+                      model=f'legendaryv369:armor/{s}_{p}'
+                      ds=[d for d in defs if d.get('model')==model]
+                      assert len(ds)==1,(model,len(ds))
+                      bid=ds[0]['bedrock_identifier']
+                      assert bid==f'raisnet369:{s}_{p}'
+                      ap=f'attachables/v369_armor_{s}_{p}.json'
+                      assert ap in names,ap
+                      a=json.loads(z.read(ap))['minecraft:attachable']['description']
+                      assert a['identifier']==bid,(ap,a['identifier'],bid)
+                      assert a['render_controllers']==['controller.render.armor']
+          print('ARMOR_MAPPING_3D PASS')
+          PY
+
+      - name: Verify weapon freeze
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.zip') as a, zipfile.ZipFile('LegendaryRais-Java-26.1.2-v3.6.9-ARMOR-ASCENSION-HD3D.zip') as b:
+              # Accepted Water Relic files must not be changed by armor build.
+              sa={n for n in a.namelist() if n.startswith('assets/soultide/')}
+              sb={n for n in b.namelist() if n.startswith('assets/soultide/')}
+              assert sa==sb
+              for n in sa: assert a.read(n)==b.read(n),n
+              n='assets/legendaryrais/models/item/abyss_leviathan_trident.json'
+              assert a.read(n)==b.read(n)
+          print('WATER_WEAPON_FREEZE PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v369"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v369/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v369/paper.jar
+          cp LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar .build/smoke-v369/plugins/
+          echo "eula=true" > .build/smoke-v369/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v369/server.properties
+          cd .build/smoke-v369
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 150); do
+            grep -Fq "LegendaryRais v3.6.9" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 15 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.9-ARMOR-ASCENSION-HD3D
+          path: |
+            LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar
+            LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.9-ARMOR-ASCENSION-HD3D.zip
+            LegendaryRais-Java-26.1.2-v3.6.9-ARMOR-ASCENSION-HD3D.sha1
+            LegendaryRais-Bedrock-v3.6.9-ARMOR-ASCENSION-HD3D.mcpack
+            LegendaryRais-Bedrock-v3.6.9-ARMOR-ASCENSION-HD3D.sha1
+            LegendaryRais-Geyser-v3.6.9-mappings.json
+            LegendaryRais-v3.6.9-QA60.txt
+          retention-days: 7
+
+      - name: Publish verified v3.6.9
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.jar             LegendaryRais-3.6.9-ARMOR-ASCENSION-WIND-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.9-ARMOR-ASCENSION-HD3D.zip             LegendaryRais-Java-26.1.2-v3.6.9-ARMOR-ASCENSION-HD3D.sha1             LegendaryRais-Bedrock-v3.6.9-ARMOR-ASCENSION-HD3D.mcpack             LegendaryRais-Bedrock-v3.6.9-ARMOR-ASCENSION-HD3D.sha1             LegendaryRais-Geyser-v3.6.9-mappings.json             LegendaryRais-v3.6.9-QA60.txt
+          git commit -m "Publish LegendaryRais v3.6.9 Armor Ascension HD3D" || exit 0
+          git pull --rebase origin main
+          git push
