@@ -1,0 +1,32 @@
+01. PASS - all JSON files parse
+02. PASS - all PNG files verify
+03. PASS - Java pack metadata exists
+04. PASS - Bedrock manifest exists
+05. PASS - Geyser mapping parses
+06. PASS - all Java weapon item definitions exist
+07. PASS - all Java weapon models exist
+08. PASS - Java weapon textures are 256px
+09. PASS - Java element budgets 10..28
+10. PASS - Java model coordinates remain inside -16..32
+11. PASS - Java models centered on Z=8 hand pivot
+12. PASS - all Java grips cross x=8/y=4 hand anchor
+13. PASS - Java third-person X offsets centered
+14. PASS - Java third-person Z offsets centered
+15. PASS - Java third-person scales <=0.63
+16. PASS - Stormpiercer three pull models exist
+17. PASS - Stormpiercer uses using_item condition
+18. PASS - Stormpiercer draw uses use_duration
+19. PASS - all Java full armor equipment has >=2 layers
+20. PASS - all Java open/closed helmet equipment files exist
+21. PASS - all Bedrock weapon geometry files exist
+22. PASS - Bedrock weapon cube budgets 8..30
+23. PASS - all Bedrock weapon textures 128px
+24. PASS - all Bedrock weapon attachables exist
+25. PASS - Bedrock weapon geometry binds to item slot bone
+26. PASS - Bedrock first/third-person hold animations wired
+27. PASS - each weapon has exactly one Geyser definition
+28. PASS - weapon Bedrock identifiers unique
+29. PASS - all Bedrock armor attachables complete
+30. PASS - Soul Tide and Leviathan locked assets still present
+
+QA30: 30/30 PASS
