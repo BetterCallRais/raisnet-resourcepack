@@ -1,0 +1,157 @@
+name: Build LegendaryRais v3.6.3 Resource Integrity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v363/**"
+      - ".build/build_v363_packs.py"
+      - ".github/workflows/build-legendaryrais-v363.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v363-src .build/v363-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v363-source.zip
+          unzip -t .build/v363-source.zip
+          mkdir -p .build/v363-src
+          unzip -q .build/v363-source.zip -d .build/v363-src
+          cp .build/extracted-v363/LegendaryRais.java .build/v363-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v363/ArsenalExpansion.java .build/v363-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v363/plugin.yml .build/v363-src/src/main/resources/plugin.yml
+          cp .build/extracted-v363/pom.xml .build/v363-src/pom.xml
+
+      - name: Guard v3.6.3 migration and resource rules
+        run: |
+          set -euo pipefail
+          SRC=.build/v363-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 363' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 363' "$SRC/LegendaryRais.java"
+          grep -q 'asset_version' "$SRC/ArsenalExpansion.java"
+          grep -q 'refreshAllLegendaryItems' "$SRC/ArsenalExpansion.java"
+          grep -q 'refreshLegendaryItem' "$SRC/ArsenalExpansion.java"
+          grep -q 'risrepair' .build/v363-src/src/main/resources/plugin.yml
+          grep -q 'astral_frost_greataxe' "$SRC/ArsenalExpansion.java"
+          grep -q 'normal right-click is NEVER cancelled' "$SRC/ArsenalExpansion.java"
+          grep -q '390.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' "$SRC/LegendaryRais.java"
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' "$SRC/LegendaryRais.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v363-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.3.jar ../../LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.sha256
+
+      - name: Verify plugin
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.6.3"
+          unzip -p LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar plugin.yml | grep -q "risrepair:"
+          jar tf LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build and exhaustively audit packs
+        run: python .build/build_v363_packs.py
+
+      - name: Final resource integrity assertions
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.3-RESOURCE-INTEGRITY.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.3-RESOURCE-INTEGRITY.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.3-mappings.json >/dev/null
+          python - <<'PY'
+          import zipfile,json
+          J='LegendaryRais-Java-26.1.2-v3.6.3-RESOURCE-INTEGRITY.zip'
+          with zipfile.ZipFile(J) as z:
+              names=set(z.namelist())
+              assert 'pack.mcmeta' in names
+              meta=json.loads(z.read('pack.mcmeta'))
+              assert meta['pack']['min_format']==[84,0]
+              assert meta['pack']['max_format']==[84,0]
+              for n in ('emberfall_claymore','noctis_longsword','stormpiercer_recurve_bow','gaia_war_spear','astral_frost_greataxe'):
+                  assert f'assets/legendaryv34/items/{n}.json' in names
+                  assert f'assets/legendaryv34/models/item/{n}.json' in names
+              old=json.loads(z.read('assets/legendaryv34/items/astral_twin_daggers.json'))
+              assert old['model']['model']=='legendaryv34:item/astral_frost_greataxe'
+              # Legacy namespaces are now tiny aliases, not duplicated 20MB asset trees.
+              legacy=[n for n in names if n.startswith('assets/legendaryv32/textures/') or n.startswith('assets/legendaryv33/textures/')]
+              assert not legacy,legacy[:5]
+          print('FINAL_RESOURCE_ASSERTIONS PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v363"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v363/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v363/paper.jar
+          cp LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar .build/smoke-v363/plugins/
+          echo "eula=true" > .build/smoke-v363/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v363/server.properties
+          cd .build/smoke-v363
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 140); do
+            grep -Fq "LegendaryRais v3.6.3" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 14 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.3-RESOURCE-INTEGRITY
+          path: |
+            LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar
+            LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.3-RESOURCE-INTEGRITY.zip
+            LegendaryRais-Java-26.1.2-v3.6.3-RESOURCE-INTEGRITY.sha1
+            LegendaryRais-Bedrock-v3.6.3-RESOURCE-INTEGRITY.mcpack
+            LegendaryRais-Bedrock-v3.6.3-RESOURCE-INTEGRITY.sha1
+            LegendaryRais-Geyser-v3.6.3-mappings.json
+          retention-days: 7
+
+      - name: Publish verified v3.6.3
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.jar             LegendaryRais-3.6.3-RESOURCE-INTEGRITY-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.3-RESOURCE-INTEGRITY.zip             LegendaryRais-Java-26.1.2-v3.6.3-RESOURCE-INTEGRITY.sha1             LegendaryRais-Bedrock-v3.6.3-RESOURCE-INTEGRITY.mcpack             LegendaryRais-Bedrock-v3.6.3-RESOURCE-INTEGRITY.sha1             LegendaryRais-Geyser-v3.6.3-mappings.json
+          git commit -m "Publish LegendaryRais v3.6.3 Resource Integrity" || exit 0
+          git pull --rebase origin main
+          git push
