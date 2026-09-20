@@ -221,7 +221,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
             File[] oldMaps=maps.listFiles();
             if(oldMaps!=null)for(File f:oldMaps)if(f.isFile()&&f.getName().toLowerCase(Locale.ROOT).contains("legendaryrais"))Files.deleteIfExists(f.toPath());
 
-            copyBundled("bedrock/LegendaryRais-Bedrock-v3.7.2-NATIVE-STABLE.mcpack",new File(packs,"LegendaryRais-Bedrock-v3.7.2-NATIVE-STABLE.mcpack"));
+            copyBundled("bedrock/LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack",new File(packs,"LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack"));
             copyBundled("bedrock/LegendaryRais-Geyser-v3.7.2-mappings.json",new File(maps,"LegendaryRais-Geyser-v3.7.2-mappings.json"));
 
             File cfg=new File(geyserDir,"config.yml");
