@@ -14,6 +14,10 @@ commands:
     description: Open the full LegendaryRais weapon and armor GUI.
     usage: /rislegend
     permission: legendaryrais.legend
+  risdiag:
+    description: Diagnose Geyser custom mappings and Bedrock resource pack deployment.
+    usage: /risdiag
+    permission: legendaryrais.diag
   rishelmet:
     description: Toggle legendary helmet visor open/closed.
     usage: /rishelmet <open|closed|toggle|status>
@@ -31,6 +35,9 @@ commands:
     usage: /riswp
     permission: legendaryrais.admin
 permissions:
+  legendaryrais.diag:
+    description: Allows LegendaryRais deployment diagnostics.
+    default: op
   legendaryrais.helmet:
     description: Allows toggling the legendary helmet visor.
     default: true
