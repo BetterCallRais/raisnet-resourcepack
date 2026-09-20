@@ -319,13 +319,13 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         m.setDisplayName(color+"§l"+title+" §8• §f"+piece.toUpperCase(Locale.ROOT));
         m.setLore(lore);
         String itemModel=piece.equals("helmet")?"armor/"+set+"_helmet_closed":"armor/"+set+"_"+piece;
-        applyVisual(m,armorCmd(set,piece),itemModel);
+        applyArmorVisualV369(m,armorCmd(set,piece),itemModel);
 
         // Explicit slot + swappable fixes right-click equipping on modern Paper.
         try{
             var eq=m.getEquippable();
             eq.setSlot(armorSlot(piece));
-            eq.setModel(new NamespacedKey("legendaryv34",piece.equals("helmet")?set+"_helmet_closed":set+"_set"));
+            eq.setModel(new NamespacedKey("legendaryv369",piece.equals("helmet")?set+"_helmet_closed":set+"_set"));
             eq.setSwappable(true);
             eq.setDamageOnHurt(false);
             m.setEquippable(eq);
@@ -544,7 +544,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         try{
             var eq=meta.getEquippable();
             eq.setSlot(EquipmentSlot.HEAD);
-            eq.setModel(new NamespacedKey("legendaryv34",set+"_helmet_"+suffix));
+            eq.setModel(new NamespacedKey("legendaryv369",set+"_helmet_"+suffix));
             eq.setSwappable(true);
             eq.setDamageOnHurt(false);
             meta.setEquippable(eq);
@@ -600,7 +600,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
                 if("OPEN".equalsIgnoreCase(im)){
                     ItemMeta fm=fresh.getItemMeta();
                     if(fm!=null){
-                        try{fm.setItemModel(new NamespacedKey("legendaryv34","armor/"+set+"_helmet_open"));}catch(Throwable ignored){}
+                        try{fm.setItemModel(new NamespacedKey("legendaryv369","armor/"+set+"_helmet_open"));}catch(Throwable ignored){}
                         try{var eq=fm.getEquippable();eq.setSlot(EquipmentSlot.HEAD);eq.setModel(new NamespacedKey("legendaryv34",set+"_helmet_open"));eq.setSwappable(true);eq.setDamageOnHurt(false);fm.setEquippable(eq);}catch(Throwable ignored){}
                         fm.getPersistentDataContainer().set(helmetModeKey,PersistentDataType.STRING,"OPEN");fresh.setItemMeta(fm);
                     }
@@ -609,6 +609,13 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
             return fresh;
         }
         return old;
+    }
+
+    private void applyArmorVisualV369(ItemMeta m,int cmd,String model){
+        m.setUnbreakable(true);
+        try{m.setCustomModelData(cmd);}catch(Throwable ignored){}
+        try{m.setItemModel(new NamespacedKey("legendaryv369",model));}catch(Throwable ignored){}
+        try{m.setEnchantmentGlintOverride(true);}catch(Throwable ignored){}
     }
 
     private void applyWeaponVisualV368(ItemMeta m,int cmd,String model){
