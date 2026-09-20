@@ -1,0 +1,133 @@
+name: Build LegendaryRais v3.6.6 Mythic Art QA30
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/build_v366_packs.py"
+      - ".github/workflows/build-legendaryrais-v366.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-qa30-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Build v3.6.6 packs and run QA30
+        run: python .build/build_v366_packs.py
+
+      - name: Verify QA30 report exactly 30/30
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^..\. PASS - ' LegendaryRais-v3.6.6-QA30.txt)" -eq 30
+          grep -q 'QA30: 30/30 PASS' LegendaryRais-v3.6.6-QA30.txt
+          cat LegendaryRais-v3.6.6-QA30.txt
+
+      - name: Verify final archives
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.6-mappings.json >/dev/null
+          test "$(wc -c < LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.zip)" -gt 1000000
+          test "$(wc -c < LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.mcpack)" -gt 200000
+
+      - name: Cross-check bow model dispatch
+        run: |
+          python - <<'PY'
+          import json,zipfile
+          p='LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.zip'
+          with zipfile.ZipFile(p) as z:
+              d=json.loads(z.read('assets/legendaryv34/items/stormpiercer_recurve_bow.json'))['model']
+              assert d['type']=='minecraft:condition'
+              assert d['property']=='minecraft:using_item'
+              assert d['on_true']['type']=='minecraft:range_dispatch'
+              assert d['on_true']['property']=='minecraft:use_duration'
+              assert len(d['on_true']['entries'])==2
+          print('BOW_DISPATCH PASS')
+          PY
+
+      - name: Cross-check no missing Java model references
+        run: |
+          python - <<'PY'
+          import json,zipfile
+          p='LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.zip'
+          with zipfile.ZipFile(p) as z:
+              names=set(z.namelist())
+              for name in names:
+                  if not name.endswith('.json') or '/items/' not in name: continue
+                  try:d=json.loads(z.read(name))
+                  except:continue
+                  refs=[]
+                  def walk(x):
+                      if isinstance(x,dict):
+                          if x.get('type')=='minecraft:model' and isinstance(x.get('model'),str):refs.append(x['model'])
+                          for v in x.values():walk(v)
+                      elif isinstance(x,list):
+                          for v in x:walk(v)
+                  walk(d)
+                  for ref in refs:
+                      ns,path=(ref.split(':',1) if ':' in ref else ('minecraft',ref))
+                      if ns!='minecraft':
+                          assert f'assets/{ns}/models/{path}.json' in names,(name,ref)
+          print('JAVA_MODEL_REFS PASS')
+          PY
+
+      - name: Cross-check Bedrock identifiers and attachables
+        run: |
+          python - <<'PY'
+          import json,zipfile
+          m=json.load(open('LegendaryRais-Geyser-v3.6.6-mappings.json'))
+          ids=[]
+          wanted={
+            'legendaryv34:emberfall_claymore',
+            'legendaryv34:noctis_longsword',
+            'legendaryv34:stormpiercer_recurve_bow',
+            'legendaryv34:gaia_war_spear',
+            'legendaryv34:astral_frost_greataxe'
+          }
+          defs=[d for arr in m['items'].values() for d in arr if d.get('type')=='definition' and d.get('model') in wanted]
+          assert len(defs)==5
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.mcpack') as z:
+              names=set(z.namelist())
+              for d in defs:
+                  ident=d['bedrock_identifier'];ids.append(ident)
+                  key=ident.split(':',1)[1]
+                  assert f'attachables/{key}.player.json' in names
+                  a=json.loads(z.read(f'attachables/{key}.player.json'))['minecraft:attachable']['description']
+                  assert a['identifier']==ident
+          assert len(set(ids))==5
+          print('BEDROCK_IDENTIFIERS PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.6-MYTHIC-ART-QA30
+          path: |
+            LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.zip
+            LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.sha1
+            LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.mcpack
+            LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.sha1
+            LegendaryRais-Geyser-v3.6.6-mappings.json
+            LegendaryRais-v3.6.6-QA30.txt
+          retention-days: 7
+
+      - name: Publish verified v3.6.6
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.zip             LegendaryRais-Java-26.1.2-v3.6.6-MYTHIC-ART-QA30.sha1             LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.mcpack             LegendaryRais-Bedrock-v3.6.6-MYTHIC-ART-QA30.sha1             LegendaryRais-Geyser-v3.6.6-mappings.json             LegendaryRais-v3.6.6-QA30.txt
+          git commit -m "Publish LegendaryRais v3.6.6 Mythic Art QA30" || exit 0
+          git pull --rebase origin main
+          git push
