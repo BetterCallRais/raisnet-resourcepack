@@ -324,7 +324,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(weaponKey, PersistentDataType.STRING, WEAPON_SOUL_TIDE);
-        pdc.set(waterAssetVersionKey, PersistentDataType.INTEGER, 368);
+        pdc.set(waterAssetVersionKey, PersistentDataType.INTEGER, 370);
         if (menuCopy) pdc.set(menuKey, PersistentDataType.STRING, WEAPON_SOUL_TIDE);
         item.setItemMeta(meta);
         return item;
@@ -365,7 +365,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         applyLegendaryVisualMeta(meta, LEVIATHAN_MODEL_DATA, "legendaryv368", "leviathan", true);
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(weaponKey, PersistentDataType.STRING, WEAPON_LEVIATHAN);
-        pdc.set(waterAssetVersionKey, PersistentDataType.INTEGER, 368);
+        pdc.set(waterAssetVersionKey, PersistentDataType.INTEGER, 370);
         if (menuCopy) pdc.set(menuKey, PersistentDataType.STRING, WEAPON_LEVIATHAN);
         item.setItemMeta(meta);
         return item;
@@ -399,7 +399,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         boolean oldSoulModel = WEAPON_SOUL_TIDE.equals(weaponId) && ("soultide:soul_tide_katana".equals(currentModel) || "soultide:soul_tide_sovereign_blade".equals(currentModel));
         if (itemModelKey.equals(currentModel) || oldSoulModel || modelData == readCustomModelNumber(meta)) {
             meta.getPersistentDataContainer().set(weaponKey, PersistentDataType.STRING, weaponId);
-            meta.getPersistentDataContainer().set(waterAssetVersionKey, PersistentDataType.INTEGER, 368);
+            meta.getPersistentDataContainer().set(waterAssetVersionKey, PersistentDataType.INTEGER, 370);
             String[] key = itemModelKey.split(":", 2);
             applyLegendaryVisualMeta(meta, modelData, key[0], key[1], loyalty);
             if (WEAPON_SOUL_TIDE.equals(weaponId)) meta.setDisplayName("§b§lSOUL TIDE §3§lSOVEREIGN BLADE §8[V6]");
@@ -417,7 +417,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         if (needsRepair || loyalty) {
             String[] key = itemModelKey.split(":", 2);
             meta.getPersistentDataContainer().set(weaponKey, PersistentDataType.STRING, weaponId);
-            meta.getPersistentDataContainer().set(waterAssetVersionKey, PersistentDataType.INTEGER, 368);
+            meta.getPersistentDataContainer().set(waterAssetVersionKey, PersistentDataType.INTEGER, 370);
             applyLegendaryVisualMeta(meta, modelData, key[0], key[1], loyalty);
             if (WEAPON_SOUL_TIDE.equals(weaponId)) meta.setDisplayName("§b§lSOUL TIDE §3§lSOVEREIGN BLADE §8[V6]");
             if (WEAPON_LEVIATHAN.equals(weaponId)) meta.setDisplayName("§3§lABYSS LEVIATHAN §8§lTRIDENT §b[V6]");
@@ -547,7 +547,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         Integer ver = meta.getPersistentDataContainer().get(waterAssetVersionKey, PersistentDataType.INTEGER);
         String expected = soul ? "legendaryv368:soul_tide" : "legendaryv368:leviathan";
         Material material = soul ? Material.NETHERITE_SWORD : Material.TRIDENT;
-        if (ver != null && ver >= 368 && expected.equals(model) && old.getType() == material && readUnbreakable(meta)) return old;
+        if (ver != null && ver >= 370 && expected.equals(model) && old.getType() == material && readUnbreakable(meta)) return old;
         ItemStack fresh = soul ? createSoulTideKatana(false) : createLeviathanTrident(false);
         fresh.setAmount(old.getAmount());
         return fresh;
@@ -561,7 +561,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
                 if (!p.isOnline()) return;
                 int fixed = repairWaterItems(p);
                 if (fixed > 0) {
-                    p.sendMessage("§bLegendaryRais §8• §a" + fixed + " Water Relic item diperbarui ke asset v3.6.8.");
+                    p.sendMessage("§bLegendaryRais §8• §a" + fixed + " Water Relic item diperbarui ke asset v3.7.0.");
                     getLogger().info("[WATER-ASSET-MIGRATION] " + p.getName() + " refreshed " + fixed + " item(s).");
                 }
             }
