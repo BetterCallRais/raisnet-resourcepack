@@ -1,7 +1,8 @@
 name: LegendaryRais
 version: 3.7.1
 main: id.raisnet.legendaryrais.LegendaryRais
-loadbefore: [Geyser-Spigot]\napi-version: '26.1.2'
+loadbefore: [Geyser-Spigot]
+api-version: '26.1.2'
 author: RaisNet
 softdepend: [floodgate]
 description: LegendaryRais v3.7.1 Native-Stable Self-Deploy - reliable damage floors, no Java follower overlay, dual Bedrock mapping, auto-deployed Geyser assets, HD native armor.
