@@ -1,0 +1,397 @@
+001. PASS - all JSON parses
+002. PASS - all PNG verifies
+003. PASS - mapping format v2
+004. PASS - fresh Bedrock UUID
+005. PASS - fresh Bedrock module UUID
+006. PASS - Soul Tide namespace found
+007. PASS - Soul Tide namespace fully retained
+008. PASS - Soul Tide exact bytes retained
+009. PASS - Leviathan model exact bytes retained
+010. PASS - assets/legendaryv368/items/soul_tide.json exact retained
+011. PASS - assets/legendaryv368/items/leviathan.json exact retained
+012. PASS - emberfall Java model exists
+013. PASS - emberfall uses v371 HD texture refs
+014. PASS - emberfall texture item/emberfall_metal exists
+015. PASS - emberfall texture item/emberfall_metal is 512
+016. PASS - emberfall texture item/emberfall_grip exists
+017. PASS - emberfall texture item/emberfall_grip is 512
+018. PASS - emberfall texture item/emberfall_accent exists
+019. PASS - emberfall texture item/emberfall_accent is 512
+020. PASS - noctis Java model exists
+021. PASS - noctis uses v371 HD texture refs
+022. PASS - noctis texture item/noctis_metal exists
+023. PASS - noctis texture item/noctis_metal is 512
+024. PASS - noctis texture item/noctis_grip exists
+025. PASS - noctis texture item/noctis_grip is 512
+026. PASS - noctis texture item/noctis_accent exists
+027. PASS - noctis texture item/noctis_accent is 512
+028. PASS - stormpiercer Java model exists
+029. PASS - stormpiercer uses v371 HD texture refs
+030. PASS - stormpiercer texture item/stormpiercer_metal exists
+031. PASS - stormpiercer texture item/stormpiercer_metal is 512
+032. PASS - stormpiercer texture item/stormpiercer_grip exists
+033. PASS - stormpiercer texture item/stormpiercer_grip is 512
+034. PASS - stormpiercer texture item/stormpiercer_accent exists
+035. PASS - stormpiercer texture item/stormpiercer_accent is 512
+036. PASS - zephya Java model exists
+037. PASS - zephya uses v371 HD texture refs
+038. PASS - zephya texture item/zephya_metal exists
+039. PASS - zephya texture item/zephya_metal is 512
+040. PASS - zephya texture item/zephya_grip exists
+041. PASS - zephya texture item/zephya_grip is 512
+042. PASS - zephya texture item/zephya_accent exists
+043. PASS - zephya texture item/zephya_accent is 512
+044. PASS - astral Java model exists
+045. PASS - astral uses v371 HD texture refs
+046. PASS - astral texture item/astral_metal exists
+047. PASS - astral texture item/astral_metal is 512
+048. PASS - astral texture item/astral_grip exists
+049. PASS - astral texture item/astral_grip is 512
+050. PASS - astral texture item/astral_accent exists
+051. PASS - astral texture item/astral_accent is 512
+052. PASS - phoenix Java native set model exists
+053. PASS - phoenix Java native closed helmet exists
+054. PASS - phoenix Java native open helmet exists
+055. PASS - phoenix humanoid base HD exists
+056. PASS - phoenix humanoid base 512x256
+057. PASS - phoenix humanoid accent HD exists
+058. PASS - phoenix humanoid accent 512x256
+059. PASS - phoenix humanoid_leggings base HD exists
+060. PASS - phoenix humanoid_leggings base 512x256
+061. PASS - phoenix humanoid_leggings accent HD exists
+062. PASS - phoenix humanoid_leggings accent 512x256
+063. PASS - voidwalker Java native set model exists
+064. PASS - voidwalker Java native closed helmet exists
+065. PASS - voidwalker Java native open helmet exists
+066. PASS - voidwalker humanoid base HD exists
+067. PASS - voidwalker humanoid base 512x256
+068. PASS - voidwalker humanoid accent HD exists
+069. PASS - voidwalker humanoid accent 512x256
+070. PASS - voidwalker humanoid_leggings base HD exists
+071. PASS - voidwalker humanoid_leggings base 512x256
+072. PASS - voidwalker humanoid_leggings accent HD exists
+073. PASS - voidwalker humanoid_leggings accent 512x256
+074. PASS - titan Java native set model exists
+075. PASS - titan Java native closed helmet exists
+076. PASS - titan Java native open helmet exists
+077. PASS - titan humanoid base HD exists
+078. PASS - titan humanoid base 512x256
+079. PASS - titan humanoid accent HD exists
+080. PASS - titan humanoid accent 512x256
+081. PASS - titan humanoid_leggings base HD exists
+082. PASS - titan humanoid_leggings base 512x256
+083. PASS - titan humanoid_leggings accent HD exists
+084. PASS - titan humanoid_leggings accent 512x256
+085. PASS - celestial Java native set model exists
+086. PASS - celestial Java native closed helmet exists
+087. PASS - celestial Java native open helmet exists
+088. PASS - celestial humanoid base HD exists
+089. PASS - celestial humanoid base 512x256
+090. PASS - celestial humanoid accent HD exists
+091. PASS - celestial humanoid accent 512x256
+092. PASS - celestial humanoid_leggings base HD exists
+093. PASS - celestial humanoid_leggings base 512x256
+094. PASS - celestial humanoid_leggings accent HD exists
+095. PASS - celestial humanoid_leggings accent 512x256
+096. PASS - water_sovereign Java native set model exists
+097. PASS - water_sovereign Java native closed helmet exists
+098. PASS - water_sovereign Java native open helmet exists
+099. PASS - water_sovereign humanoid base HD exists
+100. PASS - water_sovereign humanoid base 512x256
+101. PASS - water_sovereign humanoid accent HD exists
+102. PASS - water_sovereign humanoid accent 512x256
+103. PASS - water_sovereign humanoid_leggings base HD exists
+104. PASS - water_sovereign humanoid_leggings base 512x256
+105. PASS - water_sovereign humanoid_leggings accent HD exists
+106. PASS - water_sovereign humanoid_leggings accent 512x256
+107. PASS - soul_tide modern attachable exists
+108. PASS - soul_tide legacy attachable exists
+109. PASS - soul_tide modern identifier exact
+110. PASS - soul_tide legacy identifier exact
+111. PASS - soul_tide modern/legacy share geometry
+112. PASS - soul_tide modern/legacy share texture
+113. PASS - soul_tide modern definition exists
+114. PASS - soul_tide legacy definition exists
+115. PASS - soul_tide atlas modern exists
+116. PASS - soul_tide atlas legacy exists
+117. PASS - soul_tide geometry file exists
+118. PASS - soul_tide texture exists
+119. PASS - leviathan modern attachable exists
+120. PASS - leviathan legacy attachable exists
+121. PASS - leviathan modern identifier exact
+122. PASS - leviathan legacy identifier exact
+123. PASS - leviathan modern/legacy share geometry
+124. PASS - leviathan modern/legacy share texture
+125. PASS - leviathan modern definition exists
+126. PASS - leviathan legacy definition exists
+127. PASS - leviathan atlas modern exists
+128. PASS - leviathan atlas legacy exists
+129. PASS - leviathan geometry file exists
+130. PASS - leviathan texture exists
+131. PASS - emberfall modern attachable exists
+132. PASS - emberfall legacy attachable exists
+133. PASS - emberfall modern identifier exact
+134. PASS - emberfall legacy identifier exact
+135. PASS - emberfall modern/legacy share geometry
+136. PASS - emberfall modern/legacy share texture
+137. PASS - emberfall modern definition exists
+138. PASS - emberfall legacy definition exists
+139. PASS - emberfall atlas modern exists
+140. PASS - emberfall atlas legacy exists
+141. PASS - emberfall geometry file exists
+142. PASS - emberfall texture exists
+143. PASS - noctis modern attachable exists
+144. PASS - noctis legacy attachable exists
+145. PASS - noctis modern identifier exact
+146. PASS - noctis legacy identifier exact
+147. PASS - noctis modern/legacy share geometry
+148. PASS - noctis modern/legacy share texture
+149. PASS - noctis modern definition exists
+150. PASS - noctis legacy definition exists
+151. PASS - noctis atlas modern exists
+152. PASS - noctis atlas legacy exists
+153. PASS - noctis geometry file exists
+154. PASS - noctis texture exists
+155. PASS - stormpiercer modern attachable exists
+156. PASS - stormpiercer legacy attachable exists
+157. PASS - stormpiercer modern identifier exact
+158. PASS - stormpiercer legacy identifier exact
+159. PASS - stormpiercer modern/legacy share geometry
+160. PASS - stormpiercer modern/legacy share texture
+161. PASS - stormpiercer modern definition exists
+162. PASS - stormpiercer legacy definition exists
+163. PASS - stormpiercer atlas modern exists
+164. PASS - stormpiercer atlas legacy exists
+165. PASS - stormpiercer geometry file exists
+166. PASS - stormpiercer texture exists
+167. PASS - zephya modern attachable exists
+168. PASS - zephya legacy attachable exists
+169. PASS - zephya modern identifier exact
+170. PASS - zephya legacy identifier exact
+171. PASS - zephya modern/legacy share geometry
+172. PASS - zephya modern/legacy share texture
+173. PASS - zephya modern definition exists
+174. PASS - zephya legacy definition exists
+175. PASS - zephya atlas modern exists
+176. PASS - zephya atlas legacy exists
+177. PASS - zephya geometry file exists
+178. PASS - zephya texture exists
+179. PASS - astral modern attachable exists
+180. PASS - astral legacy attachable exists
+181. PASS - astral modern identifier exact
+182. PASS - astral legacy identifier exact
+183. PASS - astral modern/legacy share geometry
+184. PASS - astral modern/legacy share texture
+185. PASS - astral modern definition exists
+186. PASS - astral legacy definition exists
+187. PASS - astral atlas modern exists
+188. PASS - astral atlas legacy exists
+189. PASS - astral geometry file exists
+190. PASS - astral texture exists
+191. PASS - phoenix helmet_closed geometry exists
+192. PASS - phoenix helmet_closed modern attachable exists
+193. PASS - phoenix helmet_closed legacy attachable exists
+194. PASS - phoenix helmet_closed uses armor render controller
+195. PASS - phoenix helmet_closed true 3D cubes >=4
+196. PASS - phoenix helmet_closed true 3D cubes <=24
+197. PASS - phoenix helmet_open geometry exists
+198. PASS - phoenix helmet_open modern attachable exists
+199. PASS - phoenix helmet_open legacy attachable exists
+200. PASS - phoenix helmet_open uses armor render controller
+201. PASS - phoenix helmet_open true 3D cubes >=4
+202. PASS - phoenix helmet_open true 3D cubes <=24
+203. PASS - phoenix chest geometry exists
+204. PASS - phoenix chest modern attachable exists
+205. PASS - phoenix chest legacy attachable exists
+206. PASS - phoenix chest uses armor render controller
+207. PASS - phoenix chest true 3D cubes >=4
+208. PASS - phoenix chest true 3D cubes <=24
+209. PASS - phoenix legs geometry exists
+210. PASS - phoenix legs modern attachable exists
+211. PASS - phoenix legs legacy attachable exists
+212. PASS - phoenix legs uses armor render controller
+213. PASS - phoenix legs true 3D cubes >=4
+214. PASS - phoenix legs true 3D cubes <=24
+215. PASS - phoenix boots geometry exists
+216. PASS - phoenix boots modern attachable exists
+217. PASS - phoenix boots legacy attachable exists
+218. PASS - phoenix boots uses armor render controller
+219. PASS - phoenix boots true 3D cubes >=4
+220. PASS - phoenix boots true 3D cubes <=24
+221. PASS - voidwalker helmet_closed geometry exists
+222. PASS - voidwalker helmet_closed modern attachable exists
+223. PASS - voidwalker helmet_closed legacy attachable exists
+224. PASS - voidwalker helmet_closed uses armor render controller
+225. PASS - voidwalker helmet_closed true 3D cubes >=4
+226. PASS - voidwalker helmet_closed true 3D cubes <=24
+227. PASS - voidwalker helmet_open geometry exists
+228. PASS - voidwalker helmet_open modern attachable exists
+229. PASS - voidwalker helmet_open legacy attachable exists
+230. PASS - voidwalker helmet_open uses armor render controller
+231. PASS - voidwalker helmet_open true 3D cubes >=4
+232. PASS - voidwalker helmet_open true 3D cubes <=24
+233. PASS - voidwalker chest geometry exists
+234. PASS - voidwalker chest modern attachable exists
+235. PASS - voidwalker chest legacy attachable exists
+236. PASS - voidwalker chest uses armor render controller
+237. PASS - voidwalker chest true 3D cubes >=4
+238. PASS - voidwalker chest true 3D cubes <=24
+239. PASS - voidwalker legs geometry exists
+240. PASS - voidwalker legs modern attachable exists
+241. PASS - voidwalker legs legacy attachable exists
+242. PASS - voidwalker legs uses armor render controller
+243. PASS - voidwalker legs true 3D cubes >=4
+244. PASS - voidwalker legs true 3D cubes <=24
+245. PASS - voidwalker boots geometry exists
+246. PASS - voidwalker boots modern attachable exists
+247. PASS - voidwalker boots legacy attachable exists
+248. PASS - voidwalker boots uses armor render controller
+249. PASS - voidwalker boots true 3D cubes >=4
+250. PASS - voidwalker boots true 3D cubes <=24
+251. PASS - titan helmet_closed geometry exists
+252. PASS - titan helmet_closed modern attachable exists
+253. PASS - titan helmet_closed legacy attachable exists
+254. PASS - titan helmet_closed uses armor render controller
+255. PASS - titan helmet_closed true 3D cubes >=4
+256. PASS - titan helmet_closed true 3D cubes <=24
+257. PASS - titan helmet_open geometry exists
+258. PASS - titan helmet_open modern attachable exists
+259. PASS - titan helmet_open legacy attachable exists
+260. PASS - titan helmet_open uses armor render controller
+261. PASS - titan helmet_open true 3D cubes >=4
+262. PASS - titan helmet_open true 3D cubes <=24
+263. PASS - titan chest geometry exists
+264. PASS - titan chest modern attachable exists
+265. PASS - titan chest legacy attachable exists
+266. PASS - titan chest uses armor render controller
+267. PASS - titan chest true 3D cubes >=4
+268. PASS - titan chest true 3D cubes <=24
+269. PASS - titan legs geometry exists
+270. PASS - titan legs modern attachable exists
+271. PASS - titan legs legacy attachable exists
+272. PASS - titan legs uses armor render controller
+273. PASS - titan legs true 3D cubes >=4
+274. PASS - titan legs true 3D cubes <=24
+275. PASS - titan boots geometry exists
+276. PASS - titan boots modern attachable exists
+277. PASS - titan boots legacy attachable exists
+278. PASS - titan boots uses armor render controller
+279. PASS - titan boots true 3D cubes >=4
+280. PASS - titan boots true 3D cubes <=24
+281. PASS - celestial helmet_closed geometry exists
+282. PASS - celestial helmet_closed modern attachable exists
+283. PASS - celestial helmet_closed legacy attachable exists
+284. PASS - celestial helmet_closed uses armor render controller
+285. PASS - celestial helmet_closed true 3D cubes >=4
+286. PASS - celestial helmet_closed true 3D cubes <=24
+287. PASS - celestial helmet_open geometry exists
+288. PASS - celestial helmet_open modern attachable exists
+289. PASS - celestial helmet_open legacy attachable exists
+290. PASS - celestial helmet_open uses armor render controller
+291. PASS - celestial helmet_open true 3D cubes >=4
+292. PASS - celestial helmet_open true 3D cubes <=24
+293. PASS - celestial chest geometry exists
+294. PASS - celestial chest modern attachable exists
+295. PASS - celestial chest legacy attachable exists
+296. PASS - celestial chest uses armor render controller
+297. PASS - celestial chest true 3D cubes >=4
+298. PASS - celestial chest true 3D cubes <=24
+299. PASS - celestial legs geometry exists
+300. PASS - celestial legs modern attachable exists
+301. PASS - celestial legs legacy attachable exists
+302. PASS - celestial legs uses armor render controller
+303. PASS - celestial legs true 3D cubes >=4
+304. PASS - celestial legs true 3D cubes <=24
+305. PASS - celestial boots geometry exists
+306. PASS - celestial boots modern attachable exists
+307. PASS - celestial boots legacy attachable exists
+308. PASS - celestial boots uses armor render controller
+309. PASS - celestial boots true 3D cubes >=4
+310. PASS - celestial boots true 3D cubes <=24
+311. PASS - water_sovereign helmet_closed geometry exists
+312. PASS - water_sovereign helmet_closed modern attachable exists
+313. PASS - water_sovereign helmet_closed legacy attachable exists
+314. PASS - water_sovereign helmet_closed uses armor render controller
+315. PASS - water_sovereign helmet_closed true 3D cubes >=4
+316. PASS - water_sovereign helmet_closed true 3D cubes <=24
+317. PASS - water_sovereign helmet_open geometry exists
+318. PASS - water_sovereign helmet_open modern attachable exists
+319. PASS - water_sovereign helmet_open legacy attachable exists
+320. PASS - water_sovereign helmet_open uses armor render controller
+321. PASS - water_sovereign helmet_open true 3D cubes >=4
+322. PASS - water_sovereign helmet_open true 3D cubes <=24
+323. PASS - water_sovereign chest geometry exists
+324. PASS - water_sovereign chest modern attachable exists
+325. PASS - water_sovereign chest legacy attachable exists
+326. PASS - water_sovereign chest uses armor render controller
+327. PASS - water_sovereign chest true 3D cubes >=4
+328. PASS - water_sovereign chest true 3D cubes <=24
+329. PASS - water_sovereign legs geometry exists
+330. PASS - water_sovereign legs modern attachable exists
+331. PASS - water_sovereign legs legacy attachable exists
+332. PASS - water_sovereign legs uses armor render controller
+333. PASS - water_sovereign legs true 3D cubes >=4
+334. PASS - water_sovereign legs true 3D cubes <=24
+335. PASS - water_sovereign boots geometry exists
+336. PASS - water_sovereign boots modern attachable exists
+337. PASS - water_sovereign boots legacy attachable exists
+338. PASS - water_sovereign boots uses armor render controller
+339. PASS - water_sovereign boots true 3D cubes >=4
+340. PASS - water_sovereign boots true 3D cubes <=24
+341. PASS - phoenix helmet closed modern mapping
+342. PASS - phoenix helmet closed legacy mapping
+343. PASS - phoenix helmet open modern mapping
+344. PASS - phoenix helmet open legacy mapping
+345. PASS - phoenix chest modern mapping
+346. PASS - phoenix chest legacy mapping
+347. PASS - phoenix legs modern mapping
+348. PASS - phoenix legs legacy mapping
+349. PASS - phoenix boots modern mapping
+350. PASS - phoenix boots legacy mapping
+351. PASS - voidwalker helmet closed modern mapping
+352. PASS - voidwalker helmet closed legacy mapping
+353. PASS - voidwalker helmet open modern mapping
+354. PASS - voidwalker helmet open legacy mapping
+355. PASS - voidwalker chest modern mapping
+356. PASS - voidwalker chest legacy mapping
+357. PASS - voidwalker legs modern mapping
+358. PASS - voidwalker legs legacy mapping
+359. PASS - voidwalker boots modern mapping
+360. PASS - voidwalker boots legacy mapping
+361. PASS - titan helmet closed modern mapping
+362. PASS - titan helmet closed legacy mapping
+363. PASS - titan helmet open modern mapping
+364. PASS - titan helmet open legacy mapping
+365. PASS - titan chest modern mapping
+366. PASS - titan chest legacy mapping
+367. PASS - titan legs modern mapping
+368. PASS - titan legs legacy mapping
+369. PASS - titan boots modern mapping
+370. PASS - titan boots legacy mapping
+371. PASS - celestial helmet closed modern mapping
+372. PASS - celestial helmet closed legacy mapping
+373. PASS - celestial helmet open modern mapping
+374. PASS - celestial helmet open legacy mapping
+375. PASS - celestial chest modern mapping
+376. PASS - celestial chest legacy mapping
+377. PASS - celestial legs modern mapping
+378. PASS - celestial legs legacy mapping
+379. PASS - celestial boots modern mapping
+380. PASS - celestial boots legacy mapping
+381. PASS - water_sovereign helmet closed modern mapping
+382. PASS - water_sovereign helmet closed legacy mapping
+383. PASS - water_sovereign helmet open modern mapping
+384. PASS - water_sovereign helmet open legacy mapping
+385. PASS - water_sovereign chest modern mapping
+386. PASS - water_sovereign chest legacy mapping
+387. PASS - water_sovereign legs modern mapping
+388. PASS - water_sovereign legs legacy mapping
+389. PASS - water_sovereign boots modern mapping
+390. PASS - water_sovereign boots legacy mapping
+391. PASS - no v370 weapon/armor identifiers remain mapped
+392. PASS - all weapon modern IDs unique
+393. PASS - all weapon legacy IDs unique
+394. PASS - all modern IDs disjoint legacy IDs
+395. PASS - FX mappings still present
+
+QA100 MINIMUM EXCEEDED: 395/395 PASS
