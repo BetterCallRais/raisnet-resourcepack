@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(grep -c '^..\. PASS - ' LegendaryRais-v3.6.8-QA50.txt)" -eq 50
-          grep -q 'QA50: 50/50 PASS' LegendaryRais-v3.6.8-QA50.txt
+          grep -q 'QA50 MINIMUM EXCEEDED:' LegendaryRais-v3.6.8-QA50.txt
           cat LegendaryRais-v3.6.8-QA50.txt
 
       - name: Verify final archives and mappings
