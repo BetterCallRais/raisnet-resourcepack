@@ -20,11 +20,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.*;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -91,6 +96,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         PluginCommand perf=plugin.getCommand("risperf"); if(perf!=null){perf.setExecutor(this);perf.setTabCompleter(this);}
         PluginCommand repair=plugin.getCommand("risrepair"); if(repair!=null){repair.setExecutor(this);repair.setTabCompleter(this);}
         PluginCommand helmet=plugin.getCommand("rishelmet"); if(helmet!=null){helmet.setExecutor(this);helmet.setTabCompleter(this);}
+        PluginCommand diag=plugin.getCommand("risdiag"); if(diag!=null){diag.setExecutor(this);diag.setTabCompleter(this);}
         startArmorPassiveTask();
         purgeLegacyArmorDisplays();
         clearAllArmorVisuals();
@@ -98,6 +104,48 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         runSelfCheck();
     }
 
+
+    private void runBedrockDiagnostic(Player p){
+        Plugin geyser=Bukkit.getPluginManager().getPlugin("Geyser-Spigot");
+        if(geyser==null)geyser=Bukkit.getPluginManager().getPlugin("Geyser");
+        p.sendMessage("§b§lLegendaryRais v3.7.0 DIAGNOSTIC");
+        if(geyser==null){
+            p.sendMessage("§c✘ Geyser tidak terdeteksi. Bedrock custom content tidak bisa aktif.");
+            return;
+        }
+        p.sendMessage("§a✔ Geyser: §f"+geyser.getDescription().getVersion());
+        try{
+            File data=geyser.getDataFolder();
+            File cfg=new File(data,"config.yml");
+            YamlConfiguration y=YamlConfiguration.loadConfiguration(cfg);
+            boolean custom=y.getBoolean("enable-custom-content",y.getBoolean("gameplay.enable-custom-content",false));
+            p.sendMessage((custom?"§a✔":"§c✘")+" enable-custom-content = §f"+custom);
+            File maps=new File(data,"custom_mappings");
+            File packs=new File(data,"packs");
+            File[] mf=maps.listFiles((dir,name)->name.toLowerCase(Locale.ROOT).endsWith(".json"));
+            File[] pf=packs.listFiles((dir,name)->name.toLowerCase(Locale.ROOT).endsWith(".mcpack")||name.toLowerCase(Locale.ROOT).endsWith(".zip"));
+            int legendaryMaps=0,currentMaps=0,legendaryPacks=0,currentPacks=0;
+            if(mf!=null)for(File f:mf){
+                try{
+                    String s=Files.readString(f.toPath(),StandardCharsets.UTF_8);
+                    if(s.contains("LegendaryRais")||s.contains("raisnet3"))legendaryMaps++;
+                    if(s.contains("raisnet370:")&&s.contains("\"format_version\": 2"))currentMaps++;
+                }catch(Throwable ignored){}
+            }
+            if(pf!=null)for(File f:pf){
+                String n=f.getName().toLowerCase(Locale.ROOT);
+                if(n.contains("legendaryrais"))legendaryPacks++;
+                if(n.contains("3.7.0")||n.contains("v370"))currentPacks++;
+            }
+            p.sendMessage((currentMaps==1?"§a✔":"§c✘")+" v3.7.0 mapping terdeteksi: §f"+currentMaps+" §7(total Legendary: "+legendaryMaps+")");
+            p.sendMessage((currentPacks==1?"§a✔":"§c✘")+" v3.7.0 Bedrock pack terdeteksi: §f"+currentPacks+" §7(total Legendary: "+legendaryPacks+")");
+            if(legendaryMaps>1)p.sendMessage("§e⚠ Ada beberapa LegendaryRais mapping. Hapus versi lama agar tidak collision.");
+            if(legendaryPacks>1)p.sendMessage("§e⚠ Ada beberapa LegendaryRais Bedrock pack. Sisakan v3.7.0 saja.");
+            if(!custom)p.sendMessage("§cBedrock akan fallback vanilla sampai enable-custom-content=true lalu restart.");
+        }catch(Throwable ex){
+            p.sendMessage("§cDiagnostic Geyser gagal: §f"+ex.getMessage());
+        }
+    }
 
     private void purgeLegacyArmorDisplays(){
         NamespacedKey legacyTag=new NamespacedKey(plugin,"armor_visual_tag");
@@ -113,6 +161,12 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
     }
 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if(cmd.getName().equalsIgnoreCase("risdiag")){
+            if(!(sender instanceof Player p)){sender.sendMessage("LegendaryRais v3.7.0 diagnostic harus dijalankan oleh player.");return true;}
+            runBedrockDiagnostic(p);
+            return true;
+        }
+        if(cmd.getName().equalsIgnoreCase("risdiag"))return Collections.emptyList();
         if(cmd.getName().equalsIgnoreCase("rishelmet")){
             if(!(sender instanceof Player p)){sender.sendMessage("§c/rishelmet hanya untuk player.");return true;}
             String current=helmetMode(p);
@@ -661,6 +715,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         if(plugin.getCommand("risperf")==null)errors.add("/risperf missing from plugin.yml");
         if(plugin.getCommand("risrepair")==null)errors.add("/risrepair missing from plugin.yml");
         if(plugin.getCommand("rishelmet")==null)errors.add("/rishelmet missing from plugin.yml");
+        if(plugin.getCommand("risdiag")==null)errors.add("/risdiag missing from plugin.yml");
         if(plugin.getConfig().getLong("armor.input.double-sneak-window-ms",1000L)<900L)errors.add("double-sneak window too short");
         if(!plugin.getConfig().getBoolean("armor.java-3d-overlay",true))errors.add("Java 3D armor overlay disabled");
         if(!createWeapon(ASTRAL).getType().equals(Material.NETHERITE_AXE))errors.add("Astral Frost must use NETHERITE_AXE base");
