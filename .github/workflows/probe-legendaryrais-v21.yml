@@ -1,0 +1,23 @@
+name: Probe LegendaryRais v2.1 Water Pack
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/probe-legendaryrais-v21.yml"]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: List candidate water assets
+        run: |
+          set -euo pipefail
+          unzip -l LegendaryRais-Java-26plus-v2.1.zip | grep -Ei 'soul|tide|levi|trident|katana|sword|models/item|items/' | head -n 240
+          rm -rf .build/probe-v21
+          mkdir -p .build/probe-v21
+          unzip -q LegendaryRais-Java-26plus-v2.1.zip -d .build/probe-v21
+          echo '--- namespaces ---'
+          find .build/probe-v21/assets -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+          echo '--- item definitions ---'
+          find .build/probe-v21/assets -path '*/items/*.json' -o -path '*/items/*/*.json' | sort
+          echo '--- item models ---'
+          find .build/probe-v21/assets -path '*/models/item/*.json' -o -path '*/models/item/*/*.json' | sort
