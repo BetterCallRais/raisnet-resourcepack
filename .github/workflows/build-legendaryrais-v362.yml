@@ -1,0 +1,188 @@
+name: Build LegendaryRais v3.6.2 Crossplay Ascension
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v362/**"
+      - ".build/build_v362_packs.py"
+      - ".github/workflows/build-legendaryrais-v362.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v362-src .build/v362-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v362-source.zip
+          unzip -t .build/v362-source.zip
+          mkdir -p .build/v362-src
+          unzip -q .build/v362-source.zip -d .build/v362-src
+          cp .build/extracted-v362/LegendaryRais.java .build/v362-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v362/ArsenalExpansion.java .build/v362-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v362/plugin.yml .build/v362-src/src/main/resources/plugin.yml
+          cp .build/extracted-v362/pom.xml .build/v362-src/pom.xml
+
+      - name: Guard v3.6.2 gameplay rules
+        run: |
+          set -euo pipefail
+          SRC=.build/v362-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 362' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 362' "$SRC/LegendaryRais.java"
+          grep -q 'Material.NETHERITE_AXE' "$SRC/ArsenalExpansion.java"
+          grep -q 'astral_frost_greataxe' "$SRC/ArsenalExpansion.java"
+          grep -q 'armorUtilitySkill' "$SRC/ArsenalExpansion.java"
+          grep -q 'armorPunchSkillName' "$SRC/ArsenalExpansion.java"
+          grep -q 'armorHeavyMobGuard' "$SRC/ArsenalExpansion.java"
+          grep -q 'case TITAN->skill?9.6:5.2' "$SRC/ArsenalExpansion.java"
+          grep -q 'case PHOENIX->skill?11.2:6.6' "$SRC/ArsenalExpansion.java"
+          grep -q 'normal right-click is NEVER cancelled' "$SRC/ArsenalExpansion.java"
+          grep -q 'Never call createExplosion' "$SRC/ArsenalExpansion.java"
+          grep -q '390.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' "$SRC/LegendaryRais.java"
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' "$SRC/LegendaryRais.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v362-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.2.jar ../../LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.sha256
+
+      - name: Verify plugin jar
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.6.2"
+          unzip -p LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar plugin.yml | grep -q "risperf:"
+          jar tf LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build v3.6.2 Java + Bedrock packs
+        run: python .build/build_v362_packs.py
+
+      - name: Deep grip + bow + armor + performance validation
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.2-CROSSPLAY-ASCENSION.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.2-CROSSPLAY-ASCENSION.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.2-mappings.json >/dev/null
+          python - <<'PY'
+          import zipfile,json,io
+          from PIL import Image
+
+          W=['emberfall_claymore','noctis_longsword','stormpiercer_recurve_bow','gaia_war_spear','astral_frost_greataxe']
+          with zipfile.ZipFile('LegendaryRais-Java-26.1.2-v3.6.2-CROSSPLAY-ASCENSION.zip') as z:
+              names=set(z.namelist())
+              for n in W:
+                  d=json.loads(z.read(f'assets/legendaryv34/models/item/{n}.json'))
+                  assert 8 <= len(d['elements']) <= 32,(n,len(d['elements']))
+                  grips=[e for e in d['elements'] if any(v.get('texture')=='#grip' for v in e['faces'].values())]
+                  assert grips,n
+                  assert any(e['from'][0] <= 8 <= e['to'][0] and e['from'][1] <= 4 <= e['to'][1] for e in grips),n
+                  tp=d['display']['thirdperson_righthand']
+                  assert abs(tp['translation'][0]) <= .1,(n,tp)
+                  assert tp['scale'][0] <= .65,(n,tp)
+                  for key in ('metal','grip','accent'):
+                      ns,path=d['textures'][key].split(':',1)
+                      im=Image.open(io.BytesIO(z.read(f'assets/{ns}/textures/{path}.png')))
+                      assert im.size==(256,256),(n,key,im.size)
+              assert 'assets/legendaryv34/models/item/astral_frost_greataxe.json' in names
+
+          limits={'helmet':8,'chest':12,'legs':8,'boots':6}
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.6.2-CROSSPLAY-ASCENSION.mcpack') as z:
+              names=set(z.namelist())
+              for n in W:
+                  g=json.loads(z.read(f'models/entity/{n}.geo.json'))
+                  cubes=g['minecraft:geometry'][0]['bones'][0].get('cubes',[])
+                  assert 4 <= len(cubes) <= 30,(n,len(cubes))
+                  im=Image.open(io.BytesIO(z.read(f'textures/items/{n}.png')))
+                  assert im.size==(128,128),(n,im.size)
+              for s in ('phoenix','voidwalker','titan','celestial','water_sovereign'):
+                  for p in ('helmet','chest','legs','boots'):
+                      g=json.loads(z.read(f'models/entity/armor_{s}_{p}_v362.geo.json'))
+                      cubes=sum(len(b.get('cubes',[])) for b in g['minecraft:geometry'][0]['bones'])
+                      assert cubes <= limits[p],(s,p,cubes)
+                      assert f'attachables/armor_{s}_{p}.json' in names
+
+          m=json.load(open('LegendaryRais-Geyser-v3.6.2-mappings.json'))
+          bow=[d for d in m['items']['minecraft:bow'] if d.get('model')=='legendaryv34:stormpiercer_recurve_bow']
+          assert len(bow)==1 and 'components' not in bow[0]
+          assert bow[0]['bedrock_options']['display_handheld'] is True
+          axe=[d for d in m['items']['minecraft:netherite_axe'] if d.get('model')=='legendaryv34:astral_frost_greataxe']
+          assert len(axe)==1
+          assert not any(d.get('model')=='legendaryv34:astral_twin_daggers' for d in m['items'].get('minecraft:shears',[]))
+          print('V362_ASCENSION_VALIDATION PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v362"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v362/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v362/paper.jar
+          cp LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar .build/smoke-v362/plugins/
+          echo "eula=true" > .build/smoke-v362/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v362/server.properties
+          cd .build/smoke-v362
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 140); do
+            grep -Fq "LegendaryRais v3.6.2" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 14 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.2-CROSSPLAY-ASCENSION
+          path: |
+            LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar
+            LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.2-CROSSPLAY-ASCENSION.zip
+            LegendaryRais-Java-26.1.2-v3.6.2-CROSSPLAY-ASCENSION.sha1
+            LegendaryRais-Bedrock-v3.6.2-CROSSPLAY-ASCENSION.mcpack
+            LegendaryRais-Bedrock-v3.6.2-CROSSPLAY-ASCENSION.sha1
+            LegendaryRais-Geyser-v3.6.2-mappings.json
+          retention-days: 7
+
+      - name: Publish verified v3.6.2
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.jar             LegendaryRais-3.6.2-CROSSPLAY-ASCENSION-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.2-CROSSPLAY-ASCENSION.zip             LegendaryRais-Java-26.1.2-v3.6.2-CROSSPLAY-ASCENSION.sha1             LegendaryRais-Bedrock-v3.6.2-CROSSPLAY-ASCENSION.mcpack             LegendaryRais-Bedrock-v3.6.2-CROSSPLAY-ASCENSION.sha1             LegendaryRais-Geyser-v3.6.2-mappings.json
+          git commit -m "Publish LegendaryRais v3.6.2 Crossplay Ascension" || exit 0
+          git pull --rebase origin main
+          git push
