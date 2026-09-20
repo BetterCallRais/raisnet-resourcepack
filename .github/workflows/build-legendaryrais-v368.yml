@@ -1,0 +1,175 @@
+name: Build LegendaryRais v3.6.8 Clean ID Restore QA50
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v368/**"
+      - ".build/build_v368_packs.py"
+      - ".github/workflows/build-legendaryrais-v368.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v368-src .build/v368-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v368-source.zip
+          unzip -t .build/v368-source.zip
+          mkdir -p .build/v368-src
+          unzip -q .build/v368-source.zip -d .build/v368-src
+          cp .build/extracted-v368/LegendaryRais.java .build/v368-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v368/ArsenalExpansion.java .build/v368-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v368/plugin.yml .build/v368-src/src/main/resources/plugin.yml
+          cp .build/extracted-v368/pom.xml .build/v368-src/pom.xml
+
+      - name: Guard clean IDs + migration + armor skill
+        run: |
+          set -euo pipefail
+          SRC=.build/v368-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 368' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 368' "$SRC/LegendaryRais.java"
+          grep -q 'legendaryv368", "soul_tide"' "$SRC/LegendaryRais.java"
+          grep -q 'legendaryv368", "leviathan"' "$SRC/LegendaryRais.java"
+          grep -q 'legendaryv368",model' "$SRC/ArsenalExpansion.java"
+          grep -q 'repairWaterItems' "$SRC/LegendaryRais.java"
+          grep -q 'tryArmorUtility' "$SRC/ArsenalExpansion.java"
+          grep -q 'armorUtilityEntityRightClick' "$SRC/ArsenalExpansion.java"
+          grep -q 'Math.max(configured,isBedrock(p)?1400L:950L)' "$SRC/ArsenalExpansion.java"
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' "$SRC/LegendaryRais.java"
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' "$SRC/LegendaryRais.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v368-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.8.jar ../../LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.sha256
+
+      - name: Verify plugin JAR
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar plugin.yml | grep -q "version: 3.6.8"
+          unzip -p LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar plugin.yml | grep -q "risrepair:"
+          unzip -p LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar plugin.yml | grep -q "rishelmet:"
+          jar tf LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build packs + QA50
+        run: python .build/build_v368_packs.py
+
+      - name: Require QA50 50/50
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^..\. PASS - ' LegendaryRais-v3.6.8-QA50.txt)" -eq 50
+          grep -q 'QA50: 50/50 PASS' LegendaryRais-v3.6.8-QA50.txt
+          cat LegendaryRais-v3.6.8-QA50.txt
+
+      - name: Verify final archives and mappings
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.8-CLEAN-ID-RESTORE-QA50.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.8-mappings.json >/dev/null
+          python - <<'PY'
+          import json,zipfile
+          m=json.load(open('LegendaryRais-Geyser-v3.6.8-mappings.json'))
+          assert m['format_version']==2
+          wanted={
+            'legendaryv368:soul_tide':'raisnet368:soul_tide',
+            'legendaryv368:leviathan':'raisnet368:leviathan',
+            'legendaryv368:emberfall_claymore':'raisnet368:emberfall',
+            'legendaryv368:noctis_longsword':'raisnet368:noctis',
+            'legendaryv368:stormpiercer_recurve_bow':'raisnet368:stormpiercer',
+            'legendaryv368:gaia_war_spear':'raisnet368:zephya',
+            'legendaryv368:astral_frost_greataxe':'raisnet368:astral_frost'
+          }
+          defs=[d for arr in m['items'].values() for d in arr if d.get('type')=='definition']
+          for model,bid in wanted.items():
+              d=[x for x in defs if x.get('model')==model]
+              assert len(d)==1,(model,len(d))
+              assert d[0]['bedrock_identifier']==bid
+              assert 'components' not in d[0]
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.6.8-CLEAN-ID-RESTORE-QA50.mcpack') as z:
+              names=set(z.namelist())
+              for bid in wanted.values():
+                  key=bid.split(':',1)[1]
+                  assert f'attachables/v368_{key}.player.json' in names,(bid,'attachable')
+                  a=json.loads(z.read(f'attachables/v368_{key}.player.json'))['minecraft:attachable']['description']
+                  assert a['identifier']==bid
+          print('CLEAN_ID_MAPPING PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v368"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v368/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v368/paper.jar
+          cp LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar .build/smoke-v368/plugins/
+          echo "eula=true" > .build/smoke-v368/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v368/server.properties
+          cd .build/smoke-v368
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 150); do
+            grep -Fq "LegendaryRais v3.6.8" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 15 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.8-CLEAN-ID-RESTORE-QA50
+          path: |
+            LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar
+            LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.zip
+            LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.sha1
+            LegendaryRais-Bedrock-v3.6.8-CLEAN-ID-RESTORE-QA50.mcpack
+            LegendaryRais-Bedrock-v3.6.8-CLEAN-ID-RESTORE-QA50.sha1
+            LegendaryRais-Geyser-v3.6.8-mappings.json
+            LegendaryRais-v3.6.8-QA50.txt
+          retention-days: 7
+
+      - name: Publish verified v3.6.8
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.jar             LegendaryRais-3.6.8-CLEAN-ID-RESTORE-QA50-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.zip             LegendaryRais-Java-26.1.2-v3.6.8-CLEAN-ID-RESTORE-QA50.sha1             LegendaryRais-Bedrock-v3.6.8-CLEAN-ID-RESTORE-QA50.mcpack             LegendaryRais-Bedrock-v3.6.8-CLEAN-ID-RESTORE-QA50.sha1             LegendaryRais-Geyser-v3.6.8-mappings.json             LegendaryRais-v3.6.8-QA50.txt
+          git commit -m "Publish LegendaryRais v3.6.8 Clean ID Restore QA50" || exit 0
+          git pull --rebase origin main
+          git push
