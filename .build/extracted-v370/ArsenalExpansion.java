@@ -541,6 +541,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         String piece=meta.getPersistentDataContainer().get(armorPieceKey,PersistentDataType.STRING);
         if(set==null||!"helmet".equals(piece)||!Set.of(PHOENIX,VOIDWALKER,TITAN,CELESTIAL,WATER_SOVEREIGN).contains(set))return false;
         String suffix="OPEN".equalsIgnoreCase(mode)?"open":"closed";
+        try{meta.setCustomModelData("open".equals(suffix)?armorCmd(set,"helmet")+1000:armorCmd(set,"helmet"));}catch(Throwable ignored){}
         try{meta.setItemModel(new NamespacedKey("legendaryv369","armor/"+set+"_helmet_"+suffix));}catch(Throwable ignored){}
         try{
             var eq=meta.getEquippable();
@@ -601,6 +602,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
                 if("OPEN".equalsIgnoreCase(im)){
                     ItemMeta fm=fresh.getItemMeta();
                     if(fm!=null){
+                        try{fm.setCustomModelData(armorCmd(set,"helmet")+1000);}catch(Throwable ignored){}
                         try{fm.setItemModel(new NamespacedKey("legendaryv369","armor/"+set+"_helmet_open"));}catch(Throwable ignored){}
                         try{var eq=fm.getEquippable();eq.setSlot(EquipmentSlot.HEAD);eq.setModel(new NamespacedKey("legendaryv369",set+"_helmet_open"));eq.setSwappable(true);eq.setDamageOnHurt(false);fm.setEquippable(eq);}catch(Throwable ignored){}
                         fm.getPersistentDataContainer().set(helmetModeKey,PersistentDataType.STRING,"OPEN");fresh.setItemMeta(fm);
