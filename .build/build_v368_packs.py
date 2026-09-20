@@ -328,7 +328,7 @@ Q("FX mappings retained",any("fx_" in str(d.get("model","")) for arr in mapping[
 Q("Bedrock armor attachables retained",all((BR/f"attachables/armor_{s}_{p}.json").is_file() for s in ("phoenix","voidwalker","titan","celestial","water_sovereign") for p in ("helmet_open","helmet_closed","chest","legs","boots")))
 
 assert len(checks)>=50,len(checks)
-REPORT.write_text("\n".join(f"{i+1:02d}. PASS - {name}" for i,name in enumerate(checks))+"\n\nQA50: 50/50 PASS\n",encoding="utf-8")
+REPORT.write_text("\n".join(f"{i+1:02d}. PASS - {name}" for i,name in enumerate(checks))+f"\n\nQA50 MINIMUM EXCEEDED: {len(checks)}/{len(checks)} PASS\n",encoding="utf-8")
 
 for out,root in ((JOUT,JR),(BOUT,BR)):
     if out.exists():out.unlink()
