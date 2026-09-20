@@ -1,0 +1,88 @@
+01. PASS - all JSON parses
+02. PASS - all PNG verifies
+03. PASS - Geyser format_version remains 2
+04. PASS - Java pack metadata exists
+05. PASS - Bedrock manifest exists
+06. PASS - v368 Soul wrapper retained
+07. PASS - v368 Leviathan wrapper retained
+08. PASS - v368 five non-water wrappers retained
+09. PASS - Soul stable namespace retained
+10. PASS - Leviathan stable model retained
+11. PASS - phoenix Java set equipment exists
+12. PASS - voidwalker Java set equipment exists
+13. PASS - titan Java set equipment exists
+14. PASS - celestial Java set equipment exists
+15. PASS - water_sovereign Java set equipment exists
+16. PASS - phoenix Java open/closed equipment exists
+17. PASS - voidwalker Java open/closed equipment exists
+18. PASS - titan Java open/closed equipment exists
+19. PASS - celestial Java open/closed equipment exists
+20. PASS - water_sovereign Java open/closed equipment exists
+21. PASS - phoenix Java armor texture is HD 256x128
+22. PASS - voidwalker Java armor texture is HD 256x128
+23. PASS - titan Java armor texture is HD 256x128
+24. PASS - celestial Java armor texture is HD 256x128
+25. PASS - water_sovereign Java armor texture is HD 256x128
+26. PASS - phoenix Java armor uses layered equipment
+27. PASS - voidwalker Java armor uses layered equipment
+28. PASS - titan Java armor uses layered equipment
+29. PASS - celestial Java armor uses layered equipment
+30. PASS - water_sovereign Java armor uses layered equipment
+31. PASS - phoenix Java 3D overlay models valid
+32. PASS - voidwalker Java 3D overlay models valid
+33. PASS - titan Java 3D overlay models valid
+34. PASS - celestial Java 3D overlay models valid
+35. PASS - water_sovereign Java 3D overlay models valid
+36. PASS - all Java armor item_model wrappers exist
+37. PASS - all Java helmet mode wrappers exist
+38. PASS - all Java armor overlay item_models exist
+39. PASS - phoenix Bedrock HD armor textures are 256x128
+40. PASS - voidwalker Bedrock HD armor textures are 256x128
+41. PASS - titan Bedrock HD armor textures are 256x128
+42. PASS - celestial Bedrock HD armor textures are 256x128
+43. PASS - water_sovereign Bedrock HD armor textures are 256x128
+44. PASS - phoenix Bedrock helmet open/closed geometry exists
+45. PASS - voidwalker Bedrock helmet open/closed geometry exists
+46. PASS - titan Bedrock helmet open/closed geometry exists
+47. PASS - celestial Bedrock helmet open/closed geometry exists
+48. PASS - water_sovereign Bedrock helmet open/closed geometry exists
+49. PASS - phoenix Bedrock chest/legs/boots geometry exists
+50. PASS - voidwalker Bedrock chest/legs/boots geometry exists
+51. PASS - titan Bedrock chest/legs/boots geometry exists
+52. PASS - celestial Bedrock chest/legs/boots geometry exists
+53. PASS - water_sovereign Bedrock chest/legs/boots geometry exists
+54. PASS - phoenix Bedrock 3D cube budgets valid
+55. PASS - voidwalker Bedrock 3D cube budgets valid
+56. PASS - titan Bedrock 3D cube budgets valid
+57. PASS - celestial Bedrock 3D cube budgets valid
+58. PASS - water_sovereign Bedrock 3D cube budgets valid
+59. PASS - phoenix Bedrock attachables complete
+60. PASS - voidwalker Bedrock attachables complete
+61. PASS - titan Bedrock attachables complete
+62. PASS - celestial Bedrock attachables complete
+63. PASS - water_sovereign Bedrock attachables complete
+64. PASS - phoenix Bedrock armor identifiers/render controllers valid
+65. PASS - voidwalker Bedrock armor identifiers/render controllers valid
+66. PASS - titan Bedrock armor identifiers/render controllers valid
+67. PASS - celestial Bedrock armor identifiers/render controllers valid
+68. PASS - water_sovereign Bedrock armor identifiers/render controllers valid
+69. PASS - all v369 armor mapping definitions exist
+70. PASS - all v369 helmet mode mappings exist
+71. PASS - no old legendaryv34 armor mapping remains
+72. PASS - all new armor Bedrock IDs unique
+73. PASS - v368 weapon mappings retained
+74. PASS - FX mappings retained
+75. PASS - armor atlas contains all new IDs
+76. PASS - Bedrock old weapon attachables retained
+77. PASS - Stormpiercer bow wrapper retained
+78. PASS - Stormpiercer pull model 0 retained
+79. PASS - Stormpiercer pull model 1 retained
+80. PASS - Stormpiercer pull model 2 retained
+81. PASS - Soul Bedrock v368 geometry retained
+82. PASS - Leviathan Bedrock v368 geometry retained
+83. PASS - water weapon animation file retained
+84. PASS - Java visor OPEN textures contain transparency
+85. PASS - Java armor visual namespace is isolated
+86. PASS - Bedrock armor item icons are 128x128
+
+QA60 MINIMUM EXCEEDED: 86/86 PASS

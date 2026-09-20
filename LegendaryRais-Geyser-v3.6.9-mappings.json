@@ -1,0 +1,681 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:golden_helmet": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/phoenix_helmet_closed",
+        "bedrock_identifier": "raisnet369:phoenix_helmet_closed",
+        "display_name": "Phoenix Helmet Closed",
+        "bedrock_options": {
+          "icon": "raisnet369:phoenix_helmet_closed",
+          "protection_value": 4,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/phoenix_helmet_open",
+        "bedrock_identifier": "raisnet369:phoenix_helmet_open",
+        "display_name": "Phoenix Helmet Open",
+        "bedrock_options": {
+          "icon": "raisnet369:phoenix_helmet_open",
+          "protection_value": 4,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:golden_chestplate": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/phoenix_chest",
+        "bedrock_identifier": "raisnet369:phoenix_chest",
+        "display_name": "Phoenix Chestplate",
+        "bedrock_options": {
+          "icon": "raisnet369:phoenix_chest",
+          "protection_value": 4,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "chest"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:golden_leggings": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/phoenix_legs",
+        "bedrock_identifier": "raisnet369:phoenix_legs",
+        "display_name": "Phoenix Leggings",
+        "bedrock_options": {
+          "icon": "raisnet369:phoenix_legs",
+          "protection_value": 4,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "legs"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:golden_boots": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/phoenix_boots",
+        "bedrock_identifier": "raisnet369:phoenix_boots",
+        "display_name": "Phoenix Boots",
+        "bedrock_options": {
+          "icon": "raisnet369:phoenix_boots",
+          "protection_value": 4,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "feet"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:netherite_helmet": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/voidwalker_helmet_closed",
+        "bedrock_identifier": "raisnet369:voidwalker_helmet_closed",
+        "display_name": "Voidwalker Helmet Closed",
+        "bedrock_options": {
+          "icon": "raisnet369:voidwalker_helmet_closed",
+          "protection_value": 2,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/voidwalker_helmet_open",
+        "bedrock_identifier": "raisnet369:voidwalker_helmet_open",
+        "display_name": "Voidwalker Helmet Open",
+        "bedrock_options": {
+          "icon": "raisnet369:voidwalker_helmet_open",
+          "protection_value": 2,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/water_sovereign_helmet_closed",
+        "bedrock_identifier": "raisnet369:water_sovereign_helmet_closed",
+        "display_name": "Water Sovereign Helmet Closed",
+        "bedrock_options": {
+          "icon": "raisnet369:water_sovereign_helmet_closed",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/water_sovereign_helmet_open",
+        "bedrock_identifier": "raisnet369:water_sovereign_helmet_open",
+        "display_name": "Water Sovereign Helmet Open",
+        "bedrock_options": {
+          "icon": "raisnet369:water_sovereign_helmet_open",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:netherite_chestplate": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/voidwalker_chest",
+        "bedrock_identifier": "raisnet369:voidwalker_chest",
+        "display_name": "Voidwalker Chestplate",
+        "bedrock_options": {
+          "icon": "raisnet369:voidwalker_chest",
+          "protection_value": 2,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "chest"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/water_sovereign_chest",
+        "bedrock_identifier": "raisnet369:water_sovereign_chest",
+        "display_name": "Water Sovereign Chestplate",
+        "bedrock_options": {
+          "icon": "raisnet369:water_sovereign_chest",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "chest"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:netherite_leggings": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/voidwalker_legs",
+        "bedrock_identifier": "raisnet369:voidwalker_legs",
+        "display_name": "Voidwalker Leggings",
+        "bedrock_options": {
+          "icon": "raisnet369:voidwalker_legs",
+          "protection_value": 2,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "legs"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/water_sovereign_legs",
+        "bedrock_identifier": "raisnet369:water_sovereign_legs",
+        "display_name": "Water Sovereign Leggings",
+        "bedrock_options": {
+          "icon": "raisnet369:water_sovereign_legs",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "legs"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:netherite_boots": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/voidwalker_boots",
+        "bedrock_identifier": "raisnet369:voidwalker_boots",
+        "display_name": "Voidwalker Boots",
+        "bedrock_options": {
+          "icon": "raisnet369:voidwalker_boots",
+          "protection_value": 2,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "feet"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/water_sovereign_boots",
+        "bedrock_identifier": "raisnet369:water_sovereign_boots",
+        "display_name": "Water Sovereign Boots",
+        "bedrock_options": {
+          "icon": "raisnet369:water_sovereign_boots",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "feet"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:diamond_helmet": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/titan_helmet_closed",
+        "bedrock_identifier": "raisnet369:titan_helmet_closed",
+        "display_name": "Titan Helmet Closed",
+        "bedrock_options": {
+          "icon": "raisnet369:titan_helmet_closed",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/titan_helmet_open",
+        "bedrock_identifier": "raisnet369:titan_helmet_open",
+        "display_name": "Titan Helmet Open",
+        "bedrock_options": {
+          "icon": "raisnet369:titan_helmet_open",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:diamond_chestplate": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/titan_chest",
+        "bedrock_identifier": "raisnet369:titan_chest",
+        "display_name": "Titan Chestplate",
+        "bedrock_options": {
+          "icon": "raisnet369:titan_chest",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "chest"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:diamond_leggings": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/titan_legs",
+        "bedrock_identifier": "raisnet369:titan_legs",
+        "display_name": "Titan Leggings",
+        "bedrock_options": {
+          "icon": "raisnet369:titan_legs",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "legs"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:diamond_boots": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/titan_boots",
+        "bedrock_identifier": "raisnet369:titan_boots",
+        "display_name": "Titan Boots",
+        "bedrock_options": {
+          "icon": "raisnet369:titan_boots",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "feet"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:iron_helmet": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/celestial_helmet_closed",
+        "bedrock_identifier": "raisnet369:celestial_helmet_closed",
+        "display_name": "Celestial Helmet Closed",
+        "bedrock_options": {
+          "icon": "raisnet369:celestial_helmet_closed",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/celestial_helmet_open",
+        "bedrock_identifier": "raisnet369:celestial_helmet_open",
+        "display_name": "Celestial Helmet Open",
+        "bedrock_options": {
+          "icon": "raisnet369:celestial_helmet_open",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "head"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:iron_chestplate": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/celestial_chest",
+        "bedrock_identifier": "raisnet369:celestial_chest",
+        "display_name": "Celestial Chestplate",
+        "bedrock_options": {
+          "icon": "raisnet369:celestial_chest",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "chest"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:iron_leggings": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/celestial_legs",
+        "bedrock_identifier": "raisnet369:celestial_legs",
+        "display_name": "Celestial Leggings",
+        "bedrock_options": {
+          "icon": "raisnet369:celestial_legs",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "legs"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:iron_boots": [
+      {
+        "type": "definition",
+        "model": "legendaryv369:armor/celestial_boots",
+        "bedrock_identifier": "raisnet369:celestial_boots",
+        "display_name": "Celestial Boots",
+        "bedrock_options": {
+          "icon": "raisnet369:celestial_boots",
+          "protection_value": 3,
+          "creative_category": "equipment"
+        },
+        "components": {
+          "minecraft:equippable": {
+            "slot": "feet"
+          },
+          "minecraft:max_stack_size": 1
+        }
+      }
+    ],
+    "minecraft:paper": [
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_ember_rift",
+        "bedrock_identifier": "raisnet:fx_ember_rift",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_ember_rift",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_ember_meteor",
+        "bedrock_identifier": "raisnet:fx_ember_meteor",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_ember_meteor",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_inferno_crown",
+        "bedrock_identifier": "raisnet:fx_inferno_crown",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_inferno_crown",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_shade_step",
+        "bedrock_identifier": "raisnet:fx_shade_step",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_shade_step",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_soul_harvest",
+        "bedrock_identifier": "raisnet:fx_soul_harvest",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_soul_harvest",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_eclipse_cage",
+        "bedrock_identifier": "raisnet:fx_eclipse_cage",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_eclipse_cage",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_thunderhead",
+        "bedrock_identifier": "raisnet:fx_thunderhead",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_thunderhead",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_gale_bolt",
+        "bedrock_identifier": "raisnet:fx_gale_bolt",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_gale_bolt",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_cyclone_volley",
+        "bedrock_identifier": "raisnet:fx_cyclone_volley",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_cyclone_volley",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_frost_shard",
+        "bedrock_identifier": "raisnet:fx_frost_shard",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_frost_shard",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_glacier_fang",
+        "bedrock_identifier": "raisnet:fx_glacier_fang",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_glacier_fang",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_absolute_zero",
+        "bedrock_identifier": "raisnet:fx_absolute_zero",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_absolute_zero",
+          "display_handheld": false
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv34:fx_void_phase",
+        "bedrock_identifier": "raisnet:fx_void_phase",
+        "display_name": "FX",
+        "bedrock_options": {
+          "icon": "raisnet:fx_void_phase",
+          "display_handheld": false
+        }
+      }
+    ],
+    "minecraft:netherite_sword": [
+      {
+        "type": "definition",
+        "model": "legendaryv368:soul_tide",
+        "bedrock_identifier": "raisnet368:soul_tide",
+        "display_name": "Soul Tide Sovereign Blade",
+        "bedrock_options": {
+          "icon": "raisnet368:soul_tide",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv368:emberfall_claymore",
+        "bedrock_identifier": "raisnet368:emberfall",
+        "display_name": "Emberfall Claymore",
+        "bedrock_options": {
+          "icon": "raisnet368:emberfall",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      },
+      {
+        "type": "definition",
+        "model": "legendaryv368:noctis_longsword",
+        "bedrock_identifier": "raisnet368:noctis",
+        "display_name": "Noctis Longsword",
+        "bedrock_options": {
+          "icon": "raisnet368:noctis",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:trident": [
+      {
+        "type": "definition",
+        "model": "legendaryv368:leviathan",
+        "bedrock_identifier": "raisnet368:leviathan",
+        "display_name": "Abyss Leviathan Trident",
+        "bedrock_options": {
+          "icon": "raisnet368:leviathan",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:bow": [
+      {
+        "type": "definition",
+        "model": "legendaryv368:stormpiercer_recurve_bow",
+        "bedrock_identifier": "raisnet368:stormpiercer",
+        "display_name": "Stormpiercer Sovereign Arc Bow",
+        "bedrock_options": {
+          "icon": "raisnet368:stormpiercer",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:netherite_shovel": [
+      {
+        "type": "definition",
+        "model": "legendaryv368:gaia_war_spear",
+        "bedrock_identifier": "raisnet368:zephya",
+        "display_name": "Zephya Sovereign Wind Spear",
+        "bedrock_options": {
+          "icon": "raisnet368:zephya",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ],
+    "minecraft:netherite_axe": [
+      {
+        "type": "definition",
+        "model": "legendaryv368:astral_frost_greataxe",
+        "bedrock_identifier": "raisnet368:astral_frost",
+        "display_name": "Astral Frost Glacial Greataxe",
+        "bedrock_options": {
+          "icon": "raisnet368:astral_frost",
+          "display_handheld": true,
+          "creative_category": "equipment"
+        }
+      }
+    ]
+  }
+}
