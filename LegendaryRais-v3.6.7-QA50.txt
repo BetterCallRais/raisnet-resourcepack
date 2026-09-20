@@ -1,0 +1,53 @@
+01. PASS - all Java and Bedrock JSON parses
+02. PASS - all Java and Bedrock PNG verifies
+03. PASS - Java pack metadata exists
+04. PASS - Bedrock manifest exists
+05. PASS - Geyser mapping root valid
+06. PASS - Soul Tide item definition exists
+07. PASS - Soul Tide Java model exists
+08. PASS - Leviathan item definition exists
+09. PASS - Leviathan Java model exists
+10. PASS - old Soul item_model aliases current model
+11. PASS - soul_tide Java geometry has 10..30 elements
+12. PASS - leviathan Java geometry has 10..30 elements
+13. PASS - emberfall Java geometry has 10..30 elements
+14. PASS - noctis Java geometry has 10..30 elements
+15. PASS - stormpiercer Java geometry has 10..30 elements
+16. PASS - zephya Java geometry has 10..30 elements
+17. PASS - astral Java geometry has 10..30 elements
+18. PASS - all seven Java geometries stay within -16..32
+19. PASS - all seven Java models centered around Z=8
+20. PASS - all seven Java grip anchors cross x8/y4
+21. PASS - all seven Java third-person side offsets constrained
+22. PASS - all seven Java third-person scales safe
+23. PASS - all seven Java model texture references resolve
+24. PASS - all seven Java weapon textures are 256px
+25. PASS - Stormpiercer three pull models present
+26. PASS - Stormpiercer still uses using_item model condition
+27. PASS - Stormpiercer still uses use_duration pull dispatch
+28. PASS - Java armor visor open/closed files retained
+29. PASS - Java armor full-set equipment files retained
+30. PASS - soul_tide Bedrock geometry exists
+31. PASS - leviathan Bedrock geometry exists
+32. PASS - emberfall Bedrock geometry exists
+33. PASS - noctis Bedrock geometry exists
+34. PASS - stormpiercer Bedrock geometry exists
+35. PASS - zephya Bedrock geometry exists
+36. PASS - astral Bedrock geometry exists
+37. PASS - all seven Bedrock cube budgets stay 8..30
+38. PASS - all seven Bedrock weapon geometries bind to hand slot bone
+39. PASS - all seven Bedrock attachables exist
+40. PASS - all seven Bedrock attachable identifiers match mappings
+41. PASS - all seven Bedrock attachables wire first/third hold animations
+42. PASS - all seven Bedrock hold animation references resolve
+43. PASS - all seven Bedrock third-person bound-bone offsets use -24Y
+44. PASS - all seven Bedrock weapon textures are 128px
+45. PASS - all seven Bedrock atlas icon keys exist
+46. PASS - all seven modern definition mappings exist
+47. PASS - Soul Tide no longer uses legacy CMD mapping
+48. PASS - Leviathan no longer uses legacy CMD mapping
+49. PASS - all seven Bedrock identifiers are unique
+50. PASS - all seven mapped items request handheld rendering
+
+QA50: 50/50 PASS
+EXTRA SAFEGUARDS: 5/5 PASS
