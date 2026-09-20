@@ -291,7 +291,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
             case GAIA->{mat=Material.NETHERITE_SHOVEL;name="§f§lZEPHYA §a§lSOVEREIGN WIND SPEAR §8[§fWIND§8]";model="gaia_war_spear";cmd=GAIA_CMD;lore=List.of("§7Element: §fWIND §8• §7Long royal true 3D spear.","","§fI §fWindburst §8• §7Right Click","§aII §fSky Cutter §8• §7Sneak + Left Click","§fIII §fTempest Ascension §8• §7Sneak + Right Click","","§fPassive §8• §fTailwind §7• hit ke-4 memicu wind burst + speed.","§7Skill tier damage: §e60% dari Water Relic.");}
             case ASTRAL->{mat=Material.NETHERITE_AXE;name="§b§lASTRAL FROST §f§lGLACIAL GREATAXE §8[§bICE§8]";model="astral_frost_greataxe";cmd=ASTRAL_CMD;lore=List.of("§7Element: §bICE §8• §7Long two-handed crystalline great axe.","","§bI §fFrost Cleave §8• §7Right Click","§fII §fGlacier Fang §8• §7Sneak + Left Click","§bIII §fAbsolute Zero §8• §7Sneak + Right Click","","§bPassive §8• §fFrostbite §7• hit ke-3 freeze + shatter target.","§7Skill tier damage: §e60% dari Water Relic.");}
             default->{return new ItemStack(Material.BARRIER);}}
-        ItemStack item=new ItemStack(mat);ItemMeta m=item.getItemMeta();if(m==null)return item;m.setDisplayName(name);m.setLore(lore);applyWeaponVisualV368(m,cmd,model);m.getPersistentDataContainer().set(weaponKey,PersistentDataType.STRING,id);m.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,368);item.setItemMeta(m);return item;
+        ItemStack item=new ItemStack(mat);ItemMeta m=item.getItemMeta();if(m==null)return item;m.setDisplayName(name);m.setLore(lore);applyWeaponVisualV368(m,cmd,model);m.getPersistentDataContainer().set(weaponKey,PersistentDataType.STRING,id);m.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,369);item.setItemMeta(m);return item;
     }
 
     private ItemStack createArmorPiece(String set,String piece){
@@ -333,7 +333,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
 
         m.getPersistentDataContainer().set(armorSetKey,PersistentDataType.STRING,set);
         m.getPersistentDataContainer().set(armorPieceKey,PersistentDataType.STRING,piece);
-        m.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,368);
+        m.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,369);
         item.setItemMeta(m);
         return item;
     }
@@ -550,7 +550,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
             meta.setEquippable(eq);
         }catch(Throwable ex){plugin.getLogger().warning("Helmet visor model update failed for "+set+": "+ex.getMessage());}
         meta.getPersistentDataContainer().set(helmetModeKey,PersistentDataType.STRING,suffix.toUpperCase(Locale.ROOT));
-        meta.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,368);
+        meta.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,369);
         helmet.setItemMeta(meta);
         p.getInventory().setHelmet(helmet);
         return true;
@@ -586,14 +586,14 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
                 case ASTRAL->Material.NETHERITE_AXE;
                 default->old.getType();
             };
-            if(ver!=null&&ver>=368&&old.getType()==expected)return old;
+            if(ver!=null&&ver>=369&&old.getType()==expected)return old;
             ItemStack fresh=createWeapon(wid);fresh.setAmount(old.getAmount());return fresh;
         }
         String set=meta.getPersistentDataContainer().get(armorSetKey,PersistentDataType.STRING);
         String piece=meta.getPersistentDataContainer().get(armorPieceKey,PersistentDataType.STRING);
         if(set!=null&&piece!=null&&Set.of(PHOENIX,VOIDWALKER,TITAN,CELESTIAL,WATER_SOVEREIGN).contains(set)){
             Material expected=armorMaterial(set,piece);
-            if(ver!=null&&ver>=368&&old.getType()==expected)return old;
+            if(ver!=null&&ver>=369&&old.getType()==expected)return old;
             ItemStack fresh=createArmorPiece(set,piece);fresh.setAmount(old.getAmount());
             if("helmet".equals(piece)){
                 String im=meta.getPersistentDataContainer().get(helmetModeKey,PersistentDataType.STRING);
@@ -632,7 +632,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
         String id=m.getPersistentDataContainer().get(weaponKey,PersistentDataType.STRING);
         if(id==null)return "";
         Integer ver=m.getPersistentDataContainer().get(assetVersionKey,PersistentDataType.INTEGER);
-        if(expansionWeapon(id)&&(ver==null||ver<368)){
+        if(expansionWeapon(id)&&(ver==null||ver<369)){
             ItemStack fresh=createWeapon(id);
             item.setType(fresh.getType());
             item.setItemMeta(fresh.getItemMeta());
