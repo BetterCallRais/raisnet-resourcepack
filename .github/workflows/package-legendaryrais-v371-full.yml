@@ -1,0 +1,109 @@
+name: Package LegendaryRais v3.7.1 Full Bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/package-legendaryrais-v371-full.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify final v3.7.1 inputs
+        run: |
+          set -euo pipefail
+          test -f LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar
+          test -f LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip
+          test -f LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack
+          test -f LegendaryRais-Geyser-v3.7.1-mappings.json
+          test -f LegendaryRais-v3.7.1-QA100.txt
+          echo "88d7e189bb0fe2f767732ea321bd483541bff0b2  LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip" | sha1sum -c -
+          echo "a0270d3159e3c943c7c316e0d31af9f002731dd1  LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack" | sha1sum -c -
+          echo "8a75572e92118796e03608e57ab74bae5b2a6ffc3be4c57061935eb460c8a387  LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar" | sha256sum -c -
+
+      - name: Build full package
+        run: |
+          set -euo pipefail
+          rm -rf LegendaryRais-v3.7.1-FULL-PACKAGE
+          mkdir -p LegendaryRais-v3.7.1-FULL-PACKAGE
+          cp LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-Geyser-v3.7.1-mappings.json LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-v3.7.1-QA100.txt LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.sha256 LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.sha1 LegendaryRais-v3.7.1-FULL-PACKAGE/
+          cp LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.sha1 LegendaryRais-v3.7.1-FULL-PACKAGE/
+
+          cat > LegendaryRais-v3.7.1-FULL-PACKAGE/INSTALL-RAISNET.txt <<'EOF'
+          LEGENDARYRAIS v3.7.1 - FULL PACKAGE
+          ====================================
+
+          ISI:
+          - Plugin JAR v3.7.1 SELF-DEPLOY
+          - Java Resource Pack v3.7.1
+          - Bedrock Resource Pack v3.7.1
+          - Geyser Custom Mapping v3.7.1
+          - QA 395/395 Report
+          - Checksum files
+          - server.properties resource-pack block
+
+          INSTALL:
+          1. STOP server penuh.
+          2. Hapus JAR LegendaryRais versi lama dari plugins/.
+          3. Masukkan:
+             LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar
+             ke plugins/.
+          4. JAR sudah membawa Bedrock RP + mapping di dalamnya dan akan self-deploy.
+          5. Ganti Java RP di server.properties menggunakan file SERVER-PROPERTIES-RP.txt.
+          6. START server penuh, jangan /reload.
+          7. Join lalu jalankan /risrepair.
+          8. Sebagai OP jalankan /risdiag.
+
+          HASH:
+          Java RP SHA-1:
+          88d7e189bb0fe2f767732ea321bd483541bff0b2
+
+          Bedrock RP SHA-1:
+          a0270d3159e3c943c7c316e0d31af9f002731dd1
+
+          Plugin SHA-256:
+          8a75572e92118796e03608e57ab74bae5b2a6ffc3be4c57061935eb460c8a387
+          EOF
+
+          cat > LegendaryRais-v3.7.1-FULL-PACKAGE/SERVER-PROPERTIES-RP.txt <<'EOF'
+          require-resource-pack=false
+          resource-pack=https\://raw.githubusercontent.com/BetterCallRais/raisnet-resourcepack/main/LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip
+          resource-pack-id=d1b7cf07-8e3d-4f01-8b42-3718d43bb371
+          resource-pack-prompt={"text"\:"RaisNet LegendaryRais v3.7.1 NATIVE STABLE tersedia. Download untuk Legendary Weapons, HD Legendary Armor, Soul Tide, Leviathan, dan Elemental FX. Resource pack opsional.","color"\:"aqua","bold"\:true}
+          resource-pack-sha1=88d7e189bb0fe2f767732ea321bd483541bff0b2
+          EOF
+
+          rm -f LegendaryRais-v3.7.1-FULL-PACKAGE.zip
+          zip -r -9 LegendaryRais-v3.7.1-FULL-PACKAGE.zip LegendaryRais-v3.7.1-FULL-PACKAGE
+          unzip -t LegendaryRais-v3.7.1-FULL-PACKAGE.zip
+          sha256sum LegendaryRais-v3.7.1-FULL-PACKAGE.zip > LegendaryRais-v3.7.1-FULL-PACKAGE.zip.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.7.1-FULL-PACKAGE
+          path: |
+            LegendaryRais-v3.7.1-FULL-PACKAGE.zip
+            LegendaryRais-v3.7.1-FULL-PACKAGE.zip.sha256
+          retention-days: 30
+
+      - name: Publish full package
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add LegendaryRais-v3.7.1-FULL-PACKAGE.zip LegendaryRais-v3.7.1-FULL-PACKAGE.zip.sha256
+          git commit -m "Publish LegendaryRais v3.7.1 full package" || exit 0
+          git pull --rebase origin main
+          git push
