@@ -1,0 +1,47 @@
+name: LegendaryRais
+version: 3.6.3
+main: id.raisnet.legendaryrais.LegendaryRais
+api-version: '26.1.2'
+author: RaisNet
+softdepend: [Geyser-Spigot, floodgate]
+description: LegendaryRais v3.6.3 Resource Integrity Hotfix - legacy item auto-migration, validated Java models, crossplay combat, low-end-safe FX.
+commands:
+  risgive:
+    description: Give LegendaryRais gacha weapons or armor sets.
+    usage: /risgive <player> <id> [amount]
+    permission: legendaryrais.give
+  rislegend:
+    description: Open the full LegendaryRais weapon and armor GUI.
+    usage: /rislegend
+    permission: legendaryrais.legend
+  risrepair:
+    description: Refresh legacy LegendaryRais items to current resource assets.
+    usage: /risrepair
+    permission: legendaryrais.repair
+  risperf:
+    description: Choose LegendaryRais client FX performance mode.
+    usage: /risperf <auto|low|balanced|cinematic|status>
+    permission: legendaryrais.performance
+  riswp:
+    description: Open LegendaryRais weapon arsenal.
+    usage: /riswp
+    permission: legendaryrais.admin
+permissions:
+  legendaryrais.repair:
+    description: Allows repairing personal LegendaryRais items.
+    default: true
+  legendaryrais.performance:
+    description: Allows player to choose personal LegendaryRais FX quality.
+    default: true
+  legendaryrais.give:
+    description: Allows console/admin gacha rewards via /risgive.
+    default: op
+  legendaryrais.admin:
+    description: Full LegendaryRais administrator access.
+    default: op
+    children:
+      legendaryrais.legend: true
+      legendaryrais.give: true
+  legendaryrais.legend:
+    description: Open /rislegend full arsenal GUI.
+    default: op
