@@ -1,0 +1,205 @@
+name: Build LegendaryRais v3.7.1 Native Stable
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v371/**"
+      - ".build/build_v371_packs.py"
+      - ".github/workflows/build-legendaryrais-v371.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v371-src .build/v371-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v371-source.zip
+          unzip -t .build/v371-source.zip
+          mkdir -p .build/v371-src
+          unzip -q .build/v371-source.zip -d .build/v371-src
+          cp .build/extracted-v371/LegendaryRais.java .build/v371-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v371/ArsenalExpansion.java .build/v371-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v371/plugin.yml .build/v371-src/src/main/resources/plugin.yml
+          cp .build/extracted-v371/pom.xml .build/v371-src/pom.xml
+
+      - name: Guard stability fixes
+        run: |
+          set -euo pipefail
+          SRC=.build/v371-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 371' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 371' "$SRC/LegendaryRais.java"
+          grep -q 'armor.java-3d-overlay", false' "$SRC/LegendaryRais.java"
+          grep -q 'deployBundledGeyserAssets();' "$SRC/LegendaryRais.java"
+          grep -q 'BEDROCK-AUTOSETUP' "$SRC/LegendaryRais.java"
+          grep -q 'legendaryMeleeDamageFloor' "$SRC/ArsenalExpansion.java"
+          grep -q 'base-hit.sword",38.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'base-hit.trident",44.0' "$SRC/ArsenalExpansion.java"
+          grep -q 'Java display overlay permanently disabled' "$SRC/ArsenalExpansion.java"
+          ! grep -A5 'clearAllArmorVisuals(); // Java display overlay permanently disabled' "$SRC/ArsenalExpansion.java" | grep -q 'startArmorVisualTask();'
+          grep -q 'legendaryArmorPhysicalGuard' "$SRC/ArsenalExpansion.java"
+          grep -q 'Material.MACE' "$SRC/ArsenalExpansion.java"
+          grep -q 'GROUND WINDBURST LEAP' "$SRC/ArsenalExpansion.java"
+          grep -q 'loadbefore: \[Geyser-Spigot\]' .build/v371-src/src/main/resources/plugin.yml
+          ! grep -q 'softdepend: \[Geyser-Spigot' .build/v371-src/src/main/resources/plugin.yml
+
+      - name: Build Java + Bedrock packs and dual mapping
+        run: python .build/build_v371_packs.py
+
+      - name: Require QA100+
+        run: |
+          set -euo pipefail
+          COUNT="$(grep -c '^...\. PASS - ' LegendaryRais-v3.7.1-QA100.txt)"
+          test "$COUNT" -ge 100
+          grep -q 'QA100 MINIMUM EXCEEDED:' LegendaryRais-v3.7.1-QA100.txt
+          tail -n 8 LegendaryRais-v3.7.1-QA100.txt
+
+      - name: Embed Bedrock assets inside plugin
+        run: |
+          set -euo pipefail
+          mkdir -p .build/v371-src/src/main/resources/bedrock
+          cp LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack             .build/v371-src/src/main/resources/bedrock/LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack
+          cp LegendaryRais-Geyser-v3.7.1-mappings.json             .build/v371-src/src/main/resources/bedrock/LegendaryRais-Geyser-v3.7.1-mappings.json
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v371-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.7.1.jar ../../LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar > ../../LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.sha256
+
+      - name: Verify bundled self-deploy assets
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar plugin.yml | grep -q 'version: 3.7.1'
+          unzip -p LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar plugin.yml | grep -q 'loadbefore: \[Geyser-Spigot\]'
+          jar tf LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar | grep -q 'bedrock/LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack'
+          jar tf LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar | grep -q 'bedrock/LegendaryRais-Geyser-v3.7.1-mappings.json'
+          unzip -p LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar             bedrock/LegendaryRais-Geyser-v3.7.1-mappings.json > /tmp/bundled-map.json
+          cmp /tmp/bundled-map.json LegendaryRais-Geyser-v3.7.1-mappings.json
+
+      - name: Cross-check dual mapping definitions
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,zipfile
+          m=json.load(open('LegendaryRais-Geyser-v3.7.1-mappings.json'))
+          assert m['format_version']==2
+          defs=[d for arr in m['items'].values() for d in arr]
+          pairs=[
+            ('legendaryv368:soul_tide',910041,'raisnet371:soul_tide','raisnet371l:soul_tide'),
+            ('legendaryv368:leviathan',910042,'raisnet371:leviathan','raisnet371l:leviathan'),
+            ('legendaryv368:emberfall_claymore',910051,'raisnet371:emberfall','raisnet371l:emberfall'),
+            ('legendaryv368:noctis_longsword',910052,'raisnet371:noctis','raisnet371l:noctis'),
+            ('legendaryv368:stormpiercer_recurve_bow',910053,'raisnet371:stormpiercer','raisnet371l:stormpiercer'),
+            ('legendaryv368:gaia_war_spear',910054,'raisnet371:zephya','raisnet371l:zephya'),
+            ('legendaryv368:astral_frost_greataxe',910055,'raisnet371:astral_frost','raisnet371l:astral_frost'),
+          ]
+          for model,cmd,modern,legacy in pairs:
+              a=[d for d in defs if d.get('type')=='definition' and d.get('model')==model]
+              b=[d for d in defs if d.get('type')=='legacy' and d.get('custom_model_data')==cmd]
+              assert len(a)==1,(model,len(a))
+              assert len(b)==1,(cmd,len(b))
+              assert a[0]['bedrock_identifier']==modern
+              assert b[0]['bedrock_identifier']==legacy
+          print('DUAL_MAPPING PASS')
+          PY
+
+      - name: Verify Java water relic freeze
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import zipfile
+          old='LegendaryRais-Java-26.1.2-v3.7.0-RECOVERY-STABLE.zip'
+          new='LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip'
+          with zipfile.ZipFile(old) as a, zipfile.ZipFile(new) as b:
+              soul=[n for n in a.namelist() if n.startswith('assets/soultide/')]
+              assert soul
+              for n in soul: assert a.read(n)==b.read(n),n
+              for n in (
+                  'assets/legendaryv368/items/soul_tide.json',
+                  'assets/legendaryv368/items/leviathan.json',
+                  'assets/legendaryrais/models/item/abyss_leviathan_trident.json'
+              ):
+                  assert a.read(n)==b.read(n),n
+          print('WATER_FREEZE PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v371"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v371/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v371/paper.jar
+          cp LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar .build/smoke-v371/plugins/
+          echo "eula=true" > .build/smoke-v371/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v371/server.properties
+          cd .build/smoke-v371
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0; DEPLOY=0
+          for i in $(seq 1 160); do
+            grep -Fq "LegendaryRais v3.7.1" server.log && OK=1
+            grep -Fq "[SELF-CHECK] PASS" server.log && CHECK=1
+            grep -Fq "[BEDROCK-AUTOSETUP]" server.log && DEPLOY=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ] && [ "$DEPLOY" -eq 1 ]; then break; fi
+            if grep -Fq "Error occurred while enabling LegendaryRais" server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 15 -E 'LegendaryRais|BEDROCK-AUTOSETUP|SELF-CHECK' server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+          test "$DEPLOY" -eq 1
+          test -f plugins/Geyser-Spigot/packs/LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack
+          test -f plugins/Geyser-Spigot/custom_mappings/LegendaryRais-Geyser-v3.7.1-mappings.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.7.1-NATIVE-STABLE
+          path: |
+            LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar
+            LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip
+            LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.sha1
+            LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack
+            LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.sha1
+            LegendaryRais-Geyser-v3.7.1-mappings.json
+            LegendaryRais-v3.7.1-QA100.txt
+          retention-days: 7
+
+      - name: Publish verified v3.7.1
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.jar             LegendaryRais-3.7.1-NATIVE-STABLE-SELF-DEPLOY-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip             LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.sha1             LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.mcpack             LegendaryRais-Bedrock-v3.7.1-NATIVE-STABLE.sha1             LegendaryRais-Geyser-v3.7.1-mappings.json             LegendaryRais-v3.7.1-QA100.txt
+          git commit -m "Publish LegendaryRais v3.7.1 Native Stable" || exit 0
+          git pull --rebase origin main
+          git push
