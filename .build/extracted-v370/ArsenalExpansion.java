@@ -166,7 +166,6 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
             runBedrockDiagnostic(p);
             return true;
         }
-        if(cmd.getName().equalsIgnoreCase("risdiag"))return Collections.emptyList();
         if(cmd.getName().equalsIgnoreCase("rishelmet")){
             if(!(sender instanceof Player p)){sender.sendMessage("§c/rishelmet hanya untuk player.");return true;}
             String current=helmetMode(p);
@@ -190,7 +189,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
             if(plugin instanceof LegendaryRais core) fixed += core.repairWaterItems(p);
             applyHelmetMode(p,helmetMode(p));
             syncLegendaryHealth(p);
-            p.sendMessage("§aLegendaryRais repair selesai. §f"+fixed+" §aitem diperbarui ke asset v3.6.7.");
+            p.sendMessage("§aLegendaryRais repair selesai. §f"+fixed+" §aitem diperbarui ke asset v3.7.0.");
             return true;
         }
         if(cmd.getName().equalsIgnoreCase("risperf")){
@@ -231,6 +230,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
     }
 
     @Override public List<String> onTabComplete(CommandSender sender,Command cmd,String alias,String[] args){
+        if(cmd.getName().equalsIgnoreCase("risdiag"))return Collections.emptyList();
         if(cmd.getName().equalsIgnoreCase("rishelmet")){
             if(args.length==1){String q=args[0].toLowerCase(Locale.ROOT);return List.of("open","closed","toggle","status").stream().filter(x->x.startsWith(q)).toList();}
             return Collections.emptyList();
