@@ -1,0 +1,193 @@
+name: Build LegendaryRais v3.6.7 Crossplay Waterfix QA50
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v367/**"
+      - ".build/build_v367_packs.py"
+      - ".github/workflows/build-legendaryrais-v367.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-qa50-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v367-src .build/v367-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v367-source.zip
+          unzip -t .build/v367-source.zip
+          mkdir -p .build/v367-src
+          unzip -q .build/v367-source.zip -d .build/v367-src
+          cp .build/extracted-v367/LegendaryRais.java .build/v367-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v367/ArsenalExpansion.java .build/v367-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v367/plugin.yml .build/v367-src/src/main/resources/plugin.yml
+          cp .build/extracted-v367/pom.xml .build/v367-src/pom.xml
+
+      - name: Guard v3.6.7 plugin rules
+        run: |
+          set -euo pipefail
+          SRC=.build/v367-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 367' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 367' "$SRC/LegendaryRais.java"
+          grep -q 'water_asset_version' "$SRC/LegendaryRais.java"
+          grep -q 'repairWaterItems' "$SRC/LegendaryRais.java"
+          grep -q 'onWaterAssetJoin' "$SRC/LegendaryRais.java"
+          grep -q 'soultide:soul_tide_sovereign_blade' "$SRC/LegendaryRais.java"
+          grep -q 'legendaryrais:abyss_leviathan_trident' "$SRC/LegendaryRais.java"
+          grep -q 'SOUL_TIDE_MODEL_DATA = 910041' "$SRC/LegendaryRais.java"
+          grep -q 'LEVIATHAN_MODEL_DATA = 910042' "$SRC/LegendaryRais.java"
+          grep -q 'core.repairWaterItems(p)' "$SRC/ArsenalExpansion.java"
+          grep -q 'PersistentDataType.INTEGER,367' "$SRC/ArsenalExpansion.java"
+          grep -q 'tryArmorUtility' "$SRC/ArsenalExpansion.java"
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v367-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.6.7.jar ../../LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar > ../../LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.sha256
+
+      - name: Verify plugin jar
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar plugin.yml | grep -q 'version: 3.6.7'
+          unzip -p LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar plugin.yml | grep -q 'risrepair:'
+          unzip -p LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar plugin.yml | grep -q 'rishelmet:'
+          jar tf LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar | grep -q 'LegendaryRais.class'
+          jar tf LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar | grep -q 'ArsenalExpansion.class'
+
+      - name: Build Java + Bedrock packs and QA50
+        run: python .build/build_v367_packs.py
+
+      - name: Require exactly QA50 50/50
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^..\. PASS - ' LegendaryRais-v3.6.7-QA50.txt)" -eq 50
+          grep -q 'QA50: 50/50 PASS' LegendaryRais-v3.6.7-QA50.txt
+          cat LegendaryRais-v3.6.7-QA50.txt
+
+      - name: Verify archives and mapping
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-Java-26.1.2-v3.6.7-CROSSPLAY-WATERFIX-QA50.zip
+          unzip -t LegendaryRais-Bedrock-v3.6.7-CROSSPLAY-WATERFIX-QA50.mcpack
+          python -m json.tool LegendaryRais-Geyser-v3.6.7-mappings.json >/dev/null
+
+      - name: Independent Water Relic mapping audit
+        run: |
+          python - <<'PY'
+          import json,zipfile
+          m=json.load(open('LegendaryRais-Geyser-v3.6.7-mappings.json'))
+          rows=[d for arr in m['items'].values() for d in arr]
+          soul=[d for d in rows if d.get('model')=='soultide:soul_tide_sovereign_blade']
+          levi=[d for d in rows if d.get('model')=='legendaryrais:abyss_leviathan_trident']
+          assert len(soul)==1 and soul[0]['type']=='definition'
+          assert len(levi)==1 and levi[0]['type']=='definition'
+          assert soul[0]['bedrock_identifier']=='raisnet:soul_tide_v367'
+          assert levi[0]['bedrock_identifier']=='raisnet:leviathan_v367'
+          assert not any(d.get('type')=='legacy' and d.get('custom_model_data') in (910041,910042) for d in rows)
+
+          with zipfile.ZipFile('LegendaryRais-Bedrock-v3.6.7-CROSSPLAY-WATERFIX-QA50.mcpack') as z:
+              names=set(z.namelist())
+              for key,ident in [('soul_tide_v367','raisnet:soul_tide_v367'),('leviathan_v367','raisnet:leviathan_v367')]:
+                  ap=f'attachables/{key}.player.json'
+                  gp=f'models/entity/{key}.geo.json'
+                  assert ap in names and gp in names
+                  a=json.loads(z.read(ap))['minecraft:attachable']['description']
+                  assert a['identifier']==ident
+                  assert set(a['animations'])=={'hold_first_person','hold_third_person'}
+          print('WATER_RELIC_MAPPING_AUDIT PASS')
+          PY
+
+      - name: Independent Java Water Relic audit
+        run: |
+          python - <<'PY'
+          import json,zipfile
+          p='LegendaryRais-Java-26.1.2-v3.6.7-CROSSPLAY-WATERFIX-QA50.zip'
+          with zipfile.ZipFile(p) as z:
+              for ns,name in [('soultide','soul_tide_sovereign_blade'),('legendaryrais','abyss_leviathan_trident')]:
+                  item=json.loads(z.read(f'assets/{ns}/items/{name}.json'))
+                  assert item['model']['type']=='minecraft:model'
+                  assert item['model']['model']==f'{ns}:item/{name}'
+                  model=json.loads(z.read(f'assets/{ns}/models/item/{name}.json'))
+                  assert 10 <= len(model['elements']) <= 30
+                  assert abs(model['display']['thirdperson_righthand']['translation'][0]) <= .1
+              old=json.loads(z.read('assets/soultide/items/soul_tide_katana.json'))
+              assert old['model']['model']=='soultide:item/soul_tide_sovereign_blade'
+          print('JAVA_WATER_RELIC_AUDIT PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v367"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v367/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v367/paper.jar
+          cp LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar .build/smoke-v367/plugins/
+          echo "eula=true" > .build/smoke-v367/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v367/server.properties
+          cd .build/smoke-v367
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0
+          for i in $(seq 1 140); do
+            grep -Fq 'LegendaryRais v3.6.7' server.log && OK=1
+            grep -Fq '[SELF-CHECK] PASS' server.log && CHECK=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ]; then break; fi
+            if grep -Fq 'Error occurred while enabling LegendaryRais' server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 16 LegendaryRais server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.6.7-CROSSPLAY-WATERFIX-QA50
+          path: |
+            LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar
+            LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.6.7-CROSSPLAY-WATERFIX-QA50.zip
+            LegendaryRais-Java-26.1.2-v3.6.7-CROSSPLAY-WATERFIX-QA50.sha1
+            LegendaryRais-Bedrock-v3.6.7-CROSSPLAY-WATERFIX-QA50.mcpack
+            LegendaryRais-Bedrock-v3.6.7-CROSSPLAY-WATERFIX-QA50.sha1
+            LegendaryRais-Geyser-v3.6.7-mappings.json
+            LegendaryRais-v3.6.7-QA50.txt
+          retention-days: 7
+
+      - name: Publish verified v3.6.7
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.jar             LegendaryRais-3.6.7-CROSSPLAY-WATERFIX-QA50-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.6.7-CROSSPLAY-WATERFIX-QA50.zip             LegendaryRais-Java-26.1.2-v3.6.7-CROSSPLAY-WATERFIX-QA50.sha1             LegendaryRais-Bedrock-v3.6.7-CROSSPLAY-WATERFIX-QA50.mcpack             LegendaryRais-Bedrock-v3.6.7-CROSSPLAY-WATERFIX-QA50.sha1             LegendaryRais-Geyser-v3.6.7-mappings.json             LegendaryRais-v3.6.7-QA50.txt
+          git commit -m "Publish LegendaryRais v3.6.7 Crossplay Waterfix QA50" || exit 0
+          git pull --rebase origin main
+          git push
