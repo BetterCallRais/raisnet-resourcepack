@@ -60,6 +60,10 @@ for s in SETS:
 for olddir in ("v355","v360","v361"):
     shutil.rmtree(JR/"assets"/NS/"textures"/"item"/olddir,ignore_errors=True)
 
+# Old Astral dagger model referenced the removed v361 textures. Its item definition is now
+# a compatibility alias to the v3.6.3 greataxe, so the stale model file must not remain.
+(JR/"assets"/NS/"models"/"item"/"astral_twin_daggers.json").unlink(missing_ok=True)
+
 # 2) Fix any custom model element outside Minecraft model coordinate limits.
 # Keep x/z centered around 8 and y grip near 4 so the v3.6.2 hand fix stays intact.
 def repair_model_bounds(path):
