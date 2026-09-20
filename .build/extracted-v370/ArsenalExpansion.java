@@ -489,7 +489,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
             Player p=e.getPlayer();
             int fixed=refreshAllLegendaryItems(p);
             syncLegendaryHealth(p);
-            if(fixed>0)p.sendMessage("§bLegendaryRais §8• §a"+fixed+" item lama diperbarui ke asset v3.6.3.");
+            if(fixed>0)p.sendMessage("§bLegendaryRais §8• §a"+fixed+" item lama diperbarui ke asset v3.7.0.");
         },5L);
     }
 
