@@ -1,0 +1,188 @@
+name: Build LegendaryRais v3.7.2 Hand Armor Visor Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".build/extracted-v372/**"
+      - ".build/build_v372_packs.py"
+      - ".github/workflows/build-legendaryrais-v372.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pillow
+
+      - name: Reconstruct plugin source
+        run: |
+          set -euo pipefail
+          rm -rf .build/v372-src .build/v372-source.zip
+          cat .build/v300x-00.b64 .build/v300x-01.b64 .build/v300x-02.b64 .build/v300x-03.b64 .build/v300x-04.b64 .build/v300x-05.b64 | tr -d '\n\r ' | base64 -d > .build/v372-source.zip
+          unzip -t .build/v372-source.zip
+          mkdir -p .build/v372-src
+          unzip -q .build/v372-source.zip -d .build/v372-src
+          cp .build/extracted-v372/LegendaryRais.java .build/v372-src/src/main/java/id/raisnet/legendaryrais/LegendaryRais.java
+          cp .build/extracted-v372/ArsenalExpansion.java .build/v372-src/src/main/java/id/raisnet/legendaryrais/ArsenalExpansion.java
+          cp .build/extracted-v372/plugin.yml .build/v372-src/src/main/resources/plugin.yml
+          cp .build/extracted-v372/pom.xml .build/v372-src/pom.xml
+
+      - name: Guard v3.7.2 code fixes
+        run: |
+          set -euo pipefail
+          SRC=.build/v372-src/src/main/java/id/raisnet/legendaryrais
+          grep -q 'version >= 372' "$SRC/LegendaryRais.java"
+          grep -q 'config-version", 372' "$SRC/LegendaryRais.java"
+          grep -q 'HAND-ARMOR-VISOR FIX enabled' "$SRC/LegendaryRais.java"
+          grep -q 'forceHelmetEquipmentRefresh' "$SRC/ArsenalExpansion.java"
+          grep -q 'sendEquipmentChange' "$SRC/ArsenalExpansion.java"
+          grep -q 'HELMET VISOR' "$SRC/ArsenalExpansion.java"
+          grep -q 'applyHelmetMode(p,helmetMode(p));' "$SRC/ArsenalExpansion.java"
+          grep -q 'Java display overlay permanently disabled' "$SRC/ArsenalExpansion.java"
+          grep -q 'legendaryMeleeDamageFloor' "$SRC/ArsenalExpansion.java"
+          grep -q 'GROUND WINDBURST LEAP' "$SRC/ArsenalExpansion.java"
+
+      - name: Build resource packs + QA120
+        run: python .build/build_v372_packs.py
+
+      - name: Require QA120+
+        run: |
+          set -euo pipefail
+          COUNT="$(grep -c '^...\. PASS - ' LegendaryRais-v3.7.2-QA120.txt)"
+          test "$COUNT" -ge 120
+          grep -q 'QA120 MINIMUM EXCEEDED:' LegendaryRais-v3.7.2-QA120.txt
+          tail -n 10 LegendaryRais-v3.7.2-QA120.txt
+
+      - name: Embed Bedrock pack and mapping in plugin
+        run: |
+          set -euo pipefail
+          mkdir -p .build/v372-src/src/main/resources/bedrock
+          cp LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack              .build/v372-src/src/main/resources/bedrock/LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack
+          cp LegendaryRais-Geyser-v3.7.2-mappings.json              .build/v372-src/src/main/resources/bedrock/LegendaryRais-Geyser-v3.7.2-mappings.json
+
+      - name: Compile plugin
+        run: |
+          set -euo pipefail
+          cd .build/v372-src
+          mvn -B -U clean package
+          cp target/legendaryrais-3.7.2.jar ../../LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar
+          sha256sum ../../LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar > ../../LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.sha256
+
+      - name: Verify JAR and bundled assets
+        run: |
+          set -euo pipefail
+          unzip -t LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar
+          unzip -p LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar plugin.yml | grep -q 'version: 3.7.2'
+          jar tf LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar | grep -q 'bedrock/LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack'
+          jar tf LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar | grep -q 'bedrock/LegendaryRais-Geyser-v3.7.2-mappings.json'
+
+      - name: Inspect critical Bedrock weapon/armor structure
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,zipfile
+          pack='LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack'
+          with zipfile.ZipFile(pack) as z:
+              for key in ('soul_tide','leviathan','emberfall','noctis','stormpiercer','zephya','astral'):
+                  a=json.loads(z.read(f'attachables/v372_modern_{key}.player.json'))['minecraft:attachable']['description']
+                  assert 'animations' not in a
+                  g=json.loads(z.read(f'models/entity/v372_{key}.geo.json'))['minecraft:geometry'][0]
+                  roots=[b for b in g['bones'] if not b.get('parent')]
+                  assert roots and all(b.get('binding')=='q.item_slot_to_bone_name(context.item_slot)' for b in roots)
+              for s in ('phoenix','voidwalker','titan','celestial','water_sovereign'):
+                  for p in ('helmet_closed','helmet_open','chest','legs','boots'):
+                      a=json.loads(z.read(f'attachables/v372_modern_armor_{s}_{p}.json'))['minecraft:attachable']['description']
+                      assert a['render_controllers']==['controller.render.armor']
+                      assert a['materials']['default']=='armor'
+                      assert 'scripts' not in a
+          print('BEDROCK_HAND_ARMOR_STRUCTURE PASS')
+          PY
+
+      - name: Verify Java visual freeze
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import zipfile
+          old='LegendaryRais-Java-26.1.2-v3.7.1-NATIVE-STABLE.zip'
+          new='LegendaryRais-Java-26.1.2-v3.7.2-HAND-ARMOR-VISOR-FIX.zip'
+          with zipfile.ZipFile(old) as a, zipfile.ZipFile(new) as b:
+              an=[n for n in a.namelist() if n!='pack.mcmeta']
+              bn=set(b.namelist())
+              assert all(n in bn for n in an)
+              for n in an:
+                  assert a.read(n)==b.read(n),n
+          print('JAVA_FREEZE PASS')
+          PY
+
+      - name: Smoke boot Paper 26.1.2 build 74
+        run: |
+          set -euo pipefail
+          UA="RaisNet-LegendaryRais-v372"
+          BUILDS=$(curl -fsSL -H "User-Agent: $UA" https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds)
+          URL=$(echo "$BUILDS" | jq -r 'first(.[] | select((.id == 74) or (.number == 74)) | .downloads."server:default".url) // empty')
+          test -n "$URL"
+          mkdir -p .build/smoke-v372/plugins
+          curl -fsSL -H "User-Agent: $UA" "$URL" -o .build/smoke-v372/paper.jar
+          cp LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar .build/smoke-v372/plugins/
+          echo "eula=true" > .build/smoke-v372/eula.txt
+          printf 'online-mode=false\nserver-port=25565\nview-distance=2\nsimulation-distance=2\nmax-players=2\n' > .build/smoke-v372/server.properties
+          cd .build/smoke-v372
+          java -Xms512M -Xmx1024M -jar paper.jar nogui > server.log 2>&1 &
+          PID=$!
+          OK=0; CHECK=0; DEPLOY=0
+          for i in $(seq 1 160); do
+            grep -Fq 'LegendaryRais v3.7.2' server.log && OK=1
+            grep -Fq '[SELF-CHECK] PASS' server.log && CHECK=1
+            grep -Fq '[BEDROCK-AUTOSETUP]' server.log && DEPLOY=1
+            if [ "$OK" -eq 1 ] && [ "$CHECK" -eq 1 ] && [ "$DEPLOY" -eq 1 ]; then break; fi
+            if grep -Fq 'Error occurred while enabling LegendaryRais' server.log; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          grep -i -C 15 -E 'LegendaryRais|BEDROCK-AUTOSETUP|SELF-CHECK' server.log || true
+          test "$OK" -eq 1
+          test "$CHECK" -eq 1
+          test "$DEPLOY" -eq 1
+          test -f plugins/Geyser-Spigot/packs/LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack
+          test -f plugins/Geyser-Spigot/custom_mappings/LegendaryRais-Geyser-v3.7.2-mappings.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegendaryRais-v3.7.2-HAND-ARMOR-VISOR-FIX
+          path: |
+            LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar
+            LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.sha256
+            LegendaryRais-Java-26.1.2-v3.7.2-HAND-ARMOR-VISOR-FIX.zip
+            LegendaryRais-Java-26.1.2-v3.7.2-HAND-ARMOR-VISOR-FIX.sha1
+            LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack
+            LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.sha1
+            LegendaryRais-Geyser-v3.7.2-mappings.json
+            LegendaryRais-v3.7.2-QA120.txt
+          retention-days: 14
+
+      - name: Publish verified v3.7.2
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.jar             LegendaryRais-3.7.2-HAND-ARMOR-VISOR-FIX-PAPER-26.1.2.sha256             LegendaryRais-Java-26.1.2-v3.7.2-HAND-ARMOR-VISOR-FIX.zip             LegendaryRais-Java-26.1.2-v3.7.2-HAND-ARMOR-VISOR-FIX.sha1             LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.mcpack             LegendaryRais-Bedrock-v3.7.2-HAND-ARMOR-VISOR-FIX.sha1             LegendaryRais-Geyser-v3.7.2-mappings.json             LegendaryRais-v3.7.2-QA120.txt
+          git commit -m "Publish LegendaryRais v3.7.2 Hand Armor Visor Fix" || exit 0
+          git pull --rebase origin main
+          git push
