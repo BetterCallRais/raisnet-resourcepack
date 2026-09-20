@@ -192,7 +192,7 @@ public final class LegendaryRais extends JavaPlugin implements Listener, Command
         getConfig().set("armor.input.double-sneak-window-ms",1000L);
         getConfig().set("armor.input.punch-arm-ms",6000L);
         saveConfig();
-        getLogger().info("Migrated LegendaryRais config to v3.6.5 Weapon Rig & Armor Skill Hotfix defaults.");
+        getLogger().info("Migrated LegendaryRais config to v3.7.0 Recovery Stable defaults.");
     }
 
     @Override
