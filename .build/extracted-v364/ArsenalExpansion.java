@@ -330,7 +330,7 @@ public final class ArsenalExpansion implements Listener, CommandExecutor, TabCom
 
         m.getPersistentDataContainer().set(armorSetKey,PersistentDataType.STRING,set);
         m.getPersistentDataContainer().set(armorPieceKey,PersistentDataType.STRING,piece);
-        m.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,363);
+        m.getPersistentDataContainer().set(assetVersionKey,PersistentDataType.INTEGER,364);
         item.setItemMeta(m);
         return item;
     }
