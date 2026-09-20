@@ -1,0 +1,97 @@
+01. PASS - all JSON parses
+02. PASS - all PNG verifies
+03. PASS - mapping format version 2
+04. PASS - Bedrock manifest version 2
+05. PASS - fresh Bedrock UUID
+06. PASS - frozen Java file exists assets/legendaryv368/items/soul_tide.json
+07. PASS - frozen Java file byte-identical assets/legendaryv368/items/soul_tide.json
+08. PASS - frozen Java file exists assets/legendaryv368/items/leviathan.json
+09. PASS - frozen Java file byte-identical assets/legendaryv368/items/leviathan.json
+10. PASS - frozen Java file exists assets/legendaryv368/items/emberfall_claymore.json
+11. PASS - frozen Java file byte-identical assets/legendaryv368/items/emberfall_claymore.json
+12. PASS - frozen Java file exists assets/legendaryv368/items/noctis_longsword.json
+13. PASS - frozen Java file byte-identical assets/legendaryv368/items/noctis_longsword.json
+14. PASS - frozen Java file exists assets/legendaryv368/items/stormpiercer_recurve_bow.json
+15. PASS - frozen Java file byte-identical assets/legendaryv368/items/stormpiercer_recurve_bow.json
+16. PASS - frozen Java file exists assets/legendaryv368/items/gaia_war_spear.json
+17. PASS - frozen Java file byte-identical assets/legendaryv368/items/gaia_war_spear.json
+18. PASS - frozen Java file exists assets/legendaryv368/items/astral_frost_greataxe.json
+19. PASS - frozen Java file byte-identical assets/legendaryv368/items/astral_frost_greataxe.json
+20. PASS - frozen Java file exists assets/legendaryrais/models/item/abyss_leviathan_trident.json
+21. PASS - frozen Java file byte-identical assets/legendaryrais/models/item/abyss_leviathan_trident.json
+22. PASS - Soul Tide namespace exists in v368
+23. PASS - Soul Tide namespace retained
+24. PASS - Soul Tide namespace byte-identical
+25. PASS - v369 Java armor namespace overlaid
+26. PASS - Java armor 3D visual items exist
+27. PASS - Java armor equipment files exist
+28. PASS - Java helmet mode equipment exists
+29. PASS - soul_tide fresh attachable exists
+30. PASS - soul_tide fresh attachable ID matches
+31. PASS - soul_tide first/third animations retained
+32. PASS - soul_tide geometry reference present
+33. PASS - soul_tide atlas key exists
+34. PASS - leviathan fresh attachable exists
+35. PASS - leviathan fresh attachable ID matches
+36. PASS - leviathan first/third animations retained
+37. PASS - leviathan geometry reference present
+38. PASS - leviathan atlas key exists
+39. PASS - emberfall fresh attachable exists
+40. PASS - emberfall fresh attachable ID matches
+41. PASS - emberfall first/third animations retained
+42. PASS - emberfall geometry reference present
+43. PASS - emberfall atlas key exists
+44. PASS - noctis fresh attachable exists
+45. PASS - noctis fresh attachable ID matches
+46. PASS - noctis first/third animations retained
+47. PASS - noctis geometry reference present
+48. PASS - noctis atlas key exists
+49. PASS - stormpiercer fresh attachable exists
+50. PASS - stormpiercer fresh attachable ID matches
+51. PASS - stormpiercer first/third animations retained
+52. PASS - stormpiercer geometry reference present
+53. PASS - stormpiercer atlas key exists
+54. PASS - zephya fresh attachable exists
+55. PASS - zephya fresh attachable ID matches
+56. PASS - zephya first/third animations retained
+57. PASS - zephya geometry reference present
+58. PASS - zephya atlas key exists
+59. PASS - astral fresh attachable exists
+60. PASS - astral fresh attachable ID matches
+61. PASS - astral first/third animations retained
+62. PASS - astral geometry reference present
+63. PASS - astral atlas key exists
+64. PASS - phoenix closed/open fresh helmet attachables
+65. PASS - phoenix fresh body attachables
+66. PASS - phoenix fresh armor atlas keys
+67. PASS - voidwalker closed/open fresh helmet attachables
+68. PASS - voidwalker fresh body attachables
+69. PASS - voidwalker fresh armor atlas keys
+70. PASS - titan closed/open fresh helmet attachables
+71. PASS - titan fresh body attachables
+72. PASS - titan fresh armor atlas keys
+73. PASS - celestial closed/open fresh helmet attachables
+74. PASS - celestial fresh body attachables
+75. PASS - celestial fresh armor atlas keys
+76. PASS - water_sovereign closed/open fresh helmet attachables
+77. PASS - water_sovereign fresh body attachables
+78. PASS - water_sovereign fresh armor atlas keys
+79. PASS - all seven weapon legacy definitions present
+80. PASS - all seven weapon IDs unique
+81. PASS - all seven weapon priorities high
+82. PASS - all seven weapon handheld flags true
+83. PASS - Soul Tide maps by CMD 910041
+84. PASS - Leviathan maps by CMD 910042
+85. PASS - Stormpiercer maps by CMD 910053
+86. PASS - all closed helmet CMD mappings present
+87. PASS - all open helmet CMD mappings present
+88. PASS - all chest CMD mappings present
+89. PASS - all legs CMD mappings present
+90. PASS - all boots CMD mappings present
+91. PASS - no old v368 weapon mapping definitions remain
+92. PASS - no old v369 armor mapping definitions remain
+93. PASS - FX mappings retained
+94. PASS - armor custom content components use correct slots
+95. PASS - helmet custom content components use head slot
+
+QA70 MINIMUM EXCEEDED: 95/95 PASS
