@@ -389,14 +389,16 @@ Q("Soul Tide no longer uses legacy CMD mapping",not any(d.get("type")=="legacy" 
 Q("Leviathan no longer uses legacy CMD mapping",not any(d.get("type")=="legacy" and d.get("custom_model_data")==910042 for arr in mapping["items"].values() for d in arr))
 Q("all seven Bedrock identifiers are unique",len({v["bid"] for v in WEAPONS.values()})==7)
 Q("all seven mapped items request handheld rendering",all(next(d for d in defs if d.get("model")==v["model"])["bedrock_options"].get("display_handheld") is True for v in WEAPONS.values()))
-Q("Stormpiercer mapping preserves vanilla bow behavior", "components" not in next(d for d in defs if d.get("model")==WEAPONS["stormpiercer"]["model"]))
-Q("Soul Tide mapping preserves base sword behavior", "components" not in next(d for d in defs if d.get("model")==WEAPONS["soul_tide"]["model"]))
-Q("Leviathan mapping preserves base trident behavior", "components" not in next(d for d in defs if d.get("model")==WEAPONS["leviathan"]["model"]))
-Q("Bedrock armor open/closed attachables retained",all((BR/f"attachables/armor_{s}_helmet_{m}.json").is_file() for s in SETS for m in ("open","closed")))
-Q("Bedrock armor chest/legs/boots attachables retained",all((BR/f"attachables/armor_{s}_{p}.json").is_file() for s in SETS for p in ("chest","legs","boots")))
+# Five additional safeguards after QA50; these do not change the requested 50-count report.
+assert "components" not in next(d for d in defs if d.get("model")==WEAPONS["stormpiercer"]["model"])
+assert "components" not in next(d for d in defs if d.get("model")==WEAPONS["soul_tide"]["model"])
+assert "components" not in next(d for d in defs if d.get("model")==WEAPONS["leviathan"]["model"])
+assert all((BR/f"attachables/armor_{s}_helmet_{m}.json").is_file() for s in SETS for m in ("open","closed"))
+assert all((BR/f"attachables/armor_{s}_{p}.json").is_file() for s in SETS for p in ("chest","legs","boots"))
+print("EXTRA 5 SAFEGUARDS PASS")
 
 assert len(checks)==50,len(checks)
-REPORT.write_text("\n".join(f"{i+1:02d}. PASS - {name}" for i,name in enumerate(checks))+"\n\nQA50: 50/50 PASS\n",encoding="utf-8")
+REPORT.write_text("\n".join(f"{i+1:02d}. PASS - {name}" for i,name in enumerate(checks))+"\n\nQA50: 50/50 PASS\nEXTRA SAFEGUARDS: 5/5 PASS\n",encoding="utf-8")
 
 for out,root in ((JOUT,JR),(BOUT,BR)):
     if out.exists():out.unlink()
